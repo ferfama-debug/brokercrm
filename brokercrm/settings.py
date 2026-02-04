@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-3q$mi$k*ke9&cj-w54-t62qkh5lr0an0eqco1v@+)gd*c^xldp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["brokercrm-production.up.railway.app",]
 
 
 # Application definition
@@ -131,4 +131,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 CSRF_TRUSTED_ORIGINS = [
     "https://brokercrm-production.up.railway.app",
 ]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
