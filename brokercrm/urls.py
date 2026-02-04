@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+import brokercrm.csrf_exempt_admin  # noqa
 
 urlpatterns = [
-    path('', include('dashboard.urls')),
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
 ]
