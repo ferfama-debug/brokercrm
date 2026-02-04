@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fuerza Natural Broker de Seguros</title>
+</head>
+<body>
+
+<h1>Fuerza Natural Broker de Seguros</h1>
+
+<h2>Alertas activas</h2>
+<ul>
+{% for alert in alerts %}
+    <li>
+        {{ alert.message }} – <strong>{{ alert.level }}</strong>
+    </li>
+{% empty %}
+    <li>No hay alertas activas</li>
+{% endfor %}
+</ul>
+<h2>Pólizas próximas a vencer</h2>
+<ul>
+{% for policy in upcoming_policies %}
+    <li>
+        {{ policy.policy_number }} – {{ policy.client }} – vence {{ policy.end_date }}
+        |
+        <a href="https://wa.me/54{{ policy.client.phone|cut:' ' }}" target="_blank">
+            WhatsApp
+        </a>
+    </li>
+{% empty %}
+
+    <li>No hay pólizas próximas</li>
+{% endfor %}
+</ul>
+
+<p>
+    <a href="/admin/">Ingresar al panel administrador</a>
+</p>
+
+</body>
+</html>
