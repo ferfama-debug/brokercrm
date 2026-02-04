@@ -9,6 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # =========================
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
+
 DEBUG = False
 
 ALLOWED_HOSTS = [
@@ -36,12 +37,16 @@ INSTALLED_APPS = [
     "dashboard",
 ]
 
+# =========================
+# MIDDLEWARE
+# =========================
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
 
-    # ⚠️ CSRF antes de auth
+    # CSRF SIEMPRE ANTES DE AUTH
     "django.middleware.csrf.CsrfViewMiddleware",
 
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -50,6 +55,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "brokercrm.urls"
+
+# =========================
+# TEMPLATES
+# =========================
 
 TEMPLATES = [
     {
@@ -114,10 +123,11 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # =========================
-# CSRF + RAILWAY (CLAVE)
+# CSRF + HTTPS (RAILWAY)
 # =========================
 
 CSRF_TRUSTED_ORIGINS = [
@@ -133,5 +143,5 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SAMESITE = "None"
 
-# ⚠️ CRÍTICO: Railway YA usa HTTPS
+# 🚫 NO redirigir SSL (Railway ya lo hace)
 SECURE_SSL_REDIRECT = False
