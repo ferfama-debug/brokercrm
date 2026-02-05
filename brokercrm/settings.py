@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
 # =========================
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -146,3 +147,30 @@ SESSION_COOKIE_SAMESITE = "None"
 
 # 🚫 NO redirigir SSL (Railway ya lo hace)
 SECURE_SSL_REDIRECT = False
+JAZZMIN_SETTINGS = {
+    "site_title": "CRM Fuerza Natural",
+    "site_header": "CRM Fuerza Natural Brokers",
+    "site_brand": "Fuerza Natural",
+    "welcome_sign": "Bienvenido al CRM 🚀",
+    "copyright": "Fuerza Natural Brokers",
+
+    "site_logo_classes": "img-circle",
+
+    "topmenu_links": [
+        {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
+    ],
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "accounts.User": "fas fa-user",
+        "clients.Client": "fas fa-handshake",
+        "policies.Policy": "fas fa-file-contract",
+        "alerts.Alert": "fas fa-bell",
+    },
+
+    "theme": "darkly",
+}
+
