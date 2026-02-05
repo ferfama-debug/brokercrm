@@ -1,1 +1,1 @@
-web: gunicorn brokercrm.wsgi:application
+web: bash start.sh
