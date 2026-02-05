@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRM Fuerza Natural</title>
+</head>
+<body>
+
+<h1>Bienvenido al CRM Fuerza Natural Brokers</h1>
+
+<p>🎉 El sistema ya está funcionando en Railway</p>
+
+<a href="/admin/">Ir al panel admin</a>
+
+</body>
+</html>

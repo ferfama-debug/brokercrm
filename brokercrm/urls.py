@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.urls import path
-import brokercrm.csrf_exempt_admin  # noqa
+from core.views import home
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('', home),
 ]

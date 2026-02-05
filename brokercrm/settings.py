@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "policies",
     "alerts",
     "dashboard",
+    "core",
+
 ]
 
 # =========================
