@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Clientes</h1>
+
+<a href="/admin/clients/client/add/" class="btn">+ Nuevo cliente</a>
+
+<br><br>
+
+<table border="1" cellpadding="10" style="width:100%;background:white">
+    <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Teléfono</th>
+    </tr>
+
+    {% for c in clientes %}
+    <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.phone }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

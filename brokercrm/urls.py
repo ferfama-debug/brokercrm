@@ -9,4 +9,5 @@ urlpatterns = [
 
     # PANEL PRINCIPAL (HOME REAL)
     path('', include('panel.urls')),
+    path('clientes/', include('clients.urls')),
 ]
