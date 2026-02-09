@@ -4,13 +4,15 @@ from django.http import HttpResponse
 
 
 def home(request):
-    return HttpResponse("<h1>CRM Fuerza Natural Brokers funcionando 🚀</h1>")
+    return HttpResponse("CRM Fuerza Natural Brokers funcionando 🚀")
 
 
 urlpatterns = [
-    path("", home),
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
 
-    # 👇 ESTO CREA EL LOGIN AUTOMÁTICO DE DJANGO
-    path("accounts/", include("django.contrib.auth.urls")),
+    # RUTAS DE LOGIN / LOGOUT / PASSWORD
+    path('accounts/', include('django.contrib.auth.urls')),
+
+    # HOME TEMPORAL
+    path('', home),
 ]
