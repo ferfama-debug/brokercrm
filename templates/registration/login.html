@@ -1,12 +1,13 @@
-{% load static %}
-
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
 <div style="max-width:400px;margin:auto">
     <div class="card">
-	<img src="{% static 'images/logo.png' %}" class="logo">
+
+        <img src="{% static 'images/logo.png' %}" class="logo">
+
         <h2 style="text-align:center">Iniciar sesión</h2>
 
         <form method="post">
@@ -15,6 +16,7 @@
 
             <button class="btn" style="width:100%">Ingresar</button>
         </form>
+
     </div>
 </div>
 
