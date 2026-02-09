@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <h1 class="title">Panel principal</h1>
+
+    <div class="cards">
+
+        <div class="card">
+            <h2>👥 Clientes</h2>
+            <p>0</p>
+        </div>
+
+        <div class="card">
+            <h2>📄 Pólizas</h2>
+            <p>0</p>
+        </div>
+
+        <div class="card">
+            <h2>⏰ Alertas</h2>
+            <p>0</p>
+        </div>
+
+        <div class="card">
+            <h2>👤 Usuarios</h2>
+            <p>1</p>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+.dashboard{
+    padding:40px;
+}
+
+.title{
+    margin-bottom:30px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns: repeat(4,1fr);
+    gap:20px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+.card h2{
+    margin-bottom:10px;
+}
+
+.card p{
+    font-size:30px;
+    font-weight:bold;
+}
+</style>
+
+{% endblock %}
