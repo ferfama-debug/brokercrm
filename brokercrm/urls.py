@@ -8,6 +8,7 @@ def home(request):
 
 
 urlpatterns = [
+    path('', include('panel.urls')),
     path('admin/', admin.site.urls),
 
     # RUTAS DE LOGIN / LOGOUT / PASSWORD

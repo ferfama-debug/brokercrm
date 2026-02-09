@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "alerts",
     "dashboard",
     "core",
+    "panel",
 
 ]
 
