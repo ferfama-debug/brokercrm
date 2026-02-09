@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from clients.models import Client
 from policies.models import Policy
 from alerts.models import Alert
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 @login_required
