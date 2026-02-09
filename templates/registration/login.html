@@ -1,45 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login CRM</title>
-    <style>
-        body {
-            font-family: Arial;
-            background:#f5f5f5;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-        }
-        .box{
-            background:white;
-            padding:40px;
-            border-radius:10px;
-            box-shadow:0 0 10px rgba(0,0,0,.1);
-            width:300px;
-        }
-        h2{ text-align:center; }
-        button{
-            width:100%;
-            padding:10px;
-            background:#0d6efd;
-            color:white;
-            border:none;
-            margin-top:10px;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="box">
-    <h2>CRM Fuerza Natural</h2>
+{% block content %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Ingresar</button>
-    </form>
+<div style="max-width:400px;margin:auto">
+    <div class="card">
+        <h2 style="text-align:center">Iniciar sesión</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button class="btn" style="width:100%">Ingresar</button>
+        </form>
+    </div>
 </div>
 
-</body>
-</html>
+{% endblock %}
