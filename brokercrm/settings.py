@@ -10,13 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    ".railway.app",
-]
+ALLOWED_HOSTS = ["*"]
 
 # =========================
 # APPS
