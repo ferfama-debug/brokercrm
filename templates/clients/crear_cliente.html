@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h2>Nuevo Cliente</h2>
 
-<h2>Nuevo cliente</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
 
-<div class="card">
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-
-        <button class="btn">Guardar cliente</button>
-    </form>
-</div>
+    <button type="submit">Guardar cliente</button>
+</form>
 
 {% endblock %}
