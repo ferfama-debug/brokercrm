@@ -1,7 +1,7 @@
 from django import forms
-from .models import Client   # ← ESTE ES EL CAMBIO IMPORTANTE
+from .models import Client
 
-class ClienteForm(forms.ModelForm):
+class ClientForm(forms.ModelForm):
     class Meta:
-        model = Client       # ← TAMBIÉN ESTE
+        model = Client
         fields = "__all__"
