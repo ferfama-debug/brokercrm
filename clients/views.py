@@ -4,16 +4,12 @@ from .models import Client
 from .forms import ClienteForm
 
 
-# 🔹 LISTA DE CLIENTES (ESTA FALTABA)
 @login_required
 def lista_clientes(request):
     clientes = Client.objects.all()
-    return render(request, "clientes/lista_clientes.html", {
-        "clientes": clientes
-    })
+    return render(request, "clientes/lista_clientes.html", {"clientes": clientes})
 
 
-# 🔹 CREAR CLIENTE
 @login_required
 def crear_cliente(request):
     if request.method == "POST":
