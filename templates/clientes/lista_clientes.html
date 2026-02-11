@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block content %}
 
 <h1>Clientes</h1>
@@ -7,23 +8,25 @@
 
 <br><br>
 
-<table border="1" cellpadding="10" style="width:100%;background:white">
+<table border="1" cellpadding="10">
     <tr>
         <th>Nombre</th>
         <th>Email</th>
         <th>Teléfono</th>
+        <th>Acciones</th>
     </tr>
 
     {% for cliente in clientes %}
-<tr>
-    <td>{{ cliente.first_name }}</td>
-    <td>{{ cliente.last_name }}</td>
-    <td>{{ cliente.phone }}</td>
-    <td>{{ cliente.email }}</td>
+    <tr>
+        <td>{{ cliente.first_name }} {{ cliente.last_name }}</td>
+        <td>{{ cliente.email }}</td>
+        <td>{{ cliente.phone }}</td>
+        <td>
+            <a href="{% url 'editar_cliente' cliente.id %}">Editar</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 
-    <td>
-        <a href="{% url 'editar_cliente' cliente.id %}">Editar</a>
-    </td>
-</tr>
-{% endfor %}
+{% endblock %}
 
