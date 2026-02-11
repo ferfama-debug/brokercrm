@@ -21,3 +21,19 @@ def crear_cliente(request):
         form = ClientForm()
 
     return render(request, "clientes/crear_cliente.html", {"form": form})
+from django.shortcuts import get_object_or_404
+
+
+@login_required
+def editar_cliente(request, cliente_id):
+    cliente = get_object_or_404(Client, id=cliente_id)
+
+    if request.method == "POST":
+        form = ClientForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            return redirect("lista_clientes")
+    else:
+        form = ClientForm(instance=cliente)
+
+    return render(request, "clientes/editar_cliente.html", {"form": form})

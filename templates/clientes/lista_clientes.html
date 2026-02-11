@@ -14,13 +14,16 @@
         <th>Teléfono</th>
     </tr>
 
-    {% for c in clientes %}
-    <tr>
-        <td>{{ c.name }}</td>
-        <td>{{ c.email }}</td>
-        <td>{{ c.phone }}</td>
-    </tr>
-    {% endfor %}
-</table>
+    {% for cliente in clientes %}
+<tr>
+    <td>{{ cliente.first_name }}</td>
+    <td>{{ cliente.last_name }}</td>
+    <td>{{ cliente.phone }}</td>
+    <td>{{ cliente.email }}</td>
 
-{% endblock %}
+    <td>
+        <a href="{% url 'editar_cliente' cliente.id %}">Editar</a>
+    </td>
+</tr>
+{% endfor %}
+
