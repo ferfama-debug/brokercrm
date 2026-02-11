@@ -5,11 +5,11 @@ from .forms import ClienteForm
 @login_required
 def crear_cliente(request):
     if request.method == "POST":
-        form = ClientForm(request.POST)
+        form = ClienteForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect("lista_clientes")
     else:
-        form = ClientForm()
+        form = ClienteForm()
 
     return render(request, "clientes/crear_cliente.html", {"form": form})
