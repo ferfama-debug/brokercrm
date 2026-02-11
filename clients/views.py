@@ -38,3 +38,15 @@ def editar_cliente(request, cliente_id):
         form = ClientForm(instance=cliente)
 
     return render(request, "clientes/editar_cliente.html", {"form": form})
+from django.shortcuts import get_object_or_404
+
+@login_required
+def eliminar_cliente(request, id):
+    cliente = get_object_or_404(Client, id=id)
+
+    if request.method == "POST":
+        cliente.delete()
+        return redirect("lista_clientes")
+
+    return render(request, "clients/eliminar_cliente.html", {"cliente": cliente})
+
