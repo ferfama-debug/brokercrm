@@ -6,11 +6,3 @@ class ClientForm(forms.ModelForm):
         model = Client
         fields = "__all__"
 
-        labels = {
-            "first_name": "Nombres",
-            "last_name": "Apellidos",
-            "phone": "Teléfono",
-            "email": "Email",
-            "producer": "Productor",
-        }
-
