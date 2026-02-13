@@ -1,5 +1,4 @@
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Client
 from .forms import ClientForm
@@ -22,7 +21,6 @@ def crear_cliente(request):
         form = ClientForm()
 
     return render(request, "clientes/crear_cliente.html", {"form": form})
-from django.shortcuts import get_object_or_404
 
 
 @login_required
@@ -38,7 +36,7 @@ def editar_cliente(request, cliente_id):
         form = ClientForm(instance=cliente)
 
     return render(request, "clientes/editar_cliente.html", {"form": form})
-from django.shortcuts import get_object_or_404
+
 
 @login_required
 def eliminar_cliente(request, id):
@@ -48,5 +46,4 @@ def eliminar_cliente(request, id):
         cliente.delete()
         return redirect("lista_clientes")
 
-    return render(request, "clients/eliminar_cliente.html", {"cliente": cliente})
-
+    return render(request, "clientes/eliminar_cliente.html", {"cliente": cliente})

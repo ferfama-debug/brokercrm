@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 
     "accounts",
     "clients",
-    "policies",
+    "policies", 
     "alerts",
     "dashboard",
     "core",
