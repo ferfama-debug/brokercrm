@@ -26,15 +26,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "accounts",
     "clients",
-    "policies", 
+    "policies",
     "alerts",
     "dashboard",
     "core",
     "panel",
-
 ]
 
 # =========================
@@ -45,15 +43,12 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-
     # CSRF SIEMPRE ANTES DE AUTH
     "django.middleware.csrf.CsrfViewMiddleware",
-
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
 ]
 
 ROOT_URLCONF = "brokercrm.urls"
@@ -73,6 +68,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "alerts.context_processors.alert_count",
             ],
         },
     },
@@ -88,6 +84,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
     import dj_database_url
+
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
@@ -108,7 +105,9 @@ else:
 # =========================
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -118,7 +117,7 @@ LANGUAGE_CODE = "es-ar"
 TIME_ZONE = "America/Argentina/Mendoza"
 USE_I18N = True
 USE_TZ = True
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = "accounts.User"
 
 # ==============================
 # STATIC FILES
@@ -151,22 +150,23 @@ SESSION_COOKIE_SAMESITE = "None"
 
 # 🚫 NO redirigir SSL (Railway ya lo hace)
 SECURE_SSL_REDIRECT = False
+
+# =========================
+# JAZZMIN
+# =========================
+
 JAZZMIN_SETTINGS = {
     "site_title": "CRM Fuerza Natural",
     "site_header": "CRM Fuerza Natural Brokers",
     "site_brand": "Fuerza Natural",
     "welcome_sign": "Bienvenido al CRM 🚀",
     "copyright": "Fuerza Natural Brokers",
-
     "site_logo_classes": "img-circle",
-
     "topmenu_links": [
         {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
     ],
-
     "show_sidebar": True,
     "navigation_expanded": True,
-
     "icons": {
         "auth": "fas fa-users-cog",
         "accounts.User": "fas fa-user",
@@ -174,10 +174,27 @@ JAZZMIN_SETTINGS = {
         "policies.Policy": "fas fa-file-contract",
         "alerts.Alert": "fas fa-bell",
     },
-
     "theme": "darkly",
 }
-LOGIN_URL = '/admin/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/admin/login/'
 
+LOGIN_URL = "/admin/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/admin/login/"
+
+# =========================
+# EMAIL ALERTAS
+# =========================
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "ferfama@gmail.com"
+EMAIL_HOST_PASSWORD = "avfumwexwzsfrsti"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

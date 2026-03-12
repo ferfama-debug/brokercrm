@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>📄 Pólizas por cliente</h1>
+
+<!-- FILTRO POR COMPAÑIA -->
+
+<form method="get" style="margin-bottom:20px;">
+
+<label><strong>Filtrar por compañía:</strong></label>
+
+<select name="compania" onchange="this.form.submit()" style="padding:6px;">
+
+<option value="">Todas las compañías</option>
+
+{% for c in companias %}
+
+<option value="{{ c }}" {% if compania_seleccionada == c %}selected{% endif %}>
+{{ c }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</form>
+
+<style>
+
+.cliente-box{
+background:white;
+margin-bottom:15px;
+border-radius:6px;
+overflow:hidden;
+}
+
+.cliente-header{
+background:#2c3e50;
+color:white;
+padding:12px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.polizas{
+display:none;
+padding:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#34495e;
+color:white;
+padding:8px;
+}
+
+td{
+padding:8px;
+border-bottom:1px solid #ddd;
+}
+
+/* Estados */
+
+.estado-activa{
+color:green;
+font-weight:bold;
+}
+
+.estado-vencer{
+color:orange;
+font-weight:bold;
+}
+
+.estado-vencida{
+color:red;
+font-weight:bold;
+}
+
+.boton-whatsapp{
+background:#25D366;
+color:white;
+padding:6px 10px;
+border-radius:4px;
+text-decoration:none;
+font-size:13px;
+}
+
+.boton-whatsapp:hover{
+background:#1ebe5b;
+}
+
+</style>
+
+{% for cliente in clientes %}
+
+<div class="cliente-box">
+
+<div class="cliente-header" onclick="togglePolizas('cliente{{cliente.id}}')">
+▶ {{ cliente }}
+</div>
+
+<div class="polizas" id="cliente{{cliente.id}}">
+
+{% if cliente.policy_set.all %}
+
+<table>
+
+<tr>
+<th>N° Póliza</th>
+<th>Compañía</th>
+<th>Tipo</th>
+<th>Inicio</th>
+<th>Vencimiento</th>
+<th>Estado</th>
+<th>PDF</th>
+<th>Cuponera</th>
+</tr>
+
+{% for poliza in cliente.policy_set.all %}
+
+{% if not compania_seleccionada or poliza.company == compania_seleccionada %}
+
+<tr>
+
+<td>{{ poliza.policy_number }}</td>
+
+<td>{{ poliza.company }}</td>
+
+<td>{{ poliza.tipo_poliza }}</td>
+
+<td>{{ poliza.start_date }}</td>
+
+<td>{{ poliza.end_date }}</td>
+
+<td>
+
+{% if poliza.estado == "ACTIVA" %}
+<span class="estado-activa">ACTIVA</span>
+{% elif poliza.estado == "POR VENCER" %}
+<span class="estado-vencer">POR VENCER</span>
+{% else %}
+<span class="estado-vencida">VENCIDA</span>
+{% endif %}
+
+</td>
+
+<td>
+
+{% if poliza.pdf_poliza %}
+<a href="{{ poliza.pdf_poliza.url }}" target="_blank">Ver PDF</a>
+{% else %}
+Sin PDF
+{% endif %}
+
+</td>
+
+<td>
+
+{% if poliza.cuponera_pdf %}
+
+<a href="https://wa.me/{{ cliente.telefono }}?text=Hola%20{{cliente.nombre}}.%20Te%20envio%20la%20cuponera%20de%20tu%20poliza.%20{{ request.build_absolute_uri }}{{ poliza.cuponera_pdf.url }}"
+target="_blank"
+class="boton-whatsapp">
+📲 Enviar
+</a>
+
+{% else %}
+
+Sin cuponera
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endif %}
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<p>Este cliente no tiene pólizas.</p>
+
+{% endif %}
+
+</div>
+
+</div>
+
+{% endfor %}
+
+<script>
+
+function togglePolizas(id){
+
+var div = document.getElementById(id);
+
+if(div.style.display === "none" || div.style.display === ""){
+div.style.display = "block";
+}else{
+div.style.display = "none";
+}
+
+}
+
+</script>
+
+{% endblock %}

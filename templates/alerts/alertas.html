@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>🔔 Alertas del sistema</h1>
+
+<table border="1" cellpadding="10" width="100%" style="background:white;border-collapse:collapse;">
+
+<tr style="background:#2c3e50;color:white;">
+<th>Nivel</th>
+<th>Cliente</th>
+<th>DNI</th>
+<th>Mensaje</th>
+<th>Póliza</th>
+<th>Fecha</th>
+<th>WhatsApp</th>
+<th>Cliente</th>
+</tr>
+
+{% for alerta in alertas %}
+
+<tr>
+
+<td>{{ alerta.level }}</td>
+
+<td>
+{{ alerta.policy.client.first_name }} {{ alerta.policy.client.last_name }}
+</td>
+
+<td>
+{{ alerta.policy.client.dni }}
+</td>
+
+<td>
+
+<a href="/clientes/ver/{{ alerta.policy.client.id }}/?poliza={{ alerta.policy.id }}"
+style="color:#1976d2;font-weight:bold;text-decoration:none;">
+{{ alerta.message }}
+</a>
+
+</td>
+
+<td>{{ alerta.policy.policy_number }}</td>
+
+<td>{{ alerta.created_at|date:"d/m/Y H:i" }}</td>
+
+<td>
+
+<a href="https://wa.me/{{ alerta.policy.client.phone }}?text=Hola {{ alerta.policy.client.first_name }}, te escribo de Fuerza Natural Brokers. Tu póliza {{ alerta.policy.policy_number }} de {{ alerta.policy.company }} vence el {{ alerta.policy.end_date }}."
+target="_blank"
+style="background:#25D366;color:white;padding:5px 10px;border-radius:4px;text-decoration:none;font-size:13px;">
+WhatsApp
+</a>
+
+</td>
+
+<td>
+
+<a href="/clientes/ver/{{ alerta.policy.client.id }}/"
+style="background:#1976d2;color:white;padding:5px 10px;border-radius:4px;text-decoration:none;font-size:13px;">
+Ver cliente
+</a>
+
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="8" style="text-align:center;padding:20px;">
+No hay alertas
+</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}

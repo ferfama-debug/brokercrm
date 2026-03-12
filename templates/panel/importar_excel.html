@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="dashboard">
+
+<h1>Importar cartera desde Excel</h1>
+
+<p>Subí un archivo Excel con la cartera de clientes y pólizas.</p>
+
+<form method="post" enctype="multipart/form-data">
+
+{% csrf_token %}
+
+<input type="file" name="archivo" required>
+
+<button type="submit" class="btn-importar">
+📥 Importar cartera
+</button>
+
+</form>
+
+<br>
+
+<a href="/">⬅ Volver al panel</a>
+
+</div>
+
+<style>
+
+.dashboard{
+padding:40px;
+}
+
+.btn-importar{
+background:#4CAF50;
+color:white;
+padding:10px 15px;
+border:none;
+border-radius:6px;
+margin-top:10px;
+cursor:pointer;
+}
+
+.btn-importar:hover{
+background:#3e8e41;
+}
+
+</style>
+
+{% endblock %}

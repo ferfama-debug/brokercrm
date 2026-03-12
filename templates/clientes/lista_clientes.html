@@ -8,25 +8,65 @@
 
 <br><br>
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Nombre</th>
-        <th>Email</th>
-        <th>Teléfono</th>
-        <th>Acciones</th>
-    </tr>
+<!-- BUSCADOR -->
 
-    {% for cliente in clientes %}
-    <tr>
-        <td>{{ cliente.first_name }} {{ cliente.last_name }}</td>
-        <td>{{ cliente.email }}</td>
-        <td>{{ cliente.phone }}</td>
-        <td>
-            <a href="{% url 'editar_cliente' cliente.id %}">Editar</a>
-        </td>
-    </tr>
-    {% endfor %}
+<form method="get" style="margin-bottom:20px;">
+
+    <input
+        type="text"
+        name="buscar"
+        placeholder="Buscar por nombre, DNI, teléfono o email"
+        value="{{ buscar }}"
+        style="padding:8px;width:300px;"
+    >
+
+    <button type="submit" style="padding:8px 15px;">
+        Buscar
+    </button>
+
+</form>
+
+<table border="1" cellpadding="10">
+
+<tr>
+    <th>Nombre</th>
+    <th>DNI</th>
+    <th>Email</th>
+    <th>Teléfono</th>
+    <th>Acciones</th>
+</tr>
+
+{% for cliente in clientes %}
+
+<tr>
+    <td>{{ cliente.first_name }} {{ cliente.last_name }}</td>
+    <td>{{ cliente.dni }}</td>
+    <td>{{ cliente.email }}</td>
+    <td>{{ cliente.phone }}</td>
+
+    <td>
+
+        <a href="{% url 'ver_cliente' cliente.id %}">
+            Ver
+        </a>
+
+        |
+
+        <a href="{% url 'editar_cliente' cliente.id %}">
+            Editar
+        </a>
+
+    </td>
+</tr>
+
+{% empty %}
+
+<tr>
+    <td colspan="5">No se encontraron clientes.</td>
+</tr>
+
+{% endfor %}
+
 </table>
 
 {% endblock %}
-

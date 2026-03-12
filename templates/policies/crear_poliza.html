@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>➕ Nueva póliza</h1>
+
+<form method="post" enctype="multipart/form-data" style="background:white;padding:30px;width:500px;">
+    {% csrf_token %}
+
+    <div style="margin-bottom:15px;">
+        <label>Cliente</label><br>
+        <select name="client" style="width:100%;padding:8px;">
+
+            {% for cliente in clientes %}
+
+                {% if cliente.id|stringformat:"s" == cliente_id %}
+                    <option value="{{ cliente.id }}" selected>
+                        {{ cliente }}
+                    </option>
+                {% else %}
+                    <option value="{{ cliente.id }}">
+                        {{ cliente }}
+                    </option>
+                {% endif %}
+
+            {% endfor %}
+
+        </select>
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>N° Póliza</label><br>
+        <input type="text" name="policy_number" style="width:100%;padding:8px;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>Compañía</label><br>
+        <input type="text" name="company" style="width:100%;padding:8px;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>Tipo de póliza</label><br>
+        <select name="tipo_poliza" style="width:100%;padding:8px;">
+            <option value="AUTO">Auto</option>
+            <option value="MOTO">Moto</option>
+            <option value="HOGAR">Hogar</option>
+            <option value="VIDA">Vida</option>
+            <option value="COMERCIO">Comercio</option>
+            <option value="AP">Accidentes Personales</option>
+            <option value="RC">Responsabilidad Civil</option>
+            <option value="OTRO">Otro</option>
+        </select>
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>Fecha inicio</label><br>
+        <input type="date" name="start_date" style="width:100%;padding:8px;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>Fecha vencimiento</label><br>
+        <input type="date" name="end_date" style="width:100%;padding:8px;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>Forma de pago</label><br>
+        <select name="forma_pago" style="width:100%;padding:8px;">
+            <option value="TARJETA">Tarjeta de crédito</option>
+            <option value="CBU">Débito / CBU</option>
+            <option value="CUPONERA">Cuponera de pago</option>
+        </select>
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>PDF de la póliza</label><br>
+        <input type="file" name="pdf_poliza" accept="application/pdf" style="width:100%;padding:8px;">
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label>Cuponera de pago (solo si corresponde)</label><br>
+        <input type="file" name="cuponera_pdf" accept="application/pdf" style="width:100%;padding:8px;">
+    </div>
+
+    <button type="submit" style="padding:10px 20px;background:#2c3e50;color:white;border:none;">
+        Guardar póliza
+    </button>
+
+</form>
+
+{% endblock %}
