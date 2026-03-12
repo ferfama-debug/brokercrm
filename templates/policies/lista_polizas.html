@@ -4,8 +4,6 @@
 
 <h1>📄 Pólizas por cliente</h1>
 
-<!-- FILTRO POR COMPAÑIA -->
-
 <form method="get" style="margin-bottom:20px;">
 
 <label><strong>Filtrar por compañía:</strong></label>
@@ -126,13 +124,9 @@ background:#1ebe5b;
 <tr>
 
 <td>{{ poliza.policy_number }}</td>
-
 <td>{{ poliza.company }}</td>
-
 <td>{{ poliza.tipo_poliza }}</td>
-
 <td>{{ poliza.start_date }}</td>
-
 <td>{{ poliza.end_date }}</td>
 
 <td>
@@ -161,8 +155,8 @@ Sin PDF
 
 {% if poliza.cuponera_pdf %}
 
-<a 
-href="https://wa.me/{{ cliente.telefono|cut:' '|cut:'-' }}?text=Hola%20{{cliente}}.%20Te%20envio%20la%20cuponera%20de%20tu%20poliza.%20{{ poliza.cuponera_pdf.url }}"
+<a
+href="https://wa.me/{{ cliente.telefono|cut:' '|cut:'-' }}?text=Hola%20{{cliente}}.%20Te%20envio%20la%20cuponera%20de%20tu%20poliza.%20{{ request.scheme }}://{{ request.get_host }}{{ poliza.cuponera_pdf.url }}"
 target="_blank"
 class="boton-whatsapp">
 📲 Enviar
