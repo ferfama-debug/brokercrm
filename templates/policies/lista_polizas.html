@@ -64,8 +64,6 @@ padding:8px;
 border-bottom:1px solid #ddd;
 }
 
-/* Estados */
-
 .estado-activa{
 color:green;
 font-weight:bold;
@@ -163,7 +161,8 @@ Sin PDF
 
 {% if poliza.cuponera_pdf %}
 
-<a href="https://wa.me/{{ cliente.telefono }}?text=Hola%20{{cliente.nombre}}.%20Te%20envio%20la%20cuponera%20de%20tu%20poliza.%20{{ request.build_absolute_uri }}{{ poliza.cuponera_pdf.url }}"
+<a 
+href="https://wa.me/{{ cliente.telefono|cut:' '|cut:'-' }}?text=Hola%20{{cliente}}.%20Te%20envio%20la%20cuponera%20de%20tu%20poliza.%20{{ poliza.cuponera_pdf.url }}"
 target="_blank"
 class="boton-whatsapp">
 📲 Enviar
