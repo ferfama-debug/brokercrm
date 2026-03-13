@@ -158,7 +158,7 @@ Sin PDF
 {% with link=request.scheme|add:"://"|add:request.get_host|add:poliza.cuponera_pdf.url %}
 
 <a
-href="https://wa.me/{{ cliente.telefono|cut:' '|cut:'-' }}?text=Hola%20{{cliente}}.%20Te%20env%C3%ADo%20la%20cuponera%20de%20tu%20p%C3%B3liza:%20{{ link }}"
+href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola%20{{cliente}}.%20Te%20env%C3%ADo%20la%20cuponera%20de%20tu%20p%C3%B3liza:%20{{ link }}"
 target="_blank"
 class="boton-whatsapp">
 📲 Enviar
