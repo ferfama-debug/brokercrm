@@ -10,19 +10,18 @@ def generate_expiration_alerts():
 
     today = date.today()
 
-    for policy in Policy.objects.all():
+    policies = Policy.objects.filter(end_date__gte=today)
+
+    for policy in policies:
 
         days = (policy.end_date - today).days
 
-        if days < 0:
-            continue
-
         if days <= 7:
-            level = 'CRITICA'
+            level = "CRITICA"
         elif days <= 15:
-            level = 'ALTA'
+            level = "ALTA"
         elif days <= 30:
-            level = 'MEDIA'
+            level = "MEDIA"
         else:
             continue
 
@@ -31,11 +30,10 @@ def generate_expiration_alerts():
             policy=policy,
             level=level,
             defaults={
-                'message': f'La póliza {policy.policy_number} vence en {days} días'
-            }
+                "message": f"La póliza {policy.policy_number} vence en {days} días"
+            },
         )
 
-        # Enviar email SOLO si faltan 7 días
         if days == 7 and created:
 
             subject = "⚠ Póliza por vencer en 7 días"
