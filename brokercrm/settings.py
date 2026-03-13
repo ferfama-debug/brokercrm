@@ -19,7 +19,7 @@ ALLOWED_HOSTS = ["*"]
 # =========================
 
 INSTALLED_APPS = [
-    "jazzmin",
+    # "jazzmin",  # desactivado por incompatibilidad con Python 3.14
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -43,7 +43,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    # CSRF SIEMPRE ANTES DE AUTH
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -119,9 +118,9 @@ USE_I18N = True
 USE_TZ = True
 AUTH_USER_MODEL = "accounts.User"
 
-# ==============================
+# =========================
 # STATIC FILES
-# ==============================
+# =========================
 
 STATIC_URL = "/static/"
 
@@ -132,11 +131,11 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # =========================
-# CSRF + HTTPS (RAILWAY)
+# SEGURIDAD
 # =========================
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://brokercrm-production.up.railway.app",
+    "https://brokercrm.onrender.com",
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -148,34 +147,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SAMESITE = "None"
 
-# 🚫 NO redirigir SSL (Railway ya lo hace)
 SECURE_SSL_REDIRECT = False
-
-# =========================
-# JAZZMIN
-# =========================
-
-JAZZMIN_SETTINGS = {
-    "site_title": "CRM Fuerza Natural",
-    "site_header": "CRM Fuerza Natural Brokers",
-    "site_brand": "Fuerza Natural",
-    "welcome_sign": "Bienvenido al CRM 🚀",
-    "copyright": "Fuerza Natural Brokers",
-    "site_logo_classes": "img-circle",
-    "topmenu_links": [
-        {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
-    ],
-    "show_sidebar": True,
-    "navigation_expanded": True,
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "accounts.User": "fas fa-user",
-        "clients.Client": "fas fa-handshake",
-        "policies.Policy": "fas fa-file-contract",
-        "alerts.Alert": "fas fa-bell",
-    },
-    "theme": "darkly",
-}
 
 LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -195,6 +167,10 @@ EMAIL_HOST_USER = "ferfama@gmail.com"
 EMAIL_HOST_PASSWORD = "avfumwexwzsfrsti"
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# =========================
+# MEDIA
+# =========================
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
