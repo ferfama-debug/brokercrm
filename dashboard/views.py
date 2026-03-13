@@ -32,48 +32,45 @@ def home(request):
 
         if dias < 0:
             vencidas += 1
+            continue
 
-        if dias >= 0:
+        polizas_por_vencer.append(
+            {
+                "cliente": p.client,
+                "numero": p.policy_number,
+                "compania": p.company,
+                "vencimiento": p.end_date,
+                "dias": dias,
+            }
+        )
 
-            polizas_por_vencer.append(
+        if dias <= 7:
+            vencen_7 += 1
+
+            fecha = p.end_date.strftime("%d/%m/%Y")
+
+            mensaje = (
+                f"Hola {p.client.full_name}, "
+                f"tu póliza N° {p.policy_number} de {p.company} "
+                f"vence el {fecha}. "
+                f"¿Querés que avancemos con la renovación?"
+            )
+
+            clientes_llamar.append(
                 {
                     "cliente": p.client,
                     "numero": p.policy_number,
-                    "compania": p.company,
-                    "vencimiento": p.end_date,
+                    "telefono": getattr(p.client, "phone", ""),
                     "dias": dias,
+                    "mensaje": mensaje,
                 }
             )
 
-            if dias <= 7:
+        elif dias <= 15:
+            vencen_15 += 1
 
-                fecha = p.end_date.strftime("%d/%m/%Y")
-
-                mensaje = (
-                    f"Hola {p.client.full_name}, "
-                    f"tu póliza N° {p.policy_number} de {p.company} "
-                    f"vence el {fecha}. "
-                    f"¿Querés que avancemos con la renovación?"
-                )
-
-                clientes_llamar.append(
-                    {
-                        "cliente": p.client,
-                        "numero": p.policy_number,
-                        "telefono": getattr(p.client, "phone", ""),
-                        "dias": dias,
-                        "mensaje": mensaje,
-                    }
-                )
-
-            if dias <= 7:
-                vencen_7 += 1
-
-            if dias <= 15:
-                vencen_15 += 1
-
-            if dias <= 30:
-                vencen_30 += 1
+        elif dias <= 30:
+            vencen_30 += 1
 
     # SCORE CLIENTES
 

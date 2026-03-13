@@ -4,6 +4,13 @@
 
 <h1>🔔 Alertas del sistema</h1>
 
+{% if request.GET.nivel %}
+<div style="margin-bottom:15px;background:#fff3cd;padding:10px;border-radius:6px;">
+Mostrando alertas de nivel: <strong>{{ request.GET.nivel }}</strong>
+<a href="/alertas/" style="margin-left:10px;color:#1976d2;">Ver todas</a>
+</div>
+{% endif %}
+
 <table border="1" cellpadding="10" width="100%" style="background:white;border-collapse:collapse;">
 
 <tr style="background:#2c3e50;color:white;">
