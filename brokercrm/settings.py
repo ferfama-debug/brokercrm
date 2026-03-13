@@ -131,6 +131,9 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# CONFIGURACIÓN NECESARIA PARA RENDER
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 # =========================
 # SEGURIDAD
 # =========================
