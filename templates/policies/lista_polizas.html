@@ -13,11 +13,9 @@
 <option value="">Todas las compañías</option>
 
 {% for c in companias %}
-
 <option value="{{ c }}" {% if compania_seleccionada == c %}selected{% endif %}>
 {{ c }}
 </option>
-
 {% endfor %}
 
 </select>
@@ -155,10 +153,10 @@ Sin PDF
 
 {% if poliza.cuponera_pdf %}
 
-{% with link=request.scheme|add:"://"|add:request.get_host|add:poliza.cuponera_pdf.url %}
+{% with link="https://brokercrm.onrender.com"|add:poliza.cuponera_pdf.url %}
 
 <a
-href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola%20{{cliente}}.%20Te%20env%C3%ADo%20la%20cuponera%20de%20tu%20p%C3%B3liza:%20{{ link }}"
+href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{cliente}}. Te envío la cuponera de tu póliza: {{ link }}"
 target="_blank"
 class="boton-whatsapp">
 📲 Enviar
