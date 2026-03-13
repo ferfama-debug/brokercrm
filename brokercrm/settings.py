@@ -19,7 +19,7 @@ ALLOWED_HOSTS = ["*"]
 # =========================
 
 INSTALLED_APPS = [
-    # "jazzmin",  # desactivado por incompatibilidad con Python 3.14
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,13 +41,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "brokercrm.urls"
@@ -67,7 +67,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                # "alerts.context_processors.alert_count",  # desactivado para evitar conflicto con admin
             ],
         },
     },
@@ -114,8 +113,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "es-ar"
 TIME_ZONE = "America/Argentina/Mendoza"
+
 USE_I18N = True
 USE_TZ = True
+
 AUTH_USER_MODEL = "accounts.User"
 
 # =========================
@@ -174,3 +175,15 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# =========================
+# JAZZMIN CONFIG
+# =========================
+
+JAZZMIN_SETTINGS = {
+    "site_title": "CRM Fuerza Natural",
+    "site_header": "Fuerza Natural Brokers",
+    "site_brand": "CRM Fuerza Natural",
+    "welcome_sign": "Bienvenido al CRM",
+    "copyright": "Fuerza Natural Brokers",
+}
