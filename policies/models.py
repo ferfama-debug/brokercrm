@@ -73,9 +73,7 @@ class Policy(models.Model):
 
     pdf_poliza = CloudinaryField(
         resource_type="image",
-        type="upload",
         folder="clientes/polizas",
-        access_mode="public",
         blank=True,
         null=True,
         verbose_name="PDF de póliza",
@@ -90,9 +88,7 @@ class Policy(models.Model):
 
     cuponera_pdf = CloudinaryField(
         resource_type="image",
-        type="upload",
         folder="clientes/cuponeras",
-        access_mode="public",
         blank=True,
         null=True,
         verbose_name="Cuponera PDF",
