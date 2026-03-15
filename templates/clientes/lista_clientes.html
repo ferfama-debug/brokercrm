@@ -2,71 +2,173 @@
 
 {% block content %}
 
-<h1>Clientes</h1>
+<style>
 
-<a href="{% url 'crear_cliente' %}">+ Nuevo cliente</a>
+.buscador-clientes{
+display:flex;
+gap:10px;
+align-items:center;
+flex-wrap:wrap;
+}
 
-<br><br>
+.buscador-clientes input{
+padding:10px;
+width:350px;
+border:1px solid #ddd;
+border-radius:6px;
+}
+
+.tabla-clientes{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+}
+
+.tabla-clientes th{
+background:#2c3e50;
+color:white;
+padding:12px;
+text-align:left;
+}
+
+.tabla-clientes td{
+padding:12px;
+border-bottom:1px solid #eee;
+}
+
+.tabla-clientes tr:hover{
+background:#f6f8fb;
+}
+
+.acciones{
+display:flex;
+gap:6px;
+}
+
+.btn-tabla{
+padding:6px 10px;
+font-size:13px;
+border-radius:4px;
+text-decoration:none;
+}
+
+.btn-ver{
+background:#1976d2;
+color:white;
+}
+
+.btn-editar{
+background:#455a64;
+color:white;
+}
+
+</style>
+
+
+<h1 class="title">Clientes</h1>
+
+
+<div style="margin-bottom:20px;">
+<a href="{% url 'clients:crear_cliente' %}" class="btn btn-primary">
++ Nuevo cliente
+</a>
+</div>
+
 
 <!-- BUSCADOR -->
 
-<form method="get" style="margin-bottom:20px;">
+<div class="card">
 
-    <input
-        type="text"
-        name="buscar"
-        placeholder="Buscar por nombre, DNI, teléfono o email"
-        value="{{ buscar }}"
-        style="padding:8px;width:300px;"
-    >
+<form method="get" class="buscador-clientes">
 
-    <button type="submit" style="padding:8px 15px;">
-        Buscar
-    </button>
+<input
+type="text"
+name="buscar"
+placeholder="Buscar por nombre, DNI, teléfono o email"
+value="{{ buscar }}"
+>
+
+<button type="submit" class="btn btn-primary">
+Buscar
+</button>
 
 </form>
 
-<table border="1" cellpadding="10">
+</div>
+
+
+<!-- TABLA CLIENTES -->
+
+<div class="card">
+
+<table class="tabla-clientes">
+
+<thead>
 
 <tr>
-    <th>Nombre</th>
-    <th>DNI</th>
-    <th>Email</th>
-    <th>Teléfono</th>
-    <th>Acciones</th>
+<th>Nombre</th>
+<th>DNI</th>
+<th>Email</th>
+<th>Teléfono</th>
+<th style="width:160px;">Acciones</th>
 </tr>
+
+</thead>
+
+<tbody>
 
 {% for cliente in clientes %}
 
 <tr>
-    <td>{{ cliente.first_name }} {{ cliente.last_name }}</td>
-    <td>{{ cliente.dni }}</td>
-    <td>{{ cliente.email }}</td>
-    <td>{{ cliente.phone }}</td>
 
-    <td>
+<td>
+{{ cliente.first_name }} {{ cliente.last_name }}
+</td>
 
-        <a href="{% url 'ver_cliente' cliente.id %}">
-            Ver
-        </a>
+<td>
+{{ cliente.dni|default:"—" }}
+</td>
 
-        |
+<td>
+{{ cliente.email|default:"—" }}
+</td>
 
-        <a href="{% url 'editar_cliente' cliente.id %}">
-            Editar
-        </a>
+<td>
+{{ cliente.phone|default:"—" }}
+</td>
 
-    </td>
+<td>
+
+<div class="acciones">
+
+<a href="{% url 'clients:ver_cliente' cliente.id %}" class="btn-tabla btn-ver">
+Ver
+</a>
+
+<a href="{% url 'clients:editar_cliente' cliente.id %}" class="btn-tabla btn-editar">
+Editar
+</a>
+
+</div>
+
+</td>
+
 </tr>
 
 {% empty %}
 
 <tr>
-    <td colspan="5">No se encontraron clientes.</td>
+<td colspan="5" style="text-align:center;padding:25px;">
+No se encontraron clientes.
+</td>
 </tr>
 
 {% endfor %}
 
+</tbody>
+
 </table>
+
+</div>
 
 {% endblock %}

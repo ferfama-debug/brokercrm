@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="title">Eliminar cliente</h1>
+
+<div class="card" style="max-width:500px;">
+
+<p>
+¿Estás seguro que deseas eliminar al cliente
+<strong>{{ cliente.first_name }} {{ cliente.last_name }}</strong>?
+</p>
+
+<form method="post">
+
+{% csrf_token %}
+
+<button type="submit" class="btn btn-primary">
+Sí, eliminar cliente
+</button>
+
+<a href="{% url 'clients:clientes' %}" class="btn btn-pdf">
+Cancelar
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}

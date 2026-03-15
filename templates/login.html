@@ -1,8 +1,29 @@
-<h2>Login CRM Fuerza Natural Brokers</h2>
+<h1>Fuerza Natural Broker de Seguros</h1>
+
+<h2>Ingreso Para Productores</h2>
 
 <form method="POST">
-  {% csrf_token %}
-  <input type="text" name="username" placeholder="Usuario"><br><br>
-  <input type="password" name="password" placeholder="Contraseña"><br><br>
-  <button type="submit">Ingresar</button>
+
+    {% csrf_token %}
+
+    <input
+        type="text"
+        name="username"
+        placeholder="Usuario"
+    >
+
+    <br><br>
+
+    <input
+        type="password"
+        name="password"
+        placeholder="Contraseña"
+    >
+
+    <br><br>
+
+    <button type="submit">
+        Ingresar
+    </button>
+
 </form>

@@ -2,130 +2,145 @@
 
 {% block content %}
 
-<h1>Cliente</h1>
+<style>
 
-<div style="background:white;padding:20px;margin-bottom:20px;border-radius:6px;">
+.cliente-info{
+display:grid;
+grid-template-columns:180px 1fr;
+row-gap:10px;
+column-gap:20px;
+font-size:15px;
+}
 
-<p><strong>Nombre:</strong> {{ cliente.first_name }} {{ cliente.last_name }}</p>
-<p><strong>DNI:</strong> {{ cliente.dni }}</p>
-<p><strong>Email:</strong> {{ cliente.email }}</p>
-<p><strong>Teléfono:</strong> {{ cliente.phone }}</p>
+.resumen{
+display:flex;
+gap:20px;
+margin:25px 0;
+flex-wrap:wrap;
+}
+
+.resumen-card{
+background:white;
+padding:18px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+width:200px;
+text-align:center;
+}
+
+.resumen-card h2{
+margin:10px 0 0 0;
+}
+
+.tabla-polizas{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+}
+
+.tabla-polizas th{
+background:#2c3e50;
+color:white;
+padding:10px;
+text-align:left;
+}
+
+.tabla-polizas td{
+padding:10px;
+border-bottom:1px solid #eee;
+vertical-align:middle;
+}
+
+.tabla-polizas tr:hover{
+background:#f6f8fb;
+}
+
+.grupo-poliza td{
+background:#34495e;
+color:white;
+font-weight:bold;
+}
+
+.acciones-poliza{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+}
+
+</style>
+
+
+<h1 class="title">Cliente</h1>
+
+
+<div class="card">
+
+<div class="cliente-info">
+
+<strong>Nombre:</strong>
+<span>{{ cliente.first_name }} {{ cliente.last_name }}</span>
+
+<strong>DNI:</strong>
+<span>{{ cliente.dni|default:"—" }}</span>
+
+<strong>Email:</strong>
+<span>{{ cliente.email|default:"—" }}</span>
+
+<strong>Teléfono:</strong>
+<span>{{ cliente.phone|default:"—" }}</span>
 
 </div>
 
-<div style="display:flex;gap:20px;margin-bottom:30px;">
+</div>
 
-<div style="background:white;padding:20px;border-radius:6px;width:200px;text-align:center;">
+
+<div class="resumen">
+
+<div class="resumen-card">
 <strong>Pólizas activas</strong>
-<h2 style="color:#2e7d32;">{{ polizas_activas }}</h2>
+<h2 class="estado-activa">{{ polizas_activas }}</h2>
 </div>
 
-<div style="background:white;padding:20px;border-radius:6px;width:200px;text-align:center;">
+<div class="resumen-card">
 <strong>Por vencer</strong>
-<h2 style="color:#ef6c00;">{{ polizas_por_vencer }}</h2>
+<h2 class="estado-vencer">{{ polizas_por_vencer }}</h2>
 </div>
 
-<div style="background:white;padding:20px;border-radius:6px;width:200px;text-align:center;">
+<div class="resumen-card">
 <strong>Vencidas</strong>
-<h2 style="color:#c62828;">{{ polizas_vencidas }}</h2>
+<h2 class="estado-vencida">{{ polizas_vencidas }}</h2>
 </div>
 
 </div>
+
 
 <h2>Pólizas del cliente</h2>
 
+
+<div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
+
 {% if request.GET.poliza %}
 
-<a href="/alertas/"
-style="display:inline-block;margin-bottom:15px;padding:8px 12px;background:#455a64;color:white;text-decoration:none;border-radius:4px;">
+<a href="/alertas/" class="btn btn-pdf">
 ⬅ Volver a alertas
 </a>
 
 {% endif %}
 
-<a href="/polizas/nueva/?cliente={{ cliente.id }}"
-style="display:inline-block;margin-bottom:15px;padding:10px 15px;background:#2c3e50;color:white;text-decoration:none;border-radius:4px;">
+<a href="/polizas/nueva/?cliente={{ cliente.id }}" class="btn btn-primary">
 ➕ Agregar póliza
 </a>
 
-<style>
+</div>
 
-.estado-activa{
-background:#e8f5e9;
-color:#2e7d32;
-font-weight:bold;
-padding:4px 8px;
-border-radius:4px;
-}
 
-.estado-vencer{
-background:#fff3e0;
-color:#ef6c00;
-font-weight:bold;
-padding:4px 8px;
-border-radius:4px;
-}
+<div class="card">
 
-.estado-vencida{
-background:#ffebee;
-color:#c62828;
-font-weight:bold;
-padding:4px 8px;
-border-radius:4px;
-}
+<table class="tabla-polizas">
 
-.btn-renovar{
-background:#1976d2;
-color:white;
-padding:4px 8px;
-border-radius:4px;
-text-decoration:none;
-font-size:13px;
-}
+<thead>
 
-.btn-whatsapp{
-background:#25D366;
-color:white;
-padding:4px 8px;
-border-radius:4px;
-text-decoration:none;
-font-size:13px;
-}
-
-.btn-pdf{
-background:#455a64;
-color:white;
-padding:4px 8px;
-border-radius:4px;
-text-decoration:none;
-font-size:13px;
-}
-
-.btn-cuponera{
-background:#6d4c41;
-color:white;
-padding:4px 8px;
-border-radius:4px;
-text-decoration:none;
-font-size:13px;
-}
-
-.grupo-poliza{
-background:#34495e;
-color:white;
-padding:8px;
-font-weight:bold;
-}
-
-.renovacion{
-background:#f5f5f5;
-}
-
-</style>
-
-<table border="1" cellpadding="10" width="100%" style="background:white;border-collapse:collapse;">
-
-<tr style="background:#2c3e50;color:white;">
+<tr>
 <th>N° Póliza</th>
 <th>Compañía</th>
 <th>Tipo</th>
@@ -133,10 +148,15 @@ background:#f5f5f5;
 <th>Vencimiento</th>
 <th>Forma de pago</th>
 <th>Estado</th>
-<th>PDF</th>
+<th>Póliza</th>
 <th>Cuponera</th>
 <th>Acciones</th>
 </tr>
+
+</thead>
+
+
+<tbody>
 
 {% regroup polizas by policy_number as polizas_agrupadas %}
 
@@ -150,7 +170,7 @@ PÓLIZA {{ grupo.grouper }}
 
 {% for poliza in grupo.list %}
 
-<tr class="renovacion">
+<tr>
 
 <td>{{ poliza.policy_number }}</td>
 
@@ -164,6 +184,7 @@ PÓLIZA {{ grupo.grouper }}
 
 <td>{{ poliza.get_forma_pago_display }}</td>
 
+
 <td>
 
 {% if poliza.estado == "ACTIVA" %}
@@ -174,26 +195,23 @@ PÓLIZA {{ grupo.grouper }}
 
 {% else %}
 <span class="estado-vencida">🔴 VENCIDA</span>
-
 {% endif %}
 
 </td>
+
 
 <td>
 
 {% if poliza.pdf_poliza %}
-
-<a href="{{ poliza.pdf_poliza.url }}" target="_blank" style="color:blue;font-weight:bold;">
-Ver PDF
+<a href="{{ poliza.pdf_poliza.url }}" target="_blank">
+Ver póliza
 </a>
-
 {% else %}
-
-Sin PDF
-
+Sin póliza
 {% endif %}
 
 </td>
+
 
 <td>
 
@@ -201,68 +219,75 @@ Sin PDF
 
 {% if poliza.cuponera_pdf %}
 
-<a href="{{ poliza.cuponera_pdf.url }}" target="_blank" class="btn-cuponera">
+<a href="{{ poliza.cuponera_pdf.url }}" target="_blank" class="btn btn-cuponera">
 Ver cuponera
 </a>
 
-<a href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, te envío tu cuponera de pago de la póliza {{ poliza.policy_number }}: {{ poliza.cuponera_pdf.url }}"
-target="_blank"
-class="btn-whatsapp">
-Enviar cuponera
-</a>
-
 {% else %}
-
 ⚠ Sin cuponera
-
 {% endif %}
 
 {% else %}
-
 —
-
 {% endif %}
 
 </td>
+
 
 <td>
 
-<a href="/polizas/renovar/{{ poliza.id }}/" class="btn-renovar">
+<div class="acciones-poliza">
+
+<a href="/polizas/renovar/{{ poliza.id }}/" class="btn btn-renovar">
 Renovar
 </a>
 
-<a href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, tu póliza N° {{ poliza.policy_number }} de {{ poliza.company }} vence el {{ poliza.end_date }}. ¿Querés que avancemos con la renovación?"
+<a
+href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, tu póliza N° {{ poliza.policy_number }} de {{ poliza.company }} vence el {{ poliza.end_date }}. ¿Querés que avancemos con la renovación?"
 target="_blank"
-class="btn-whatsapp">
+class="btn btn-whatsapp">
 WhatsApp
 </a>
 
+
 {% if poliza.pdf_poliza %}
 
-<a href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, te envío tu póliza N° {{ poliza.policy_number }} de {{ poliza.company }}: {{ poliza.pdf_poliza.url }}"
+{% if poliza.forma_pago == "CUPONERA" and poliza.cuponera_pdf %}
+
+<a
+href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, te envío tu póliza {{ poliza.policy_number }} y la cuponera de pago:%0A%0APóliza:%20{{ poliza.pdf_poliza.url }}%0ACuponera:%20{{ poliza.cuponera_pdf.url }}"
 target="_blank"
-class="btn-pdf">
-Enviar PDF
+class="btn btn-pdf">
+Enviar póliza + cuponera
+</a>
+
+{% else %}
+
+<a
+href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, te envío tu póliza {{ poliza.policy_number }}:%20{{ poliza.pdf_poliza.url }}"
+target="_blank"
+class="btn btn-pdf">
+Enviar póliza
 </a>
 
 {% endif %}
 
+{% endif %}
+
+</div>
+
 </td>
 
 </tr>
 
 {% endfor %}
 
-{% empty %}
-
-<tr>
-<td colspan="10" style="text-align:center;padding:20px;">
-Este cliente no tiene pólizas cargadas.
-</td>
-</tr>
-
 {% endfor %}
+
+</tbody>
 
 </table>
+
+</div>
 
 {% endblock %}

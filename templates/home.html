@@ -1,32 +1,263 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html>
+
+<html lang="es">
+
 <head>
+
+    <meta charset="UTF-8">
+
     <title>CRM Fuerza Natural Brokers</title>
+
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
+
         body {
-            font-family: Arial;
-            background:#f5f6fa;
-            text-align:center;
-            padding-top:80px;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f9;
         }
-        h1 { color:#2c3e50; }
-        a {
-            display:inline-block;
-            margin-top:20px;
-            padding:12px 25px;
-            background:#0d6efd;
-            color:white;
-            text-decoration:none;
-            border-radius:6px;
+
+        /* TOP BAR */
+
+        .topbar {
+            height: 60px;
+            background: #0f1e2e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
         }
+
+        .logo {
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* CAMPANA ALERTAS */
+
+        .alert-bell {
+            position: relative;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+
+        .alert-bell span {
+            margin-left: 5px;
+        }
+
+        .alert-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 35px;
+            background: white;
+            color: black;
+            width: 320px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .alert-dropdown-header {
+            padding: 10px;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+        }
+
+        .alert-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-item.critica {
+            color: #ff4d4d;
+        }
+
+        .alert-item.alta {
+            color: #ff9800;
+        }
+
+        .alert-item.media {
+            color: #ffd54f;
+        }
+
+        .alert-bell:hover .alert-dropdown {
+            display: block;
+        }
+
+        /* LAYOUT */
+
+        .layout {
+            display: flex;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 260px;
+            background: #1f2d3d;
+            height: calc(100vh - 60px);
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 14px 25px;
+            text-decoration: none;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .sidebar a:hover {
+            background: #32465a;
+            padding-left: 30px;
+        }
+
+        /* ALERT COLORS */
+
+        .alert-critica {
+            color: #ff4d4d;
+            font-weight: bold;
+        }
+
+        .alert-alta {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .alert-media {
+            color: #ffd54f;
+            font-weight: bold;
+        }
+
+        /* CONTENT */
+
+        .content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+        }
+
     </style>
+
 </head>
+
 <body>
 
-    <h1>🎉 CRM Fuerza Natural Brokers</h1>
-    <p>El sistema está funcionando en Railway 🚀</p>
+    <!-- TOPBAR -->
 
-    <a href="/admin/">Ir al panel administrador</a>
+    <div class="topbar">
+
+        <div class="logo">
+            CRM Fuerza Natural Brokers
+        </div>
+
+        <div style="display:flex; align-items:center;">
+
+            <div class="alert-bell">
+
+                🔔 {{ alert_count }}
+
+                <div class="alert-dropdown">
+
+                    <div class="alert-dropdown-header">
+                        Últimas alertas
+                    </div>
+
+                    {% for alerta in ultimas_alertas %}
+
+                        <div class="alert-item {{ alerta.level|lower }}">
+                            {{ alerta.message }}
+                        </div>
+
+                    {% empty %}
+
+                        <div class="alert-item">
+                            No hay alertas
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div>
+                👤 {{ request.user.username }}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LAYOUT -->
+
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+
+        <div class="sidebar">
+
+            <a href="/">🏠 Dashboard</a>
+
+            <a href="/clientes/">👥 Clientes</a>
+
+            <a href="/polizas/">📄 Pólizas</a>
+
+            <a href="/polizas/nueva/">➕ Nueva póliza</a>
+
+            <a href="/alertas/">
+
+                🔔 Alertas
+
+                <span class="
+                    {% if alert_color == 'critica' %}alert-critica
+                    {% elif alert_color == 'alta' %}alert-alta
+                    {% elif alert_color == 'media' %}alert-media
+                    {% endif %}
+                ">
+                    ({{ alert_count }})
+                </span>
+
+            </a>
+
+            <a href="/admin/">⚙️ Administración</a>
+
+            <a href="/accounts/logout/">🚪 Cerrar sesión</a>
+
+        </div>
+
+        <!-- CONTENT -->
+
+        <div class="content">
+
+            {% block content %}
+            {% endblock %}
+
+        </div>
+
+    </div>
 
 </body>
+
 </html>

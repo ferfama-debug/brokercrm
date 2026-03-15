@@ -6,17 +6,18 @@ from .models import Alert
 @login_required
 def alertas(request):
 
-    nivel = request.GET.get("nivel")
+    nivel = request.GET.get("nivel", "")
 
-    # Si es administrador ve todas
+    # Base queryset
     if request.user.is_superuser:
         alertas = Alert.objects.filter(resolved=False)
-
-    # Si es productor ve solo las suyas
     else:
-        alertas = Alert.objects.filter(user=request.user, resolved=False)
+        alertas = Alert.objects.filter(
+            user=request.user,
+            resolved=False
+        )
 
-    # FILTRO POR NIVEL (para el radar)
+    # Filtro por nivel (usado por el radar)
     if nivel:
         alertas = alertas.filter(level=nivel)
 
@@ -27,5 +28,6 @@ def alertas(request):
         "alerts/alertas.html",
         {
             "alertas": alertas,
+            "nivel": nivel,
         },
     )

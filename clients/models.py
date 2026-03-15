@@ -11,12 +11,19 @@ class Client(models.Model):
 
     # DNI como identificador fuerte
     dni = models.CharField(
-        max_length=20, unique=True, blank=True, null=True, db_index=True
+        max_length=20,
+        unique=True,
+        blank=True,
+        null=True,
+        db_index=True,
     )
 
     phone = models.CharField(max_length=20)
 
-    email = models.EmailField(blank=True, null=True)
+    email = models.EmailField(
+        blank=True,
+        null=True,
+    )
 
     producer = models.ForeignKey(
         User,
@@ -25,6 +32,13 @@ class Client(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["last_name", "first_name"]
+        indexes = [
+            models.Index(fields=["last_name"]),
+            models.Index(fields=["dni"]),
+        ]
 
     @property
     def full_name(self):

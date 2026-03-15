@@ -21,13 +21,31 @@ class Policy(models.Model):
         ("CUPONERA", "Cuponera de pago"),
     ]
 
+    FRECUENCIAS_CUPONERA = [
+        (1, "Mensual"),
+        (3, "Trimestral"),
+        (4, "Cuatrimestral"),
+        (6, "Semestral"),
+        (12, "Anual"),
+    ]
+
     client = models.ForeignKey(
-        "clients.Client", on_delete=models.CASCADE, verbose_name="Cliente"
+        "clients.Client",
+        on_delete=models.CASCADE,
+        verbose_name="Cliente",
+        db_index=True,
     )
 
-    company = models.CharField(max_length=100, verbose_name="Compañía")
+    company = models.CharField(
+        max_length=100,
+        verbose_name="Compañía",
+    )
 
-    policy_number = models.CharField(max_length=50, verbose_name="Número de póliza")
+    policy_number = models.CharField(
+        max_length=50,
+        verbose_name="Número de póliza",
+        db_index=True,
+    )
 
     tipo_poliza = models.CharField(
         max_length=20,
@@ -37,19 +55,27 @@ class Policy(models.Model):
     )
 
     insurance_type = models.CharField(
-        max_length=100, blank=True, verbose_name="Detalle del seguro"
+        max_length=100,
+        blank=True,
+        verbose_name="Detalle del seguro",
     )
 
-    start_date = models.DateField(verbose_name="Fecha de inicio")
+    start_date = models.DateField(
+        verbose_name="Fecha de inicio"
+    )
 
-    end_date = models.DateField(verbose_name="Fecha de vencimiento")
+    end_date = models.DateField(
+        verbose_name="Fecha de vencimiento",
+        db_index=True,
+    )
 
-    # PDF de la póliza
     pdf_poliza = models.FileField(
-        upload_to="polizas/", blank=True, null=True, verbose_name="PDF de póliza"
+        upload_to="polizas/",
+        blank=True,
+        null=True,
+        verbose_name="PDF de póliza",
     )
 
-    # Forma de pago
     forma_pago = models.CharField(
         max_length=20,
         choices=FORMAS_PAGO,
@@ -57,28 +83,42 @@ class Policy(models.Model):
         verbose_name="Forma de pago",
     )
 
-    # PDF de cuponera
     cuponera_pdf = models.FileField(
-        upload_to="cuponeras/", blank=True, null=True, verbose_name="Cuponera PDF"
+        upload_to="cuponeras/",
+        blank=True,
+        null=True,
+        verbose_name="Cuponera PDF",
+    )
+
+    # NUEVO CAMPO
+    frecuencia_cuponera = models.IntegerField(
+        choices=FRECUENCIAS_CUPONERA,
+        blank=True,
+        null=True,
+        verbose_name="Frecuencia de cuponera (meses)"
     )
 
     @property
     def estado(self):
+
         hoy = date.today()
         dias = (self.end_date - hoy).days
 
         if dias < 0:
             return "VENCIDA"
-
-        if dias <= 30:
+        elif dias <= 30:
             return "POR VENCER"
-
-        return "ACTIVA"
+        else:
+            return "ACTIVA"
 
     def __str__(self):
-        return f"{self.policy_number} - {self.client}"
+        return f"{self.policy_number} - {self.client.nombre_completo()}"
 
     class Meta:
         verbose_name = "Póliza"
         verbose_name_plural = "Pólizas"
         ordering = ["end_date"]
+        indexes = [
+            models.Index(fields=["end_date"]),
+            models.Index(fields=["policy_number"]),
+        ]

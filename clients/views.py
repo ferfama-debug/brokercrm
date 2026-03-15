@@ -11,18 +11,20 @@ from policies.models import Policy
 @login_required
 def lista_clientes(request):
 
-    buscar = request.GET.get("buscar")
+    buscar = request.GET.get("buscar", "")
+
+    clientes = Client.objects.all()
 
     if buscar:
-        clientes = Client.objects.filter(
+        clientes = clientes.filter(
             Q(first_name__icontains=buscar)
             | Q(last_name__icontains=buscar)
             | Q(dni__icontains=buscar)
             | Q(phone__icontains=buscar)
             | Q(email__icontains=buscar)
         )
-    else:
-        clientes = Client.objects.all()
+
+    clientes = clientes.order_by("last_name", "first_name")
 
     return render(
         request,
@@ -41,49 +43,35 @@ def ver_cliente(request, cliente_id):
 
     hoy = date.today()
 
-    # POLIZA QUE VIENE DESDE ALERTA
     poliza_id = request.GET.get("poliza")
 
-    if poliza_id:
-        polizas = (
-            Policy.objects.filter(id=poliza_id, client=cliente)
-            .annotate(
-                estado_orden=Case(
-                    When(end_date__gte=hoy, then=1),
-                    default=2,
-                    output_field=IntegerField(),
-                )
-            )
-            .order_by("estado_orden", "-end_date")
-        )
-    else:
-        polizas = (
-            Policy.objects.filter(client=cliente)
-            .annotate(
-                estado_orden=Case(
-                    When(end_date__gte=hoy, then=1),
-                    default=2,
-                    output_field=IntegerField(),
-                )
-            )
-            .order_by("estado_orden", "-end_date")
-        )
+    polizas_query = Policy.objects.filter(client=cliente)
 
-    # RESUMEN DEL CLIENTE
+    if poliza_id:
+        polizas_query = polizas_query.filter(id=poliza_id)
+
+    polizas = (
+        polizas_query.annotate(
+            estado_orden=Case(
+                When(end_date__gte=hoy, then=1),
+                default=2,
+                output_field=IntegerField(),
+            )
+        ).order_by("estado_orden", "-end_date")
+    )
+
     polizas_activas = 0
     polizas_por_vencer = 0
     polizas_vencidas = 0
 
-    for p in Policy.objects.filter(client=cliente):
+    for p in polizas_query:
 
         dias = (p.end_date - hoy).days
 
         if dias < 0:
             polizas_vencidas += 1
-
         elif dias <= 30:
             polizas_por_vencer += 1
-
         else:
             polizas_activas += 1
 
@@ -109,10 +97,9 @@ def crear_cliente(request):
 
         if form.is_valid():
             form.save()
-            return redirect("clientes")
+            return redirect("clients:clientes")
 
     else:
-
         form = ClientForm()
 
     return render(
@@ -135,10 +122,9 @@ def editar_cliente(request, cliente_id):
 
         if form.is_valid():
             form.save()
-            return redirect("clientes")
+            return redirect("clients:clientes")
 
     else:
-
         form = ClientForm(instance=cliente)
 
     return render(
@@ -157,7 +143,7 @@ def eliminar_cliente(request, id):
 
     if request.method == "POST":
         cliente.delete()
-        return redirect("clientes")
+        return redirect("clients:clientes")
 
     return render(
         request,

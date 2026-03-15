@@ -2,15 +2,22 @@
 
 {% block content %}
 
-<h2>Nuevo cliente</h2>
+<h1 class="title">Nuevo cliente</h1>
 
-<div style="max-width:500px;">
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+<div class="card" style="max-width:500px;">
 
-        <button type="submit" class="btn">Guardar cliente</button>
-    </form>
+<form method="post">
+
+{% csrf_token %}
+
+{{ form.as_p }}
+
+<button type="submit" class="btn btn-primary">
+Guardar cliente
+</button>
+
+</form>
+
 </div>
 
 {% endblock %}

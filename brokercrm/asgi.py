@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'brokercrm.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "brokercrm.settings")
 
 application = get_asgi_application()

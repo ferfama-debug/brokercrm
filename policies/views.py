@@ -9,14 +9,10 @@ def lista_polizas(request):
 
     companias = Policy.objects.values_list("company", flat=True).distinct()
 
+    clientes = Client.objects.prefetch_related("policy_set")
+
     if compania:
-        clientes = (
-            Client.objects.prefetch_related("policy_set")
-            .filter(policy__company=compania)
-            .distinct()
-        )
-    else:
-        clientes = Client.objects.prefetch_related("policy_set")
+        clientes = clientes.filter(policy__company=compania).distinct()
 
     return render(
         request,
@@ -31,12 +27,12 @@ def lista_polizas(request):
 
 def crear_poliza(request):
 
-    clientes = Client.objects.all()
+    clientes = Client.objects.all().order_by("last_name", "first_name")
     cliente_id = request.GET.get("cliente")
 
     if request.method == "POST":
 
-        client = Client.objects.get(id=request.POST["client"])
+        client = get_object_or_404(Client, id=request.POST.get("client"))
 
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
@@ -63,6 +59,7 @@ def crear_poliza(request):
             start_date=start_date,
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
+            frecuencia_cuponera=request.POST.get("frecuencia_cuponera"),
             pdf_poliza=pdf,
             cuponera_pdf=cuponera,
         )
@@ -109,6 +106,7 @@ def renovar_poliza(request, poliza_id):
             start_date=start_date,
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
+            frecuencia_cuponera=request.POST.get("frecuencia_cuponera"),
             pdf_poliza=pdf,
             cuponera_pdf=cuponera,
         )

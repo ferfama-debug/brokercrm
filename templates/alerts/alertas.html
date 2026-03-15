@@ -2,69 +2,90 @@
 
 {% block content %}
 
-<h1>🔔 Alertas del sistema</h1>
+<h1 class="title">Alertas</h1>
 
-{% if request.GET.nivel %}
-<div style="margin-bottom:15px;background:#fff3cd;padding:10px;border-radius:6px;">
-Mostrando alertas de nivel: <strong>{{ request.GET.nivel }}</strong>
-<a href="/alertas/" style="margin-left:10px;color:#1976d2;">Ver todas</a>
+
+<div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
+
+<a href="{% url 'alerts:alertas' %}" class="btn btn-primary">
+Todas
+</a>
+
+<a href="?nivel=CRITICA" class="btn btn-pdf">
+Críticas
+</a>
+
+<a href="?nivel=ALTA" class="btn btn-renovar">
+Altas
+</a>
+
+<a href="?nivel=MEDIA" class="btn btn-cuponera">
+Medias
+</a>
+
 </div>
-{% endif %}
 
-<table border="1" cellpadding="10" width="100%" style="background:white;border-collapse:collapse;">
 
-<tr style="background:#2c3e50;color:white;">
-<th>Nivel</th>
-<th>Cliente</th>
-<th>DNI</th>
-<th>Mensaje</th>
-<th>Póliza</th>
+<div class="card">
+
+<table>
+
+<thead>
+
+<tr>
 <th>Fecha</th>
-<th>WhatsApp</th>
 <th>Cliente</th>
+<th>Póliza</th>
+<th>Mensaje</th>
+<th>Nivel</th>
+<th>Acciones</th>
 </tr>
+
+</thead>
+
+<tbody>
 
 {% for alerta in alertas %}
 
 <tr>
 
-<td>{{ alerta.level }}</td>
-
 <td>
-{{ alerta.policy.client.first_name }} {{ alerta.policy.client.last_name }}
+{{ alerta.created_at|date:"d/m/Y H:i" }}
 </td>
 
 <td>
-{{ alerta.policy.client.dni }}
+{{ alerta.policy.client }}
 </td>
 
 <td>
+{{ alerta.policy.policy_number }}
+</td>
 
-<a href="/clientes/ver/{{ alerta.policy.client.id }}/?poliza={{ alerta.policy.id }}"
-style="color:#1976d2;font-weight:bold;text-decoration:none;">
+<td>
 {{ alerta.message }}
-</a>
-
-</td>
-
-<td>{{ alerta.policy.policy_number }}</td>
-
-<td>{{ alerta.created_at|date:"d/m/Y H:i" }}</td>
-
-<td>
-
-<a href="https://wa.me/{{ alerta.policy.client.phone }}?text=Hola {{ alerta.policy.client.first_name }}, te escribo de Fuerza Natural Brokers. Tu póliza {{ alerta.policy.policy_number }} de {{ alerta.policy.company }} vence el {{ alerta.policy.end_date }}."
-target="_blank"
-style="background:#25D366;color:white;padding:5px 10px;border-radius:4px;text-decoration:none;font-size:13px;">
-WhatsApp
-</a>
-
 </td>
 
 <td>
 
-<a href="/clientes/ver/{{ alerta.policy.client.id }}/"
-style="background:#1976d2;color:white;padding:5px 10px;border-radius:4px;text-decoration:none;font-size:13px;">
+{% if alerta.level == "CRITICA" %}
+
+<span class="estado-vencida">🔴 CRÍTICA</span>
+
+{% elif alerta.level == "ALTA" %}
+
+<span class="estado-vencer">🟠 ALTA</span>
+
+{% else %}
+
+<span class="estado-activa">🟡 MEDIA</span>
+
+{% endif %}
+
+</td>
+
+<td>
+
+<a href="{% url 'clients:ver_cliente' alerta.policy.client.id %}?poliza={{ alerta.policy.id }}" class="btn btn-primary">
 Ver cliente
 </a>
 
@@ -75,13 +96,19 @@ Ver cliente
 {% empty %}
 
 <tr>
-<td colspan="8" style="text-align:center;padding:20px;">
-No hay alertas
+
+<td colspan="6" style="text-align:center;padding:20px;">
+No hay alertas activas.
 </td>
+
 </tr>
 
 {% endfor %}
 
+</tbody>
+
 </table>
+
+</div>
 
 {% endblock %}

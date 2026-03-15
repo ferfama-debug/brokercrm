@@ -2,76 +2,85 @@
 
 {% block content %}
 
-<h1>📄 Pólizas por cliente</h1>
-
-<form method="get" style="margin-bottom:20px;">
-
-<label><strong>Filtrar por compañía:</strong></label>
-
-<select name="compania" onchange="this.form.submit()" style="padding:6px;">
-
-<option value="">Todas las compañías</option>
-
-{% for c in companias %}
-<option value="{{ c }}" {% if compania_seleccionada == c %}selected{% endif %}>
-{{ c }}
-</option>
-{% endfor %}
-
-</select>
-
-</form>
-
 <style>
+
+.filtro-compania{
+margin-bottom:20px;
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.filtro-compania select{
+padding:6px;
+border-radius:4px;
+border:1px solid #ddd;
+}
 
 .cliente-box{
 background:white;
 margin-bottom:15px;
-border-radius:6px;
+border-radius:8px;
 overflow:hidden;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
 .cliente-header{
 background:#2c3e50;
 color:white;
-padding:12px;
+padding:12px 15px;
 cursor:pointer;
 font-weight:bold;
+font-size:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.cliente-header:hover{
+background:#34495e;
 }
 
 .polizas{
 display:none;
-padding:10px;
+padding:15px;
 }
 
-table{
+.tabla-polizas{
 width:100%;
 border-collapse:collapse;
+font-size:14px;
 }
 
-th{
+.tabla-polizas th{
 background:#34495e;
 color:white;
-padding:8px;
+padding:10px;
+text-align:left;
 }
 
-td{
-padding:8px;
-border-bottom:1px solid #ddd;
+.tabla-polizas td{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
+.tabla-polizas tr:hover{
+background:#f6f8fb;
 }
 
 .estado-activa{
-color:green;
+color:#2e7d32;
 font-weight:bold;
 }
 
 .estado-vencer{
-color:orange;
+color:#ef6c00;
 font-weight:bold;
 }
 
 .estado-vencida{
-color:red;
+color:#c62828;
 font-weight:bold;
 }
 
@@ -90,20 +99,45 @@ background:#1ebe5b;
 
 </style>
 
+
+<h1>📄 Pólizas por cliente</h1>
+
+
+<form method="get" class="filtro-compania">
+
+<label><strong>Filtrar por compañía:</strong></label>
+
+<select name="compania" onchange="this.form.submit()">
+
+<option value="">Todas las compañías</option>
+
+{% for c in companias %}
+<option value="{{ c }}" {% if compania_seleccionada == c %}selected{% endif %}>
+{{ c }}
+</option>
+{% endfor %}
+
+</select>
+
+</form>
+
+
 {% for cliente in clientes %}
 
 <div class="cliente-box">
 
-<div class="cliente-header" onclick="togglePolizas('cliente{{cliente.id}}')">
-▶ {{ cliente }}
+<div class="cliente-header" onclick="togglePolizas('cliente{{ cliente.id }}')">
+<span>▶ {{ cliente }}</span>
 </div>
 
-<div class="polizas" id="cliente{{cliente.id}}">
 
-{% if cliente.policy_set.all %}
+<div class="polizas" id="cliente{{ cliente.id }}">
 
-<table>
+{% if cliente.policy_set.all|length > 0 %}
 
+<table class="tabla-polizas">
+
+<thead>
 <tr>
 <th>N° Póliza</th>
 <th>Compañía</th>
@@ -111,9 +145,12 @@ background:#1ebe5b;
 <th>Inicio</th>
 <th>Vencimiento</th>
 <th>Estado</th>
-<th>PDF</th>
+<th>Póliza</th>
 <th>Cuponera</th>
 </tr>
+</thead>
+
+<tbody>
 
 {% for poliza in cliente.policy_set.all %}
 
@@ -122,19 +159,29 @@ background:#1ebe5b;
 <tr>
 
 <td>{{ poliza.policy_number }}</td>
+
 <td>{{ poliza.company }}</td>
+
 <td>{{ poliza.tipo_poliza }}</td>
+
 <td>{{ poliza.start_date }}</td>
+
 <td>{{ poliza.end_date }}</td>
 
 <td>
 
 {% if poliza.estado == "ACTIVA" %}
+
 <span class="estado-activa">ACTIVA</span>
+
 {% elif poliza.estado == "POR VENCER" %}
+
 <span class="estado-vencer">POR VENCER</span>
+
 {% else %}
+
 <span class="estado-vencida">VENCIDA</span>
+
 {% endif %}
 
 </td>
@@ -142,9 +189,15 @@ background:#1ebe5b;
 <td>
 
 {% if poliza.pdf_poliza %}
-<a href="{{ poliza.pdf_poliza.url }}" target="_blank">Ver PDF</a>
+
+<a href="{{ poliza.pdf_poliza.url }}" target="_blank">
+Ver póliza
+</a>
+
 {% else %}
-Sin PDF
+
+Sin póliza
+
 {% endif %}
 
 </td>
@@ -156,7 +209,7 @@ Sin PDF
 {% with link="https://brokercrm.onrender.com"|add:poliza.cuponera_pdf.url %}
 
 <a
-href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{cliente}}. Te envío la cuponera de tu póliza: {{ link }}"
+href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{ cliente }}. Te envío la cuponera de tu póliza: {{ link }}"
 target="_blank"
 class="boton-whatsapp">
 📲 Enviar
@@ -178,6 +231,8 @@ Sin cuponera
 
 {% endfor %}
 
+</tbody>
+
 </table>
 
 {% else %}
@@ -191,6 +246,7 @@ Sin cuponera
 </div>
 
 {% endfor %}
+
 
 <script>
 
