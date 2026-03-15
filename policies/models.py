@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import date
+from dateutil.relativedelta import relativedelta
 
 
 def ruta_poliza(instance, filename):
@@ -117,6 +118,27 @@ class Policy(models.Model):
             return "POR VENCER"
         else:
             return "ACTIVA"
+
+    @property
+    def proximo_pago_cuponera(self):
+        """
+        Calcula la próxima fecha de pago de cuponera
+        según la frecuencia elegida.
+        """
+
+        if self.forma_pago != "CUPONERA":
+            return None
+
+        if not self.frecuencia_cuponera:
+            return None
+
+        fecha = self.start_date
+        hoy = date.today()
+
+        while fecha <= hoy:
+            fecha = fecha + relativedelta(months=self.frecuencia_cuponera)
+
+        return fecha
 
     def __str__(self):
         return f"{self.policy_number} - {self.client.nombre_completo()}"
