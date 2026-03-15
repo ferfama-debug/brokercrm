@@ -2,6 +2,14 @@ from django.db import models
 from datetime import date
 
 
+def ruta_poliza(instance, filename):
+    return f"clientes/{instance.client.id}/polizas/{filename}"
+
+
+def ruta_cuponera(instance, filename):
+    return f"clientes/{instance.client.id}/cuponeras/{filename}"
+
+
 class Policy(models.Model):
 
     TIPOS_POLIZA = [
@@ -70,7 +78,7 @@ class Policy(models.Model):
     )
 
     pdf_poliza = models.FileField(
-        upload_to="polizas/",
+        upload_to=ruta_poliza,
         blank=True,
         null=True,
         verbose_name="PDF de póliza",
@@ -84,13 +92,12 @@ class Policy(models.Model):
     )
 
     cuponera_pdf = models.FileField(
-        upload_to="cuponeras/",
+        upload_to=ruta_cuponera,
         blank=True,
         null=True,
         verbose_name="Cuponera PDF",
     )
 
-    # NUEVO CAMPO
     frecuencia_cuponera = models.IntegerField(
         choices=FRECUENCIAS_CUPONERA,
         blank=True,
