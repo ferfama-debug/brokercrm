@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from cloudinary.models import CloudinaryField
 
 
 def ruta_poliza(instance, filename):
@@ -78,8 +79,10 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    pdf_poliza = models.FileField(
-        upload_to=ruta_poliza,
+    # PDF de póliza en Cloudinary
+    pdf_poliza = CloudinaryField(
+        resource_type="raw",
+        folder="clientes/polizas",
         blank=True,
         null=True,
         verbose_name="PDF de póliza",
@@ -92,8 +95,10 @@ class Policy(models.Model):
         verbose_name="Forma de pago",
     )
 
-    cuponera_pdf = models.FileField(
-        upload_to=ruta_cuponera,
+    # PDF de cuponera en Cloudinary
+    cuponera_pdf = CloudinaryField(
+        resource_type="raw",
+        folder="clientes/cuponeras",
         blank=True,
         null=True,
         verbose_name="Cuponera PDF",
@@ -121,10 +126,6 @@ class Policy(models.Model):
 
     @property
     def proximo_pago_cuponera(self):
-        """
-        Calcula la próxima fecha de pago de cuponera
-        según la frecuencia elegida.
-        """
 
         if self.forma_pago != "CUPONERA":
             return None
