@@ -79,7 +79,6 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    # PDF de póliza en Cloudinary
     pdf_poliza = CloudinaryField(
         resource_type="raw",
         folder="clientes/polizas",
@@ -95,7 +94,6 @@ class Policy(models.Model):
         verbose_name="Forma de pago",
     )
 
-    # PDF de cuponera en Cloudinary
     cuponera_pdf = CloudinaryField(
         resource_type="raw",
         folder="clientes/cuponeras",
@@ -110,6 +108,18 @@ class Policy(models.Model):
         null=True,
         verbose_name="Frecuencia de cuponera (meses)"
     )
+
+    @property
+    def url_poliza(self):
+        if self.pdf_poliza:
+            return self.pdf_poliza.url.replace("/raw/upload/", "/raw/upload/fl_attachment/")
+        return None
+
+    @property
+    def url_cuponera(self):
+        if self.cuponera_pdf:
+            return self.cuponera_pdf.url.replace("/raw/upload/", "/raw/upload/fl_attachment/")
+        return None
 
     @property
     def estado(self):
