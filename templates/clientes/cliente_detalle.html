@@ -197,9 +197,17 @@ PÓLIZA {{ grupo.grouper }}
 <td>
 
 {% if poliza.pdf_poliza %}
+
 <a href="{{ poliza.pdf_poliza.url }}" target="_blank">
 Ver póliza
 </a>
+
+<button
+onclick="copiarLink('{{ poliza.pdf_poliza.url }}')"
+class="btn btn-renovar">
+📋 Copiar link
+</button>
+
 {% else %}
 Sin póliza
 {% endif %}
@@ -283,5 +291,17 @@ Enviar póliza
 </table>
 
 </div>
+
+
+<script>
+
+function copiarLink(link){
+
+navigator.clipboard.writeText(link);
+alert("Link copiado al portapapeles");
+
+}
+
+</script>
 
 {% endblock %}
