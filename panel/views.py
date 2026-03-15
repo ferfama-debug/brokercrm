@@ -22,7 +22,6 @@ def home(request):
     hoy = date.today()
     buscar = request.GET.get("buscar", "")
 
-    # OPTIMIZA CONSULTA
     policies = Policy.objects.select_related("client")
 
     if buscar:
@@ -96,12 +95,11 @@ def home(request):
             and p.cuponera_pdf
         ):
 
-            frecuencia = p.frecuencia_cuponera
-            fecha_pago = p.start_date
+            proximo_pago = p.proximo_pago_cuponera
 
-            while fecha_pago <= p.end_date:
+            if proximo_pago:
 
-                dias_pago = (fecha_pago - hoy).days
+                dias_pago = (proximo_pago - hoy).days
 
                 if 0 <= dias_pago <= 5:
 
@@ -109,7 +107,7 @@ def home(request):
                         f"Hola {p.client.first_name}. "
                         f"Te recordamos el pago de la cuponera de tu póliza "
                         f"{p.policy_number} de {p.company}. "
-                        f"Vence el {fecha_pago}."
+                        f"Vence el {proximo_pago}."
                     )
 
                     pagos_cuponera.append(
@@ -117,22 +115,12 @@ def home(request):
                             "cliente": p.client,
                             "numero": p.policy_number,
                             "company": p.company,
-                            "fecha": fecha_pago,
+                            "fecha": proximo_pago,
                             "telefono": getattr(p.client, "phone", ""),
                             "mensaje": mensaje_pago,
                             "pdf": p.cuponera_pdf.url,
                         }
                     )
-
-                # siguiente cuota
-                mes = fecha_pago.month + frecuencia
-                anio = fecha_pago.year
-
-                while mes > 12:
-                    mes -= 12
-                    anio += 1
-
-                fecha_pago = fecha_pago.replace(year=anio, month=mes)
 
     mes_actual = datetime.now().month
     anio_actual = datetime.now().year
@@ -158,8 +146,6 @@ def home(request):
 
     companias_json = json.dumps(companias)
     cantidades_json = json.dumps(cantidades)
-
-    # CRECIMIENTO POR MES
 
     crecimiento = (
         Policy.objects.annotate(mes=ExtractMonth("start_date"))
