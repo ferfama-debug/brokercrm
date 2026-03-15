@@ -173,17 +173,11 @@ PÓLIZA {{ grupo.grouper }}
 <tr>
 
 <td>{{ poliza.policy_number }}</td>
-
 <td>{{ poliza.company }}</td>
-
 <td>{{ poliza.tipo_poliza }}</td>
-
 <td>{{ poliza.start_date }}</td>
-
 <td>{{ poliza.end_date }}</td>
-
 <td>{{ poliza.get_forma_pago_display }}</td>
-
 
 <td>
 
@@ -243,7 +237,7 @@ Renovar
 </a>
 
 <a
-href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, tu póliza N° {{ poliza.policy_number }} de {{ poliza.company }} vence el {{ poliza.end_date }}. ¿Querés que avancemos con la renovación?"
+href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }},%0A%0ATu póliza N° {{ poliza.policy_number }} de {{ poliza.company }} vence el {{ poliza.end_date }}.%0A%0A¿Querés que avancemos con la renovación?"
 target="_blank"
 class="btn btn-whatsapp">
 WhatsApp
@@ -255,7 +249,7 @@ WhatsApp
 {% if poliza.forma_pago == "CUPONERA" and poliza.cuponera_pdf %}
 
 <a
-href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, te envío tu póliza {{ poliza.policy_number }} y la cuponera de pago:%0A%0APóliza:%20{{ poliza.pdf_poliza.url }}%0ACuponera:%20{{ poliza.cuponera_pdf.url }}"
+href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }},%0A%0ATe envío tu póliza y cuponera de pago.%0A%0APóliza:%20{{ poliza.pdf_poliza.url }}%0A%0ACuponera:%20{{ poliza.cuponera_pdf.url }}"
 target="_blank"
 class="btn btn-pdf">
 Enviar póliza + cuponera
@@ -264,7 +258,7 @@ Enviar póliza + cuponera
 {% else %}
 
 <a
-href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }}, te envío tu póliza {{ poliza.policy_number }}:%20{{ poliza.pdf_poliza.url }}"
+href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }},%0A%0ATe envío tu póliza N° {{ poliza.policy_number }}.%0A%0A{{ poliza.pdf_poliza.url }}"
 target="_blank"
 class="btn btn-pdf">
 Enviar póliza
