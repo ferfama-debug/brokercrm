@@ -4,14 +4,6 @@ from dateutil.relativedelta import relativedelta
 from cloudinary.models import CloudinaryField
 
 
-def ruta_poliza(instance, filename):
-    return f"clientes/{instance.client.id}/polizas/{filename}"
-
-
-def ruta_cuponera(instance, filename):
-    return f"clientes/{instance.client.id}/cuponeras/{filename}"
-
-
 class Policy(models.Model):
 
     TIPOS_POLIZA = [
@@ -81,6 +73,7 @@ class Policy(models.Model):
 
     pdf_poliza = CloudinaryField(
         resource_type="raw",
+        type="upload",
         folder="clientes/polizas",
         blank=True,
         null=True,
@@ -96,6 +89,7 @@ class Policy(models.Model):
 
     cuponera_pdf = CloudinaryField(
         resource_type="raw",
+        type="upload",
         folder="clientes/cuponeras",
         blank=True,
         null=True,
@@ -108,18 +102,6 @@ class Policy(models.Model):
         null=True,
         verbose_name="Frecuencia de cuponera (meses)"
     )
-
-    @property
-    def url_poliza(self):
-        if self.pdf_poliza:
-            return self.pdf_poliza.url.replace("/raw/upload/", "/raw/upload/fl_attachment/")
-        return None
-
-    @property
-    def url_cuponera(self):
-        if self.cuponera_pdf:
-            return self.cuponera_pdf.url.replace("/raw/upload/", "/raw/upload/fl_attachment/")
-        return None
 
     @property
     def estado(self):
