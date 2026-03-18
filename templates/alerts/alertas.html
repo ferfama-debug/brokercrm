@@ -26,6 +26,67 @@ Medias
 </div>
 
 
+<!-- 🔥 ALERTAS AUTOMÁTICAS -->
+
+{% if clientes_con_deuda %}
+<div class="card" style="margin-bottom:20px;">
+<h2>🔴 Clientes con deuda</h2>
+
+<ul>
+{% for cliente in clientes_con_deuda %}
+<li>
+<strong>{{ cliente }}</strong> — 
+Debe: ${{ cliente.total_deuda_vencida }}
+
+<a href="/clientes/ver/{{ cliente.id }}/" class="btn btn-primary">
+Ver cliente
+</a>
+
+<a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{ cliente.first_name }},%20tenés%20deuda%20pendiente%20en%20tu%20póliza.%20¿Querés%20que%20te%20ayude%20a%20regularizarla?" 
+target="_blank"
+class="btn btn-whatsapp">
+📲 WhatsApp
+</a>
+
+</li>
+{% endfor %}
+</ul>
+
+</div>
+{% endif %}
+
+
+{% if polizas_por_vencer %}
+<div class="card" style="margin-bottom:20px;">
+<h2>🟠 Pólizas por vencer</h2>
+
+<ul>
+{% for poliza in polizas_por_vencer %}
+<li>
+<strong>{{ poliza.policy_number }}</strong> — 
+{{ poliza.client }} — 
+Vence: {{ poliza.end_date }}
+
+<a href="/clientes/ver/{{ poliza.client.id }}/?poliza={{ poliza.id }}" class="btn btn-renovar">
+Ver
+</a>
+
+<a href="https://wa.me/{{ poliza.client.phone|cut:' '|cut:'-' }}?text=Hola {{ poliza.client.first_name }},%20tu%20póliza%20N°%20{{ poliza.policy_number }}%20vence%20el%20{{ poliza.end_date }}.%20¿Querés%20renovarla?" 
+target="_blank"
+class="btn btn-whatsapp">
+📲 WhatsApp
+</a>
+
+</li>
+{% endfor %}
+</ul>
+
+</div>
+{% endif %}
+
+
+<!-- 🔹 ALERTAS MANUALES -->
+
 <div class="card">
 
 <table>
@@ -49,44 +110,34 @@ Medias
 
 <tr>
 
-<td>
-{{ alerta.created_at|date:"d/m/Y H:i" }}
-</td>
+<td>{{ alerta.created_at|date:"d/m/Y H:i" }}</td>
+
+<td>{{ alerta.policy.client }}</td>
+
+<td>{{ alerta.policy.policy_number }}</td>
+
+<td>{{ alerta.message }}</td>
 
 <td>
-{{ alerta.policy.client }}
-</td>
-
-<td>
-{{ alerta.policy.policy_number }}
-</td>
-
-<td>
-{{ alerta.message }}
-</td>
-
-<td>
-
 {% if alerta.level == "CRITICA" %}
-
 <span class="estado-vencida">🔴 CRÍTICA</span>
-
 {% elif alerta.level == "ALTA" %}
-
 <span class="estado-vencer">🟠 ALTA</span>
-
 {% else %}
-
 <span class="estado-activa">🟡 MEDIA</span>
-
 {% endif %}
-
 </td>
 
 <td>
 
 <a href="{% url 'clients:ver_cliente' alerta.policy.client.id %}?poliza={{ alerta.policy.id }}" class="btn btn-primary">
 Ver cliente
+</a>
+
+<a href="https://wa.me/{{ alerta.policy.client.phone|cut:' '|cut:'-' }}?text=Hola {{ alerta.policy.client.first_name }},%20te%20contacto%20por%20tu%20póliza%20N°%20{{ alerta.policy.policy_number }}.%20{{ alerta.message }}" 
+target="_blank"
+class="btn btn-whatsapp">
+📲 WhatsApp
 </a>
 
 </td>
@@ -96,11 +147,9 @@ Ver cliente
 {% empty %}
 
 <tr>
-
 <td colspan="6" style="text-align:center;padding:20px;">
 No hay alertas activas.
 </td>
-
 </tr>
 
 {% endfor %}

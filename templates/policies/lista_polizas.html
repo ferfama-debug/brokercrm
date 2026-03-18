@@ -171,17 +171,13 @@ background:#1ebe5b;
 <td>
 
 {% if poliza.estado == "ACTIVA" %}
-
 <span class="estado-activa">ACTIVA</span>
 
 {% elif poliza.estado == "POR VENCER" %}
-
 <span class="estado-vencer">POR VENCER</span>
 
 {% else %}
-
 <span class="estado-vencida">VENCIDA</span>
-
 {% endif %}
 
 </td>
@@ -189,15 +185,9 @@ background:#1ebe5b;
 <td>
 
 {% if poliza.pdf_poliza %}
-
-<a href="{{ poliza.url_poliza }}" target="_blank">
-Ver póliza
-</a>
-
+    <span>Archivo cargado</span>
 {% else %}
-
-Sin póliza
-
+    Sin póliza
 {% endif %}
 
 </td>
@@ -205,22 +195,9 @@ Sin póliza
 <td>
 
 {% if poliza.cuponera_pdf %}
-
-{% with link="https://brokercrm.onrender.com"|add:poliza.cuponera_pdf.url %}
-
-<a
-href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{ cliente }}. Te envío la cuponera de tu póliza: {{ link }}"
-target="_blank"
-class="boton-whatsapp">
-📲 Enviar
-</a>
-
-{% endwith %}
-
+    <span>Cuponera cargada</span>
 {% else %}
-
-Sin cuponera
-
+    Sin cuponera
 {% endif %}
 
 </td>

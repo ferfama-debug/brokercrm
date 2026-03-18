@@ -69,8 +69,6 @@ margin-top:30px;
 margin-bottom:10px;
 }
 
-/* BOTONES TABLAS */
-
 .btn-whatsapp{
 background:#25D366;
 color:white;
@@ -107,6 +105,32 @@ background:#5d4037;
 <div class="dashboard">
 
 <h1 class="title">Panel principal</h1>
+
+
+<!-- 🔥 FINANZAS (NIVEL PRO) -->
+<div class="radar-container">
+
+<div class="radar radar-vencidas">
+<h3>💰 Deuda total</h3>
+<span>$ {{ deuda_total|default:0 }}</span>
+</div>
+
+<div class="radar radar-rojo">
+<h3>🔴 Cuotas vencidas</h3>
+<span>{{ cuotas_vencidas|default:0 }}</span>
+</div>
+
+<div class="radar radar-amarillo">
+<h3>🟡 Próximos cobros</h3>
+<span>$ {{ proximos_pagos|default:0 }}</span>
+</div>
+
+<div class="radar radar-naranja">
+<h3>📄 Cuotas pendientes</h3>
+<span>{{ cuotas_pendientes|default:0 }}</span>
+</div>
+
+</div>
 
 
 <div class="radar-container">

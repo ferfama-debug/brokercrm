@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from clients.models import Client
-from policies.models import Policy
+from policies.models import Policy, Payment
 from django.contrib.auth.models import User
 from datetime import date
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 
 
@@ -20,7 +20,7 @@ def home(request):
     polizas_por_vencer = []
     clientes_llamar = []
 
-    # RADAR
+    # 🔴 RADAR
     vencidas = 0
     vencen_7 = 0
     vencen_15 = 0
@@ -72,7 +72,27 @@ def home(request):
         elif dias <= 30:
             vencen_30 += 1
 
-    # SCORE CLIENTES
+    # 🔥 💰 DEUDA Y COBRANZA (NUEVO PRO)
+
+    pagos = Payment.objects.all()
+
+    deuda_total = pagos.filter(
+        estado="VENCIDO"
+    ).aggregate(total=Sum("monto"))["total"] or 0
+
+    cuotas_vencidas = pagos.filter(estado="VENCIDO").count()
+
+    proximos_pagos = pagos.filter(
+        estado="PENDIENTE",
+        fecha_vencimiento__gte=hoy
+    ).aggregate(total=Sum("monto"))["total"] or 0
+
+    cuotas_pendientes = pagos.filter(
+        estado="PENDIENTE",
+        fecha_vencimiento__gte=hoy
+    ).count()
+
+    # ⭐ SCORE CLIENTES
 
     clientes_score_db = Client.objects.annotate(total_polizas=Count("policy")).order_by(
         "-total_polizas"
@@ -97,7 +117,7 @@ def home(request):
             }
         )
 
-    # PRODUCCION POR COMPAÑIA
+    # 🏢 PRODUCCIÓN POR COMPAÑÍA
 
     produccion_companias = (
         Policy.objects.values("company").annotate(total=Count("id")).order_by("-total")
@@ -110,7 +130,7 @@ def home(request):
         companias.append(c["company"])
         cantidades.append(c["total"])
 
-    # CRECIMIENTO DE CARTERA POR MES
+    # 📈 CRECIMIENTO
 
     crecimiento = (
         Policy.objects.annotate(mes=TruncMonth("start_date"))
@@ -131,6 +151,19 @@ def home(request):
         "polizas": polizas,
         "usuarios": usuarios,
         "alertas": len(polizas_por_vencer),
+
+        # 🔥 💰 NUEVO
+        "deuda_total": deuda_total,
+        "cuotas_vencidas": cuotas_vencidas,
+        "proximos_pagos": proximos_pagos,
+        "cuotas_pendientes": cuotas_pendientes,
+
+        # RADAR
+        "vencidas": vencidas,
+        "vencen_7": vencen_7,
+        "vencen_15": vencen_15,
+        "vencen_30": vencen_30,
+
         "polizas_por_vencer": polizas_por_vencer,
         "clientes_score": clientes_score,
         "clientes_llamar": clientes_llamar,
@@ -139,11 +172,6 @@ def home(request):
         "cantidades": cantidades,
         "meses": meses,
         "crecimiento_totales": crecimiento_totales,
-        # RADAR
-        "vencidas": vencidas,
-        "vencen_7": vencen_7,
-        "vencen_15": vencen_15,
-        "vencen_30": vencen_30,
     }
 
     return render(request, "panel/dashboard.html", context)

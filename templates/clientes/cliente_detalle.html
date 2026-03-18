@@ -67,6 +67,36 @@ gap:6px;
 flex-wrap:wrap;
 }
 
+.tabla-cuotas{
+width:100%;
+margin-top:10px;
+font-size:13px;
+border-collapse:collapse;
+}
+
+.tabla-cuotas th{
+background:#eee;
+padding:6px;
+}
+
+.tabla-cuotas td{
+padding:6px;
+border-bottom:1px solid #ddd;
+}
+
+.estado-pagado{ color:#2e7d32; font-weight:bold; }
+.estado-pendiente{ color:#ef6c00; font-weight:bold; }
+.estado-vencido{ color:#c62828; font-weight:bold; }
+
+.btn-pagado{
+background:#2e7d32;
+color:white;
+padding:4px 8px;
+border-radius:4px;
+text-decoration:none;
+font-size:12px;
+}
+
 </style>
 
 
@@ -111,6 +141,36 @@ flex-wrap:wrap;
 <h2 class="estado-vencida">{{ polizas_vencidas }}</h2>
 </div>
 
+<!-- 🔥 DEUDA (AGREGADO SIN ROMPER NADA) -->
+
+<div class="resumen-card">
+<strong>Deuda vencida</strong>
+<h2 class="estado-vencida">
+$ {{ cliente.total_deuda_vencida }}
+</h2>
+</div>
+
+<div class="resumen-card">
+<strong>Próximos pagos</strong>
+<h2 class="estado-vencer">
+$ {{ cliente.total_deuda_pendiente }}
+</h2>
+</div>
+
+<div class="resumen-card">
+<strong>Cuotas vencidas</strong>
+<h2 class="estado-vencida">
+{{ cliente.cuotas_vencidas }}
+</h2>
+</div>
+
+<div class="resumen-card">
+<strong>Cuotas pendientes</strong>
+<h2 class="estado-vencer">
+{{ cliente.cuotas_pendientes }}
+</h2>
+</div>
+
 </div>
 
 
@@ -120,11 +180,7 @@ flex-wrap:wrap;
 <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
 
 {% if request.GET.poliza %}
-
-<a href="/alertas/" class="btn btn-pdf">
-⬅ Volver a alertas
-</a>
-
+<a href="/alertas/" class="btn btn-pdf">⬅ Volver a alertas</a>
 {% endif %}
 
 <a href="/polizas/nueva/?cliente={{ cliente.id }}" class="btn btn-primary">
@@ -139,7 +195,6 @@ flex-wrap:wrap;
 <table class="tabla-polizas">
 
 <thead>
-
 <tr>
 <th>N° Póliza</th>
 <th>Compañía</th>
@@ -152,9 +207,7 @@ flex-wrap:wrap;
 <th>Cuponera</th>
 <th>Acciones</th>
 </tr>
-
 </thead>
-
 
 <tbody>
 
@@ -180,110 +233,102 @@ PÓLIZA {{ grupo.grouper }}
 <td>{{ poliza.get_forma_pago_display }}</td>
 
 <td>
-
 {% if poliza.estado == "ACTIVA" %}
 <span class="estado-activa">🟢 ACTIVA</span>
-
 {% elif poliza.estado == "POR VENCER" %}
 <span class="estado-vencer">🟠 POR VENCER</span>
-
 {% else %}
 <span class="estado-vencida">🔴 VENCIDA</span>
 {% endif %}
-
 </td>
 
-
 <td>
-
-{% if poliza.pdf_poliza %}
-
-<a href="{{ poliza.pdf_poliza.url }}" target="_blank">
-Ver póliza
-</a>
-
-<button
-onclick="copiarLink('{{ poliza.pdf_poliza.url }}')"
-class="btn btn-renovar">
+{% if poliza.pdf_url %}
+<a href="{{ poliza.pdf_url }}" target="_blank">Ver póliza</a>
+<button onclick="copiarLink('{{ poliza.pdf_url }}')" class="btn btn-renovar">
 📋 Copiar link
 </button>
-
 {% else %}
 Sin póliza
 {% endif %}
-
 </td>
 
-
 <td>
-
 {% if poliza.forma_pago == "CUPONERA" %}
-
-{% if poliza.cuponera_pdf %}
-
-<a href="{{ poliza.cuponera_pdf.url }}" target="_blank" class="btn btn-cuponera">
-Ver cuponera
-</a>
-
-{% else %}
-⚠ Sin cuponera
-{% endif %}
-
+    {% if poliza.cuponera_url %}
+        <a href="{{ poliza.cuponera_url }}" target="_blank" class="btn btn-cuponera">
+        Ver cuponera
+        </a>
+    {% else %}
+        ⚠ Sin cuponera
+    {% endif %}
 {% else %}
 —
 {% endif %}
-
 </td>
 
-
 <td>
-
 <div class="acciones-poliza">
-
 <a href="/polizas/renovar/{{ poliza.id }}/" class="btn btn-renovar">
 Renovar
 </a>
-
-<a
-href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }},%0A%0ATu póliza N° {{ poliza.policy_number }} de {{ poliza.company }} vence el {{ poliza.end_date }}.%0A%0A¿Querés que avancemos con la renovación?"
-target="_blank"
-class="btn btn-whatsapp">
-WhatsApp
-</a>
-
-
-{% if poliza.pdf_poliza %}
-
-{% if poliza.forma_pago == "CUPONERA" and poliza.cuponera_pdf %}
-
-<a
-href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }},%0A%0ATe envío tu póliza y cuponera de pago.%0A%0APóliza:%20{{ poliza.pdf_poliza.url }}%0A%0ACuponera:%20{{ poliza.cuponera_pdf.url }}"
-target="_blank"
-class="btn btn-pdf">
-Enviar póliza + cuponera
-</a>
-
-{% else %}
-
-<a
-href="https://wa.me/{{ cliente.phone }}?text=Hola {{ cliente.first_name }},%0A%0ATe envío tu póliza N° {{ poliza.policy_number }}.%0A%0A{{ poliza.pdf_poliza.url }}"
-target="_blank"
-class="btn btn-pdf">
-Enviar póliza
-</a>
-
-{% endif %}
-
-{% endif %}
-
 </div>
+</td>
 
+</tr>
+
+
+{% if poliza.forma_pago == "CUPONERA" %}
+<tr>
+<td colspan="10">
+
+<table class="tabla-cuotas">
+
+<tr>
+<th>Cuota</th>
+<th>Vencimiento</th>
+<th>Estado</th>
+<th>Acción</th>
+</tr>
+
+{% for pago in poliza.pagos.all %}
+
+<tr>
+<td>#{{ pago.numero_cuota }}</td>
+<td>{{ pago.fecha_vencimiento }}</td>
+
+<td>
+{% if pago.estado == "PAGADO" %}
+<span class="estado-pagado">PAGADO</span>
+{% elif pago.estado == "VENCIDO" %}
+<span class="estado-vencido">VENCIDO</span>
+{% else %}
+<span class="estado-pendiente">PENDIENTE</span>
+{% endif %}
+</td>
+
+<td>
+{% if pago.estado != "PAGADO" %}
+<a href="/polizas/pago/{{ pago.id }}/" class="btn-pagado">
+✔ Pagado
+</a>
+{% else %}
+—
+{% endif %}
 </td>
 
 </tr>
 
 {% endfor %}
 
+</table>
+
+</td>
+</tr>
+{% endif %}
+
+
+{% endfor %}
 {% endfor %}
 
 </tbody>
@@ -292,16 +337,11 @@ Enviar póliza
 
 </div>
 
-
 <script>
-
 function copiarLink(link){
-
 navigator.clipboard.writeText(link);
 alert("Link copiado al portapapeles");
-
 }
-
 </script>
 
 {% endblock %}

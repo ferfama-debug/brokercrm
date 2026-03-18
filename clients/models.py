@@ -49,3 +49,39 @@ class Client(models.Model):
 
     def __str__(self):
         return f"{self.last_name}, {self.first_name}"
+
+    # 🔥 NUEVAS PROPIEDADES (NO ROMPEN NADA)
+
+    @property
+    def cuotas_vencidas(self):
+        from policies.models import Payment
+        return Payment.objects.filter(
+            policy__client=self,
+            estado="VENCIDO"
+        ).count()
+
+    @property
+    def cuotas_pendientes(self):
+        from policies.models import Payment
+        return Payment.objects.filter(
+            policy__client=self,
+            estado="PENDIENTE"
+        ).count()
+
+    @property
+    def total_deuda_vencida(self):
+        from policies.models import Payment
+        pagos = Payment.objects.filter(
+            policy__client=self,
+            estado="VENCIDO"
+        )
+        return sum(p.monto or 0 for p in pagos)
+
+    @property
+    def total_deuda_pendiente(self):
+        from policies.models import Payment
+        pagos = Payment.objects.filter(
+            policy__client=self,
+            estado="PENDIENTE"
+        )
+        return sum(p.monto or 0 for p in pagos)

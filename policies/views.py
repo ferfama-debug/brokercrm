@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Policy
+from .models import Policy, Payment
 from clients.models import Client
+from datetime import date
 
 
 def lista_polizas(request):
@@ -120,3 +121,15 @@ def renovar_poliza(request, poliza_id):
             "poliza": poliza,
         },
     )
+
+
+# 🔥 NUEVA VISTA: MARCAR PAGO
+def marcar_pago(request, pago_id):
+
+    pago = get_object_or_404(Payment, id=pago_id)
+
+    pago.estado = "PAGADO"
+    pago.fecha_pago = date.today()
+    pago.save()
+
+    return redirect(f"/clientes/ver/{pago.policy.client.id}/")

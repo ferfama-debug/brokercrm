@@ -4,6 +4,17 @@ from dateutil.relativedelta import relativedelta
 from cloudinary.models import CloudinaryField
 
 
+class Company(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = "Compañía"
+        verbose_name_plural = "Compañías"
+
+
 class Policy(models.Model):
 
     TIPOS_POLIZA = [
@@ -43,6 +54,14 @@ class Policy(models.Model):
         verbose_name="Compañía",
     )
 
+    company_obj = models.ForeignKey(
+        Company,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Compañía (estructura nueva)"
+    )
+
     policy_number = models.CharField(
         max_length=50,
         verbose_name="Número de póliza",
@@ -72,7 +91,7 @@ class Policy(models.Model):
     )
 
     pdf_poliza = CloudinaryField(
-        resource_type="image",
+        resource_type="raw",
         folder="clientes_polizas",
         blank=True,
         null=True,
@@ -87,7 +106,7 @@ class Policy(models.Model):
     )
 
     cuponera_pdf = CloudinaryField(
-        resource_type="image",
+        resource_type="raw",
         folder="clientes_cuponeras",
         blank=True,
         null=True,
@@ -101,9 +120,53 @@ class Policy(models.Model):
         verbose_name="Frecuencia de cuponera (meses)"
     )
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.forma_pago == "CUPONERA" and self.frecuencia_cuponera:
+            if self.pagos.exists():
+                return
+
+            from .models import Payment
+
+            frecuencia = int(self.frecuencia_cuponera)
+
+            fecha = self.start_date
+            fecha_fin = self.end_date
+
+            if isinstance(fecha, str):
+                fecha = date.fromisoformat(fecha)
+
+            if isinstance(fecha_fin, str):
+                fecha_fin = date.fromisoformat(fecha_fin)
+
+            numero = 1
+
+            while fecha <= fecha_fin:
+                Payment.objects.create(
+                    policy=self,
+                    numero_cuota=numero,
+                    fecha_vencimiento=fecha
+                )
+                fecha = fecha + relativedelta(months=frecuencia)
+                numero += 1
+
+    @property
+    def pdf_url(self):
+        try:
+            return self.pdf_poliza.url if self.pdf_poliza else None
+        except:
+            return None
+
+    @property
+    def cuponera_url(self):
+        try:
+            return self.cuponera_pdf.url if self.cuponera_pdf else None
+        except:
+            return None
+
     @property
     def estado(self):
-
         hoy = date.today()
         dias = (self.end_date - hoy).days
 
@@ -116,18 +179,21 @@ class Policy(models.Model):
 
     @property
     def proximo_pago_cuponera(self):
-
         if self.forma_pago != "CUPONERA":
             return None
 
         if not self.frecuencia_cuponera:
             return None
 
+        frecuencia = int(self.frecuencia_cuponera)
         fecha = self.start_date
         hoy = date.today()
 
+        if isinstance(fecha, str):
+            fecha = date.fromisoformat(fecha)
+
         while fecha <= hoy:
-            fecha = fecha + relativedelta(months=self.frecuencia_cuponera)
+            fecha = fecha + relativedelta(months=frecuencia)
 
         return fecha
 
@@ -142,3 +208,80 @@ class Policy(models.Model):
             models.Index(fields=["end_date"]),
             models.Index(fields=["policy_number"]),
         ]
+
+
+class Payment(models.Model):
+
+    ESTADOS = [
+        ("PENDIENTE", "Pendiente"),
+        ("PAGADO", "Pagado"),
+        ("VENCIDO", "Vencido"),
+    ]
+
+    policy = models.ForeignKey(
+        Policy,
+        on_delete=models.CASCADE,
+        related_name="pagos",
+        verbose_name="Póliza"
+    )
+
+    numero_cuota = models.IntegerField(
+        verbose_name="Número de cuota"
+    )
+
+    fecha_vencimiento = models.DateField(
+        verbose_name="Fecha de vencimiento"
+    )
+
+    fecha_pago = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Fecha de pago"
+    )
+
+    estado = models.CharField(
+        max_length=10,
+        choices=ESTADOS,
+        default="PENDIENTE",
+        verbose_name="Estado"
+    )
+
+    monto = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Monto"
+    )
+
+    comprobante = CloudinaryField(
+        resource_type="raw",
+        folder="clientes_pagos",
+        blank=True,
+        null=True,
+        verbose_name="Comprobante"
+    )
+
+    # 🔥 LÓGICA AUTOMÁTICA
+    @property
+    def estado_calculado(self):
+        hoy = date.today()
+
+        if self.fecha_pago:
+            return "PAGADO"
+        elif self.fecha_vencimiento < hoy:
+            return "VENCIDO"
+        else:
+            return "PENDIENTE"
+
+    def save(self, *args, **kwargs):
+        self.estado = self.estado_calculado
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.policy.policy_number} - Cuota {self.numero_cuota}"
+
+    class Meta:
+        verbose_name = "Pago"
+        verbose_name_plural = "Pagos"
+        ordering = ["fecha_vencimiento"]

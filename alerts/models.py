@@ -13,6 +13,13 @@ class Alert(models.Model):
         ("MEDIA", "Media"),
     )
 
+    # 🔥 NUEVO: tipos de alerta (automatización)
+    TIPOS = (
+        ("DEUDA", "Deuda"),
+        ("VENCIMIENTO", "Vencimiento"),
+        ("MANUAL", "Manual"),
+    )
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -35,6 +42,14 @@ class Alert(models.Model):
         db_index=True,
     )
 
+    # 🔥 NUEVO
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPOS,
+        default="MANUAL",
+        db_index=True,
+    )
+
     resolved = models.BooleanField(
         default=False,
         db_index=True,
@@ -52,3 +67,6 @@ class Alert(models.Model):
         verbose_name = "Alerta"
         verbose_name_plural = "Alertas"
         ordering = ["-created_at"]
+
+        # 🔥 CLAVE: evita duplicados automáticos
+        unique_together = ("policy", "tipo", "resolved")
