@@ -1,7 +1,6 @@
 from django.db import models
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from cloudinary.models import CloudinaryField
 
 
 class Company(models.Model):
@@ -59,7 +58,7 @@ class Policy(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Compañía (estructura nueva)"
+        verbose_name="Compañía (estructura nueva)",
     )
 
     policy_number = models.CharField(
@@ -81,21 +80,18 @@ class Policy(models.Model):
         verbose_name="Detalle del seguro",
     )
 
-    start_date = models.DateField(
-        verbose_name="Fecha de inicio"
-    )
+    start_date = models.DateField(verbose_name="Fecha de inicio")
 
     end_date = models.DateField(
         verbose_name="Fecha de vencimiento",
         db_index=True,
     )
 
-    pdf_poliza = CloudinaryField(
-        resource_type="raw",
-        folder="clientes_polizas",
+    # 🔥 AHORA SON URLs (SUPABASE)
+    pdf_poliza = models.TextField(
         blank=True,
         null=True,
-        verbose_name="PDF de póliza",
+        verbose_name="URL PDF de póliza",
     )
 
     forma_pago = models.CharField(
@@ -105,19 +101,17 @@ class Policy(models.Model):
         verbose_name="Forma de pago",
     )
 
-    cuponera_pdf = CloudinaryField(
-        resource_type="raw",
-        folder="clientes_cuponeras",
+    cuponera_pdf = models.TextField(
         blank=True,
         null=True,
-        verbose_name="Cuponera PDF",
+        verbose_name="URL cuponera",
     )
 
     frecuencia_cuponera = models.IntegerField(
         choices=FRECUENCIAS_CUPONERA,
         blank=True,
         null=True,
-        verbose_name="Frecuencia de cuponera (meses)"
+        verbose_name="Frecuencia de cuponera (meses)",
     )
 
     def save(self, *args, **kwargs):
@@ -144,26 +138,19 @@ class Policy(models.Model):
 
             while fecha <= fecha_fin:
                 Payment.objects.create(
-                    policy=self,
-                    numero_cuota=numero,
-                    fecha_vencimiento=fecha
+                    policy=self, numero_cuota=numero, fecha_vencimiento=fecha
                 )
                 fecha = fecha + relativedelta(months=frecuencia)
                 numero += 1
 
+    # 🔥 AHORA DEVUELVEN DIRECTAMENTE EL LINK
     @property
     def pdf_url(self):
-        try:
-            return self.pdf_poliza.url if self.pdf_poliza else None
-        except:
-            return None
+        return self.pdf_poliza
 
     @property
     def cuponera_url(self):
-        try:
-            return self.cuponera_pdf.url if self.cuponera_pdf else None
-        except:
-            return None
+        return self.cuponera_pdf
 
     @property
     def estado(self):
@@ -219,50 +206,28 @@ class Payment(models.Model):
     ]
 
     policy = models.ForeignKey(
-        Policy,
-        on_delete=models.CASCADE,
-        related_name="pagos",
-        verbose_name="Póliza"
+        Policy, on_delete=models.CASCADE, related_name="pagos", verbose_name="Póliza"
     )
 
-    numero_cuota = models.IntegerField(
-        verbose_name="Número de cuota"
-    )
+    numero_cuota = models.IntegerField(verbose_name="Número de cuota")
 
-    fecha_vencimiento = models.DateField(
-        verbose_name="Fecha de vencimiento"
-    )
+    fecha_vencimiento = models.DateField(verbose_name="Fecha de vencimiento")
 
-    fecha_pago = models.DateField(
-        blank=True,
-        null=True,
-        verbose_name="Fecha de pago"
-    )
+    fecha_pago = models.DateField(blank=True, null=True, verbose_name="Fecha de pago")
 
     estado = models.CharField(
-        max_length=10,
-        choices=ESTADOS,
-        default="PENDIENTE",
-        verbose_name="Estado"
+        max_length=10, choices=ESTADOS, default="PENDIENTE", verbose_name="Estado"
     )
 
     monto = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        blank=True,
-        null=True,
-        verbose_name="Monto"
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Monto"
     )
 
-    comprobante = CloudinaryField(
-        resource_type="raw",
-        folder="clientes_pagos",
-        blank=True,
-        null=True,
-        verbose_name="Comprobante"
+    # 🔥 AHORA TAMBIÉN URL
+    comprobante = models.TextField(
+        blank=True, null=True, verbose_name="URL comprobante"
     )
 
-    # 🔥 LÓGICA AUTOMÁTICA
     @property
     def estado_calculado(self):
         hoy = date.today()

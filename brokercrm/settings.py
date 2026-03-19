@@ -14,8 +14,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "localhost,127.0.0.1,brokercrm.onrender.com"
+    "ALLOWED_HOSTS", "localhost,127.0.0.1,brokercrm.onrender.com"
 ).split(",")
 
 
@@ -25,18 +24,12 @@ ALLOWED_HOSTS = os.environ.get(
 
 INSTALLED_APPS = [
     "jazzmin",
-
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # CLOUDINARY
-    "cloudinary",
-    "cloudinary_storage",
-
     "accounts",
     "clients",
     "policies",
@@ -54,14 +47,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -100,7 +90,6 @@ WSGI_APPLICATION = "brokercrm.wsgi.application"
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
-
     import dj_database_url
 
     DATABASES = {
@@ -110,9 +99,7 @@ if DATABASE_URL:
             ssl_require=True,
         )
     }
-
 else:
-
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -129,15 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -170,18 +151,11 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # =========================
-# MEDIA FILES (CLOUDINARY)
+# MEDIA (backup local opcional)
 # =========================
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
-
-# =========================
-# CLOUDINARY CONFIG
-# =========================
-
-import cloudinary
-cloudinary.config(secure=True)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # =========================
@@ -241,16 +215,19 @@ JAZZMIN_SETTINGS = {
     "site_title": "Fuerza Natural Broker de Seguros",
     "site_header": "Fuerza Natural Broker de Seguros",
     "site_brand": "Fuerza Natural Broker de Seguros",
-
     "site_logo": "images/img/logo.png",
     "login_logo": "images/img/logo.png",
-
     "custom_css": "images/css/crm.css",
-
     "site_logo_classes": "img-circle",
     "site_logo_width": "120px",
-
     "welcome_sign": "Ingreso Para Productores",
-
     "copyright": "Fuerza Natural Broker de Seguros",
 }
+
+
+# =========================
+# SUPABASE CONFIG (🔥 CORRECTO)
+# =========================
+
+SUPABASE_URL = "https://hgpnzjnlujgaiblzmpp.supabase.co".strip()
+SUPABASE_KEY = "sb_publishable_3JBNutKqw2k5EnvL2jd-TQ_BnSBD-Hj".strip()

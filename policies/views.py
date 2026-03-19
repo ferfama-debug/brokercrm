@@ -3,6 +3,9 @@ from .models import Policy, Payment
 from clients.models import Client
 from datetime import date
 
+# 🔥 SUPABASE
+from core.supabase_client import subir_archivo_supabase
+
 
 def lista_polizas(request):
 
@@ -45,14 +48,26 @@ def crear_poliza(request):
                 {
                     "clientes": clientes,
                     "cliente_id": cliente_id,
-                    "error": "Debe completar las fechas de inicio y vencimiento",
+                    "error": "Debe completar las fechas",
                 },
             )
 
+        # 🔥 ARCHIVOS
         pdf = request.FILES.get("pdf_poliza")
         cuponera = request.FILES.get("cuponera_pdf")
 
-        Policy.objects.create(
+        pdf_url = None
+        cuponera_url = None
+
+        # 🔥 SUBIDA A SUPABASE
+        if pdf:
+            pdf_url = subir_archivo_supabase(pdf, "polizas_clientes")
+
+        if cuponera:
+            cuponera_url = subir_archivo_supabase(cuponera, "cuponeras_clientes")
+
+        # 🔥 GUARDADO
+        nueva_poliza = Policy(
             client=client,
             company=request.POST.get("company"),
             policy_number=request.POST.get("policy_number"),
@@ -61,9 +76,14 @@ def crear_poliza(request):
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
             frecuencia_cuponera=request.POST.get("frecuencia_cuponera"),
-            pdf_poliza=pdf,
-            cuponera_pdf=cuponera,
+            pdf_poliza=pdf_url,
+            cuponera_pdf=cuponera_url,
         )
+
+        nueva_poliza.save()
+
+        print("GUARDADO PDF:", pdf_url)
+        print("GUARDADO CUPONERA:", cuponera_url)
 
         return redirect(f"/clientes/ver/{client.id}/")
 
@@ -96,10 +116,21 @@ def renovar_poliza(request, poliza_id):
                 },
             )
 
+        # 🔥 ARCHIVOS
         pdf = request.FILES.get("pdf_poliza")
         cuponera = request.FILES.get("cuponera_pdf")
 
-        Policy.objects.create(
+        pdf_url = None
+        cuponera_url = None
+
+        # 🔥 SUBIDA A SUPABASE
+        if pdf:
+            pdf_url = subir_archivo_supabase(pdf, "polizas_clientes")
+
+        if cuponera:
+            cuponera_url = subir_archivo_supabase(cuponera, "cuponeras_clientes")
+
+        nueva_poliza = Policy(
             client=poliza.client,
             company=poliza.company,
             policy_number=request.POST.get("policy_number"),
@@ -108,9 +139,11 @@ def renovar_poliza(request, poliza_id):
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
             frecuencia_cuponera=request.POST.get("frecuencia_cuponera"),
-            pdf_poliza=pdf,
-            cuponera_pdf=cuponera,
+            pdf_poliza=pdf_url,
+            cuponera_pdf=cuponera_url,
         )
+
+        nueva_poliza.save()
 
         return redirect(f"/clientes/ver/{poliza.client.id}/")
 
@@ -123,7 +156,7 @@ def renovar_poliza(request, poliza_id):
     )
 
 
-# 🔥 NUEVA VISTA: MARCAR PAGO
+# 🔥 MARCAR PAGO
 def marcar_pago(request, pago_id):
 
     pago = get_object_or_404(Payment, id=pago_id)
