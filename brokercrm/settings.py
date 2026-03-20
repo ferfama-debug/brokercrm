@@ -151,7 +151,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # =========================
-# MEDIA (backup local opcional)
+# MEDIA
 # =========================
 
 MEDIA_URL = "/media/"
@@ -192,7 +192,7 @@ LOGOUT_REDIRECT_URL = "/admin/login/"
 
 
 # =========================
-# EMAIL ALERTAS
+# EMAIL ALERTAS (🔥 LISTO)
 # =========================
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -201,8 +201,11 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = os.environ.get("EMAIL_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+# 🔥 PONÉ ACÁ TU MAIL EMPRESA
+EMAIL_HOST_USER = "fuerzanaturalbroker@gmail.com"
+
+# 🔥 APP PASSWORD (SIN ESPACIOS)
+EMAIL_HOST_PASSWORD = "bnrmhkxspegcrhdp"
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -226,8 +229,8 @@ JAZZMIN_SETTINGS = {
 
 
 # =========================
-# SUPABASE CONFIG (🔥 CORRECTO)
+# SUPABASE CONFIG
 # =========================
 
-SUPABASE_URL = "https://hgpnzjnlujgaiblzmpp.supabase.co".strip()
+SUPABASE_URL = "https://hgpnzjjnlujgaiblzmpp.supabase.co".strip()
 SUPABASE_KEY = "sb_publishable_3JBNutKqw2k5EnvL2jd-TQ_BnSBD-Hj".strip()

@@ -3,8 +3,13 @@ from .models import Policy, Payment
 from clients.models import Client
 from datetime import date
 
-# 🔥 SUPABASE
 from core.supabase_client import subir_archivo_supabase
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+# 🔥 MENSAJES
+from django.contrib import messages
 
 
 def lista_polizas(request):
@@ -52,21 +57,18 @@ def crear_poliza(request):
                 },
             )
 
-        # 🔥 ARCHIVOS
         pdf = request.FILES.get("pdf_poliza")
         cuponera = request.FILES.get("cuponera_pdf")
 
         pdf_url = None
         cuponera_url = None
 
-        # 🔥 SUBIDA A SUPABASE
         if pdf:
             pdf_url = subir_archivo_supabase(pdf, "polizas_clientes")
 
         if cuponera:
             cuponera_url = subir_archivo_supabase(cuponera, "cuponeras_clientes")
 
-        # 🔥 GUARDADO
         nueva_poliza = Policy(
             client=client,
             company=request.POST.get("company"),
@@ -82,8 +84,7 @@ def crear_poliza(request):
 
         nueva_poliza.save()
 
-        print("GUARDADO PDF:", pdf_url)
-        print("GUARDADO CUPONERA:", cuponera_url)
+        messages.success(request, "Póliza creada correctamente")
 
         return redirect(f"/clientes/ver/{client.id}/")
 
@@ -116,14 +117,12 @@ def renovar_poliza(request, poliza_id):
                 },
             )
 
-        # 🔥 ARCHIVOS
         pdf = request.FILES.get("pdf_poliza")
         cuponera = request.FILES.get("cuponera_pdf")
 
         pdf_url = None
         cuponera_url = None
 
-        # 🔥 SUBIDA A SUPABASE
         if pdf:
             pdf_url = subir_archivo_supabase(pdf, "polizas_clientes")
 
@@ -145,6 +144,8 @@ def renovar_poliza(request, poliza_id):
 
         nueva_poliza.save()
 
+        messages.success(request, "Póliza renovada correctamente")
+
         return redirect(f"/clientes/ver/{poliza.client.id}/")
 
     return render(
@@ -156,7 +157,6 @@ def renovar_poliza(request, poliza_id):
     )
 
 
-# 🔥 MARCAR PAGO
 def marcar_pago(request, pago_id):
 
     pago = get_object_or_404(Payment, id=pago_id)
@@ -165,4 +165,52 @@ def marcar_pago(request, pago_id):
     pago.fecha_pago = date.today()
     pago.save()
 
+    messages.success(request, "Pago registrado")
+
     return redirect(f"/clientes/ver/{pago.policy.client.id}/")
+
+
+# 🔥 EMAIL
+def enviar_poliza(request, poliza_id):
+
+    poliza = get_object_or_404(Policy, id=poliza_id)
+    cliente = poliza.client
+
+    if not cliente.email:
+        messages.error(request, "El cliente no tiene email")
+        return redirect(f"/clientes/ver/{cliente.id}/")
+
+    asunto = f"Póliza {poliza.policy_number}"
+
+    mensaje = f"""
+Hola {cliente.first_name},
+
+Te enviamos tu póliza:
+
+Compañía: {poliza.company}
+Vigencia: {poliza.start_date} - {poliza.end_date}
+
+"""
+
+    if poliza.pdf_poliza:
+        mensaje += f"\n📄 Póliza:\n{poliza.pdf_poliza}\n"
+
+    if poliza.cuponera_pdf:
+        mensaje += f"\n💳 Cuponera:\n{poliza.cuponera_pdf}\n"
+
+    try:
+        send_mail(
+            asunto,
+            mensaje,
+            settings.DEFAULT_FROM_EMAIL,
+            [cliente.email],
+            fail_silently=False,
+        )
+
+        messages.success(request, "Email enviado correctamente")
+
+    except Exception as e:
+        print("ERROR EMAIL:", e)
+        messages.error(request, "Error al enviar el email")
+
+    return redirect(f"/clientes/ver/{cliente.id}/")
