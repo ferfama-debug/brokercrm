@@ -7,7 +7,15 @@
     EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
     DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
     DEBUG: False
-    DJANGO_SETTINGS_MODULE: brokercrm.settings
   run: |
-    python manage.py migrate
+    echo "📍 Carpeta actual:"
+    pwd
+    ls
+
+    echo "📍 Comandos disponibles:"
+    python manage.py help
+
+    echo "📍 Buscando check_policies:"
+    python manage.py help | grep check_policies || echo "NO EXISTE"
+
     python manage.py check_policies
