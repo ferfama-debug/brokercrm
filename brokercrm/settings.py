@@ -5,7 +5,6 @@ from django.core.management.utils import get_random_secret_key
 # 🔥 DOTENV SEGURO (NO ROMPE NUNCA)
 try:
     from dotenv import load_dotenv
-
     load_dotenv()
 except Exception:
     pass
@@ -211,3 +210,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+# 🔥 VALIDACIÓN SEGURA (CLAVE)
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("⚠️ SUPABASE no configurado correctamente (variables faltantes)")
+    SUPABASE_URL = None
+    SUPABASE_KEY = None
