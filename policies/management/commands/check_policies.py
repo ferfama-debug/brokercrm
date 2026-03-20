@@ -13,6 +13,10 @@ class Command(BaseCommand):
 
         policies = Policy.objects.filter(vigencia_hasta__range=(hoy, limite))
 
+        if not policies.exists():
+            self.stdout.write("No hay pólizas por vencer")
+            return
+
         for policy in policies:
             self.stdout.write(f"⚠️ Póliza por vencer: {policy}")
 
