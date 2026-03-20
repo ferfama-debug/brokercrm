@@ -3,13 +3,17 @@ from .models import Policy, Payment
 from clients.models import Client
 from datetime import date
 
-from core.supabase_client import subir_archivo_supabase
-
 from django.core.mail import send_mail
 from django.conf import settings
 
 # 🔥 MENSAJES
 from django.contrib import messages
+
+
+# 🔥 IMPORT LAZY (SOLUCIÓN DEFINITIVA)
+def get_subir_archivo():
+    from core.supabase_client import subir_archivo_supabase
+    return subir_archivo_supabase
 
 
 def lista_polizas(request):
@@ -63,11 +67,13 @@ def crear_poliza(request):
         pdf_url = None
         cuponera_url = None
 
+        subir_archivo = get_subir_archivo()
+
         if pdf:
-            pdf_url = subir_archivo_supabase(pdf, "polizas_clientes")
+            pdf_url = subir_archivo(pdf, "polizas_clientes")
 
         if cuponera:
-            cuponera_url = subir_archivo_supabase(cuponera, "cuponeras_clientes")
+            cuponera_url = subir_archivo(cuponera, "cuponeras_clientes")
 
         nueva_poliza = Policy(
             client=client,
@@ -123,11 +129,13 @@ def renovar_poliza(request, poliza_id):
         pdf_url = None
         cuponera_url = None
 
+        subir_archivo = get_subir_archivo()
+
         if pdf:
-            pdf_url = subir_archivo_supabase(pdf, "polizas_clientes")
+            pdf_url = subir_archivo(pdf, "polizas_clientes")
 
         if cuponera:
-            cuponera_url = subir_archivo_supabase(cuponera, "cuponeras_clientes")
+            cuponera_url = subir_archivo(cuponera, "cuponeras_clientes")
 
         nueva_poliza = Policy(
             client=poliza.client,
