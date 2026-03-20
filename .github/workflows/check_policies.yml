@@ -1,8 +1,6 @@
 name: Check Policy Expirations
 
 on:
-  schedule:
-    - cron: '0 12 * * *'
   workflow_dispatch:
 
 jobs:
@@ -18,9 +16,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Actualizar pip
-        run: python -m pip install --upgrade pip
-
       - name: Instalar dependencias
         run: |
           pip install -r requirements.txt
@@ -28,6 +23,7 @@ jobs:
 
       - name: Ejecutar comando Django
         env:
+          DJANGO_SETTINGS_MODULE: brokercrm.settings
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -35,7 +31,6 @@ jobs:
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG: False
-          DJANGO_SETTINGS_MODULE: brokercrm.settings
         run: |
           python manage.py migrate
           python manage.py check_policies
