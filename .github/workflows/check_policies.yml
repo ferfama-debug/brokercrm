@@ -1,38 +1,13 @@
-name: Check Policy Expirations
-
-on:
-  schedule:
-    - cron: '0 12 * * *'
-  workflow_dispatch:
-
-jobs:
-  run-check:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clonar repositorio
-        uses: actions/checkout@v3
-
-      - name: Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Actualizar pip
-        run: python -m pip install --upgrade pip
-
-      - name: Instalar dependencias (FORZADO)
-        run: |
-          pip install -r requirements.txt
-          pip install python-dotenv
-
-      - name: Ejecutar comando Django
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
-          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-          DEBUG: False
-        run: python manage.py check_policies
+- name: Ejecutar comando Django
+  env:
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+    SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+    EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+    EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+    DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+    DEBUG: False
+    DJANGO_SETTINGS_MODULE: brokercrm.settings
+  run: |
+    python manage.py migrate
+    python manage.py check_policies
