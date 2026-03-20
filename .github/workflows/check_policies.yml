@@ -11,20 +11,28 @@ jobs:
 
     steps:
       - name: Clonar repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🧹 LIMPIAR CACHE PYTHON (CLAVE)
+        run: |
+          echo "Eliminando cache viejo..."
+          find . -name "__pycache__" -type d -exec rm -rf {} +
+          find . -name "*.pyc" -delete
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Instalar dependencias (FIX REAL)
+      - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
-          pip install python-dotenv==1.0.1
+          pip install python-dotenv
           pip install -r requirements.txt
 
-      - name: Ejecutar comando Django (FIX PATH)
+      - name: Ejecutar comando Django
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -34,8 +42,5 @@ jobs:
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG: False
         run: |
-          echo "📁 Carpeta actual:"
-          pwd
-          echo "📂 Archivos:"
-          ls
+          echo "🚀 Ejecutando chequeo limpio (SIN CACHE)"
           python manage.py check_policies
