@@ -1,23 +1,36 @@
-from django.core.management.base import BaseCommand
-from policies.models import Policy
-from django.utils import timezone
-from datetime import timedelta
+name: Check Policy Expirations
 
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
 
-class Command(BaseCommand):
-    help = "Verifica pólizas próximas a vencer"
+jobs:
+  run-check:
+    runs-on: ubuntu-latest
 
-    def handle(self, *args, **kwargs):
-        hoy = timezone.now().date()
-        limite = hoy + timedelta(days=3)
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
 
-        policies = Policy.objects.filter(vigencia_hasta__range=(hoy, limite))
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-        if not policies.exists():
-            self.stdout.write("No hay pólizas por vencer")
-            return
+      - name: Instalar dependencias (FIX REAL)
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-dotenv==1.0.1
+          pip install -r requirements.txt
 
-        for policy in policies:
-            self.stdout.write(f"⚠️ Póliza por vencer: {policy}")
-
-        self.stdout.write(self.style.SUCCESS("✔ Chequeo completado"))
+      - name: Ejecutar comando Django
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DEBUG: False
+        run: python manage.py check_policies
