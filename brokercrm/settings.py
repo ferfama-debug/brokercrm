@@ -2,11 +2,13 @@ from pathlib import Path
 import os
 from django.core.management.utils import get_random_secret_key
 
-# 🔥 DOTENV SOLO EN LOCAL (EVITA ERRORES EN GITHUB)
-if os.path.exists(".env"):
+# 🔥 DOTENV SEGURO (NO ROMPE NUNCA)
+try:
     from dotenv import load_dotenv
 
     load_dotenv()
+except Exception:
+    pass
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
