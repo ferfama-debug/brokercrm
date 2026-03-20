@@ -1,6 +1,10 @@
 from pathlib import Path
 import os
 from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
+
+# 🔥 CARGAR VARIABLES DEL .env
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -84,7 +88,7 @@ WSGI_APPLICATION = "brokercrm.wsgi.application"
 
 
 # =========================
-# DATABASE
+# DATABASE (🔥 SUPABASE)
 # =========================
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -192,7 +196,7 @@ LOGOUT_REDIRECT_URL = "/admin/login/"
 
 
 # =========================
-# EMAIL ALERTAS (🔥 LISTO)
+# EMAIL (🔥 DESDE .env)
 # =========================
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -201,11 +205,8 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-# 🔥 PONÉ ACÁ TU MAIL EMPRESA
-EMAIL_HOST_USER = "fuerzanaturalbroker@gmail.com"
-
-# 🔥 APP PASSWORD (SIN ESPACIOS)
-EMAIL_HOST_PASSWORD = "bnrmhkxspegcrhdp"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -229,8 +230,8 @@ JAZZMIN_SETTINGS = {
 
 
 # =========================
-# SUPABASE CONFIG
+# SUPABASE (🔥 DESDE .env)
 # =========================
 
-SUPABASE_URL = "https://hgpnzjjnlujgaiblzmpp.supabase.co".strip()
-SUPABASE_KEY = "sb_publishable_3JBNutKqw2k5EnvL2jd-TQ_BnSBD-Hj".strip()
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")

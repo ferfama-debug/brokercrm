@@ -2,6 +2,23 @@
 
 {% block content %}
 
+<!-- 🔥 MENSAJES -->
+{% if messages %}
+  {% for message in messages %}
+    <div style="
+      background:#d4edda;
+      color:#155724;
+      padding:12px;
+      margin-bottom:15px;
+      border-radius:6px;
+      font-weight:500;
+      box-shadow:0 2px 5px rgba(0,0,0,0.08);
+    ">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
 <style>
 
 .cliente-info{

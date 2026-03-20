@@ -84,7 +84,7 @@ def crear_poliza(request):
 
         nueva_poliza.save()
 
-        messages.success(request, "Póliza creada correctamente")
+        messages.success(request, "✅ Póliza creada correctamente")
 
         return redirect(f"/clientes/ver/{client.id}/")
 
@@ -144,7 +144,7 @@ def renovar_poliza(request, poliza_id):
 
         nueva_poliza.save()
 
-        messages.success(request, "Póliza renovada correctamente")
+        messages.success(request, "🔄 Póliza renovada correctamente")
 
         return redirect(f"/clientes/ver/{poliza.client.id}/")
 
@@ -165,38 +165,39 @@ def marcar_pago(request, pago_id):
     pago.fecha_pago = date.today()
     pago.save()
 
-    messages.success(request, "Pago registrado")
+    messages.success(request, "💰 Pago registrado correctamente")
 
     return redirect(f"/clientes/ver/{pago.policy.client.id}/")
 
 
-# 🔥 EMAIL
+# 🔥 EMAIL PROFESIONAL
 def enviar_poliza(request, poliza_id):
 
     poliza = get_object_or_404(Policy, id=poliza_id)
     cliente = poliza.client
 
     if not cliente.email:
-        messages.error(request, "El cliente no tiene email")
+        messages.error(request, "❌ El cliente no tiene email cargado")
         return redirect(f"/clientes/ver/{cliente.id}/")
 
-    asunto = f"Póliza {poliza.policy_number}"
+    asunto = f"Póliza {poliza.policy_number} - Fuerza Natural Broker"
 
     mensaje = f"""
 Hola {cliente.first_name},
 
 Te enviamos tu póliza:
 
-Compañía: {poliza.company}
-Vigencia: {poliza.start_date} - {poliza.end_date}
-
+📌 Compañía: {poliza.company}
+📅 Vigencia: {poliza.start_date} - {poliza.end_date}
 """
 
     if poliza.pdf_poliza:
-        mensaje += f"\n📄 Póliza:\n{poliza.pdf_poliza}\n"
+        mensaje += f"\n📄 Ver póliza:\n{poliza.pdf_poliza}\n"
 
     if poliza.cuponera_pdf:
-        mensaje += f"\n💳 Cuponera:\n{poliza.cuponera_pdf}\n"
+        mensaje += f"\n💳 Ver cuponera:\n{poliza.cuponera_pdf}\n"
+
+    mensaje += "\nFuerza Natural Broker de Seguros"
 
     try:
         send_mail(
@@ -207,10 +208,10 @@ Vigencia: {poliza.start_date} - {poliza.end_date}
             fail_silently=False,
         )
 
-        messages.success(request, "Email enviado correctamente")
+        messages.success(request, f"✅ Email enviado correctamente a {cliente.email}")
 
     except Exception as e:
         print("ERROR EMAIL:", e)
-        messages.error(request, "Error al enviar el email")
+        messages.error(request, "❌ Error al enviar el email")
 
     return redirect(f"/clientes/ver/{cliente.id}/")
