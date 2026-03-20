@@ -2,12 +2,12 @@ from pathlib import Path
 import os
 from django.core.management.utils import get_random_secret_key
 
-# 🔥 DOTENV OPCIONAL (NO ROMPE EN PRODUCCIÓN)
+# 🔥 DOTENV (NO ROMPE SI NO EXISTE)
 try:
     from dotenv import load_dotenv
 
     load_dotenv()
-except:
+except ImportError:
     pass
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS", "localhost,127.0.0.1,brokercrm.onrender.com"
@@ -92,7 +92,7 @@ WSGI_APPLICATION = "brokercrm.wsgi.application"
 
 
 # =========================
-# DATABASE (🔥 SUPABASE)
+# DATABASE
 # =========================
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -144,17 +144,12 @@ USE_TZ = True
 
 
 # =========================
-# STATIC FILES
+# STATIC
 # =========================
 
 STATIC_URL = "/static/"
-
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
+STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
@@ -180,12 +175,8 @@ USE_X_FORWARDED_HOST = True
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
-if DEBUG:
-    CSRF_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SAMESITE = "Lax"
-else:
-    CSRF_COOKIE_SAMESITE = "None"
-    SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
+SESSION_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
 
 SECURE_SSL_REDIRECT = False
 
@@ -204,7 +195,6 @@ LOGOUT_REDIRECT_URL = "/admin/login/"
 # =========================
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -213,24 +203,6 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-
-# =========================
-# JAZZMIN CONFIG
-# =========================
-
-JAZZMIN_SETTINGS = {
-    "site_title": "Fuerza Natural Broker de Seguros",
-    "site_header": "Fuerza Natural Broker de Seguros",
-    "site_brand": "Fuerza Natural Broker de Seguros",
-    "site_logo": "images/img/logo.png",
-    "login_logo": "images/img/logo.png",
-    "custom_css": "images/css/crm.css",
-    "site_logo_classes": "img-circle",
-    "site_logo_width": "120px",
-    "welcome_sign": "Ingreso Para Productores",
-    "copyright": "Fuerza Natural Broker de Seguros",
-}
 
 
 # =========================
