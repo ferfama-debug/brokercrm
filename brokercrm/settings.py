@@ -1,10 +1,14 @@
 from pathlib import Path
 import os
 from django.core.management.utils import get_random_secret_key
-from dotenv import load_dotenv
 
-# 🔥 CARGAR VARIABLES DEL .env
-load_dotenv()
+# 🔥 DOTENV OPCIONAL (NO ROMPE EN PRODUCCIÓN)
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except:
+    pass
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -196,7 +200,7 @@ LOGOUT_REDIRECT_URL = "/admin/login/"
 
 
 # =========================
-# EMAIL (🔥 DESDE .env)
+# EMAIL
 # =========================
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -230,7 +234,7 @@ JAZZMIN_SETTINGS = {
 
 
 # =========================
-# SUPABASE (🔥 DESDE .env)
+# SUPABASE
 # =========================
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
