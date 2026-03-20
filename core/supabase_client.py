@@ -1,28 +1,22 @@
-from supabase import create_client
-from django.conf import settings
-import uuid
 import os
-
-
-def get_supabase_client():
-    # 🔥 SI ESTAMOS EN GITHUB ACTIONS → NO USAR SUPABASE
-    if os.environ.get("GITHUB_ACTIONS") == "true":
-        print("⚠️ Supabase desactivado en GitHub Actions")
-        return None
-
-    if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
-        raise Exception("Supabase no configurado correctamente")
-
-    return create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+import uuid
+from django.conf import settings
 
 
 def subir_archivo_supabase(file, carpeta):
     try:
-        supabase = get_supabase_client()
-
-        # 🔥 SI NO HAY SUPABASE (GITHUB) → SALIR LIMPIO
-        if supabase is None:
+        # 🔥 SI ESTAMOS EN GITHUB → NO HACER NADA
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            print("⚠️ Supabase desactivado en GitHub")
             return None
+
+        # 🔥 IMPORT DINÁMICO (CLAVE)
+        from supabase import create_client
+
+        if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
+            raise Exception("Supabase no configurado correctamente")
+
+        supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
         nombre_unico = f"{uuid.uuid4()}_{file.name}"
         path = f"{carpeta}/{nombre_unico}"
