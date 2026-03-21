@@ -6,11 +6,17 @@
 <style>
 
 .dashboard{
-max-width:1200px;
+max-width:1300px;
 margin:auto;
+padding:20px;
 }
 
-/* FILA TARJETAS PRINCIPALES */
+.title{
+margin-bottom:25px;
+font-weight:600;
+}
+
+/* TARJETAS */
 
 .radar-container{
 display:grid;
@@ -18,8 +24,6 @@ grid-template-columns:repeat(4,1fr);
 gap:20px;
 margin-bottom:30px;
 }
-
-/* FILA TARJETAS SECUNDARIAS */
 
 .radar-container-second{
 display:grid;
@@ -30,54 +34,60 @@ margin-bottom:30px;
 
 .radar{
 background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+padding:22px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
 text-align:center;
+transition:0.2s;
+}
+
+.radar:hover{
+transform:translateY(-3px);
 }
 
 .radar h3{
-font-size:16px;
+font-size:15px;
 margin-bottom:10px;
+color:#555;
 }
 
 .radar span{
-font-size:32px;
+font-size:34px;
 font-weight:bold;
 }
+
+/* COLORES */
 
 .radar-rojo{border-left:6px solid #e53935;}
 .radar-naranja{border-left:6px solid #fb8c00;}
 .radar-amarillo{border-left:6px solid #fdd835;}
 .radar-vencidas{border-left:6px solid #c62828;}
 
-.radar:hover{
-transform:translateY(-2px);
-transition:0.2s;
-}
+/* GRAFICOS */
 
 .grafico-box{
 background:white;
 padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
 margin-bottom:30px;
 }
 
 .grafico-title{
-margin-top:30px;
+margin-top:40px;
 margin-bottom:10px;
 }
+
+/* BOTONES */
 
 .btn-whatsapp{
 background:#25D366;
 color:white;
 padding:6px 12px;
-border-radius:4px;
+border-radius:6px;
 text-decoration:none;
 font-size:13px;
 font-weight:bold;
-display:inline-block;
 }
 
 .btn-whatsapp:hover{
@@ -88,15 +98,40 @@ background:#1ebe5b;
 background:#6d4c41;
 color:white;
 padding:6px 12px;
-border-radius:4px;
+border-radius:6px;
 text-decoration:none;
 font-size:13px;
 font-weight:bold;
-display:inline-block;
 }
 
 .btn-cuponera:hover{
 background:#5d4037;
+}
+
+/* TABLAS */
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-bottom:30px;
+background:white;
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+th, td{
+padding:10px;
+text-align:left;
+}
+
+th{
+background:#f5f5f5;
+font-weight:600;
+}
+
+tr:hover{
+background:#fafafa;
 }
 
 </style>
@@ -104,10 +139,10 @@ background:#5d4037;
 
 <div class="dashboard">
 
-<h1 class="title">Panel principal</h1>
+<h1 class="title">📊 Panel de control</h1>
 
 
-<!-- 🔥 FINANZAS (NIVEL PRO) -->
+<!-- 💰 FINANZAS -->
 <div class="radar-container">
 
 <div class="radar radar-vencidas">
@@ -133,30 +168,31 @@ background:#5d4037;
 </div>
 
 
+<!-- ⚠️ ALERTAS -->
 <div class="radar-container">
 
 <div class="radar radar-vencidas">
-<h3>⛔ Pólizas vencidas</h3>
+<h3>⛔ Vencidas</h3>
 <span>{{ vencidas|default:0 }}</span>
 </div>
 
 <a href="{% url 'alerts:alertas' %}?nivel=CRITICA" style="text-decoration:none;color:inherit;">
 <div class="radar radar-rojo">
-<h3>🔴 Vencen en 7 días</h3>
+<h3>🔴 7 días</h3>
 <span>{{ vencen_7|default:0 }}</span>
 </div>
 </a>
 
 <a href="{% url 'alerts:alertas' %}?nivel=ALTA" style="text-decoration:none;color:inherit;">
 <div class="radar radar-naranja">
-<h3>🟠 Vencen en 15 días</h3>
+<h3>🟠 15 días</h3>
 <span>{{ vencen_15|default:0 }}</span>
 </div>
 </a>
 
 <a href="{% url 'alerts:alertas' %}?nivel=MEDIA" style="text-decoration:none;color:inherit;">
 <div class="radar radar-amarillo">
-<h3>🟡 Vencen en 30 días</h3>
+<h3>🟡 30 días</h3>
 <span>{{ vencen_30|default:0 }}</span>
 </div>
 </a>
@@ -164,106 +200,23 @@ background:#5d4037;
 </div>
 
 
-<div class="radar-container-second">
-
-<div class="radar">
-<h3>📈 Producción del mes</h3>
-<span>{{ produccion_mes|default:0 }}</span>
-</div>
-
-<div class="radar">
-<h3>🔄 Renovaciones del mes</h3>
-<span>{{ renovaciones_mes|default:0 }}</span>
-</div>
-
-</div>
-
-
-<h2 class="grafico-title">📊 Distribución de cartera por compañía</h2>
+<h2 class="grafico-title">📊 Producción por compañía</h2>
 
 <div class="grafico-box">
 <canvas id="graficoCompanias"></canvas>
 </div>
 
 
-<h2 class="grafico-title">📈 Crecimiento de cartera por mes</h2>
+<h2 class="grafico-title">📈 Crecimiento mensual</h2>
 
 <div class="grafico-box">
 <canvas id="graficoCrecimiento"></canvas>
 </div>
 
 
-<h2 class="produccion-title">📊 Producción por compañía</h2>
+<h2>📞 Clientes para llamar</h2>
 
-<table class="tabla-produccion">
-
-<thead>
-<tr>
-<th>Compañía</th>
-<th>Pólizas</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for c in produccion_companias %}
-
-<tr>
-<td>{{ c.company }}</td>
-<td>{{ c.total }}</td>
-</tr>
-
-{% empty %}
-
-<tr>
-<td colspan="2">No hay datos</td>
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-
-<h2 class="score-clientes-title">🏆 Valor de clientes</h2>
-
-<table class="tabla-score-clientes">
-
-<thead>
-<tr>
-<th>Cliente</th>
-<th>Pólizas</th>
-<th>Valor</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for c in clientes_score %}
-
-<tr>
-<td>{{ c.cliente }}</td>
-<td>{{ c.polizas }}</td>
-<td>{{ c.score }}</td>
-</tr>
-
-{% empty %}
-
-<tr>
-<td colspan="3">No hay datos</td>
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-
-<h2 class="agenda-title">📞 Clientes para llamar hoy</h2>
-
-<table class="tabla-llamadas">
+<table>
 
 <thead>
 <tr>
@@ -277,35 +230,24 @@ background:#5d4037;
 <tbody>
 
 {% for c in clientes_llamar %}
-
 <tr>
-
 <td>{{ c.cliente }}</td>
 <td>{{ c.numero }}</td>
 <td>{{ c.dias }}</td>
-
 <td>
 
 <a href="{% url 'clients:ver_cliente' c.cliente.id %}" class="btn-cuponera">
-Ver cliente
+Ver
 </a>
 
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}"
-target="_blank"
-class="btn-whatsapp">
+<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">
 WhatsApp
 </a>
 
 </td>
-
 </tr>
-
 {% empty %}
-
-<tr>
-<td colspan="4">No hay clientes para llamar hoy</td>
-</tr>
-
+<tr><td colspan="4">Sin datos</td></tr>
 {% endfor %}
 
 </tbody>
@@ -313,9 +255,9 @@ WhatsApp
 </table>
 
 
-<h2 class="vencimientos-title">📅 Pólizas por vencer</h2>
+<h2>📅 Pólizas por vencer</h2>
 
-<table class="tabla-vencimientos">
+<table>
 
 <thead>
 <tr>
@@ -330,87 +272,15 @@ WhatsApp
 <tbody>
 
 {% for p in polizas_por_vencer %}
-
 <tr>
-
 <td>{{ p.cliente }}</td>
 <td>{{ p.numero }}</td>
 <td>{{ p.compania }}</td>
 <td>{{ p.vencimiento|date:"d/m/Y" }}</td>
 <td>{{ p.dias }}</td>
-
 </tr>
-
 {% empty %}
-
-<tr>
-<td colspan="5">No hay pólizas próximas a vencer</td>
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-
-<h2>💳 Pagos de cuponera próximos</h2>
-
-<table class="tabla-cuponeras">
-
-<thead>
-<tr>
-<th>Cliente</th>
-<th>Póliza</th>
-<th>Compañía</th>
-<th>Próximo pago</th>
-<th>Acción</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for pago in pagos_cuponera %}
-
-<tr>
-
-<td>{{ pago.cliente }}</td>
-<td>{{ pago.numero }}</td>
-<td>{{ pago.company }}</td>
-<td>{{ pago.fecha|date:"d/m/Y" }}</td>
-
-<td>
-
-<a
-href="https://wa.me/{{ pago.telefono }}?text={{ pago.mensaje }}"
-target="_blank"
-class="btn-whatsapp">
-WhatsApp
-</a>
-
-{% if pago.pdf %}
-
-<a
-href="{{ pago.pdf }}"
-target="_blank"
-class="btn-cuponera">
-Ver cuponera
-</a>
-
-{% endif %}
-
-</td>
-
-</tr>
-
-{% empty %}
-
-<tr>
-<td colspan="5">
-No hay pagos de cuponera próximos
-</td>
-</tr>
-
+<tr><td colspan="5">Sin datos</td></tr>
 {% endfor %}
 
 </tbody>
@@ -425,9 +295,7 @@ No hay pagos de cuponera próximos
 const companias = JSON.parse('{{ companias|safe }}');
 const cantidades = JSON.parse('{{ cantidades|safe }}');
 
-new Chart(
-document.getElementById('graficoCompanias'),
-{
+new Chart(document.getElementById('graficoCompanias'), {
 type: 'bar',
 data: {
 labels: companias,
@@ -436,25 +304,21 @@ label: 'Pólizas',
 data: cantidades
 }]
 }
-}
-);
+});
 
 const meses = JSON.parse('{{ meses|safe }}');
 const totales = JSON.parse('{{ crecimiento_totales|safe }}');
 
-new Chart(
-document.getElementById('graficoCrecimiento'),
-{
+new Chart(document.getElementById('graficoCrecimiento'), {
 type: 'line',
 data: {
 labels: meses,
 datasets: [{
-label: 'Pólizas por mes',
+label: 'Crecimiento',
 data: totales
 }]
 }
-}
-);
+});
 
 </script>
 
