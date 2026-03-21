@@ -25,7 +25,6 @@ def lista_polizas(request):
     compania = request.GET.get("compania")
     buscar = request.GET.get("buscar")
 
-    # 🔴 MULTIUSUARIO
     if request.user.is_superuser:
         clientes = Client.objects.prefetch_related("policy_set")
     else:
@@ -33,7 +32,6 @@ def lista_polizas(request):
             producer=request.user
         ).prefetch_related("policy_set")
 
-    # 🔍 BUSCADOR
     if buscar:
         clientes = clientes.filter(
             Q(first_name__icontains=buscar)
@@ -41,7 +39,6 @@ def lista_polizas(request):
             | Q(policy__policy_number__icontains=buscar)
         ).distinct()
 
-    # 🏢 FILTRO COMPAÑÍA
     if compania:
         clientes = clientes.filter(policy__company=compania).distinct()
 
@@ -76,7 +73,6 @@ def crear_poliza(request):
 
         client = get_object_or_404(Client, id=request.POST.get("client"))
 
-        # 🔴 SEGURIDAD
         if not request.user.is_superuser and client.producer != request.user:
             messages.error(request, "❌ No tenés permisos para este cliente")
             return redirect("clients:clientes")
@@ -144,7 +140,6 @@ def renovar_poliza(request, poliza_id):
 
     poliza = get_object_or_404(Policy, id=poliza_id)
 
-    # 🔴 SEGURIDAD
     if not request.user.is_superuser and poliza.client.producer != request.user:
         messages.error(request, "❌ No tenés permisos")
         return redirect("clients:clientes")
@@ -225,7 +220,7 @@ def marcar_pago(request, pago_id):
     return redirect(f"/clientes/ver/{pago.policy.client.id}/")
 
 
-# 🔴 EMAIL PROFESIONAL SEGURO
+# 🔴 EMAIL PROFESIONAL + MENSAJE CUPONERA
 @login_required
 def enviar_poliza(request, poliza_id):
 
@@ -251,11 +246,14 @@ Te enviamos tu póliza:
 📅 Vigencia: {poliza.start_date} - {poliza.end_date}
 """
 
+    # 🔥 POLIZA
     if poliza.pdf_poliza:
         mensaje += f"\n📄 Ver póliza:\n{poliza.pdf_poliza}\n"
 
+    # 🔥 CUPONERA (ACA ESTA LA MEJORA CLAVE)
     if poliza.cuponera_pdf:
-        mensaje += f"\n💳 Ver cuponera:\n{poliza.cuponera_pdf}\n"
+        mensaje += f"\n💳 Te adjuntamos la cuponera:\n{poliza.cuponera_pdf}\n"
+        mensaje += "\nCuando realices cada pago, por favor envianos el comprobante para registrar la cuota correspondiente.\n"
 
     mensaje += "\nFuerza Natural Broker de Seguros"
 
