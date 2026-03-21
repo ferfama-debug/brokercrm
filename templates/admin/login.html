@@ -3,9 +3,9 @@
 
 {% block extrastyle %}
 <style>
-    body.login-page {
-        background: url("{% static 'images/img/fondo.png' %}") no-repeat center center fixed;
-        background-size: cover;
+    body {
+        background: url("{% static 'images/img/fondo.png' %}") no-repeat center center fixed !important;
+        background-size: cover !important;
     }
 
     .login-box {
@@ -15,7 +15,7 @@
     }
 
     .login-logo img {
-        max-width: 180px; /* 🔥 tamaño controlado */
+        max-width: 180px;
         height: auto;
     }
 </style>
