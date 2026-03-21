@@ -15,30 +15,34 @@
 
 <style>
 
+/* 🔥 FONDO GLOBAL */
+
 body{
 margin:0;
 font-family:Arial, Helvetica, sans-serif;
-background:#f4f6f9;
+background: radial-gradient(circle at top, #0f172a, #020617);
+color:#e2e8f0;
 }
 
 /* TOPBAR */
 
 .topbar{
 height:60px;
-background:#0f1e2e;
+background:rgba(15,23,42,0.8);
+backdrop-filter:blur(10px);
 color:white;
 display:flex;
 align-items:center;
 justify-content:space-between;
 padding:0 30px;
-box-shadow:0 2px 4px rgba(0,0,0,0.2);
+border-bottom:1px solid rgba(255,255,255,0.1);
 }
 
 .logo{
 font-weight:bold;
 font-size:18px;
 letter-spacing:0.5px;
-color:#4CAF50; /* 🔥 VERDE MARCA */
+color:#22c55e;
 }
 
 /* RIGHT */
@@ -57,21 +61,16 @@ cursor:pointer;
 font-size:15px;
 }
 
-.alert-bell span{
-margin-left:5px;
-font-weight:bold;
-}
-
 .alert-dropdown{
 display:none;
 position:absolute;
 right:0;
 top:35px;
-background:white;
-color:black;
+background:rgba(15,23,42,0.95);
+color:#e2e8f0;
 width:320px;
-border-radius:8px;
-box-shadow:0 5px 15px rgba(0,0,0,0.2);
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
 z-index:100;
 overflow:hidden;
 }
@@ -79,34 +78,18 @@ overflow:hidden;
 .alert-dropdown-header{
 padding:10px 15px;
 font-weight:bold;
-background:#f5f6f8;
-border-bottom:1px solid #eee;
+background:rgba(255,255,255,0.05);
 }
 
 .alert-item{
 padding:10px 15px;
-border-bottom:1px solid #eee;
+border-bottom:1px solid rgba(255,255,255,0.05);
 font-size:14px;
 }
 
-.alert-item:last-child{
-border-bottom:none;
-}
-
-.alert-item.critica{
-color:#e53935;
-font-weight:bold;
-}
-
-.alert-item.alta{
-color:#fb8c00;
-font-weight:bold;
-}
-
-.alert-item.media{
-color:#fdd835;
-font-weight:bold;
-}
+.alert-item.critica{color:#ef4444;}
+.alert-item.alta{color:#f97316;}
+.alert-item.media{color:#eab308;}
 
 .alert-bell:hover .alert-dropdown{
 display:block;
@@ -123,41 +106,33 @@ min-height:calc(100vh - 60px);
 
 .sidebar{
 width:250px;
-background:#1f2d3d;
+background:rgba(15,23,42,0.9);
+backdrop-filter:blur(12px);
+border-right:1px solid rgba(255,255,255,0.05);
 padding-top:20px;
 }
 
 .sidebar a{
 display:block;
-color:white;
+color:#cbd5f5;
 padding:14px 25px;
 text-decoration:none;
 font-size:14px;
-transition:0.2s;
+transition:0.3s;
 border-left:3px solid transparent;
 }
 
 .sidebar a:hover{
-background:#32465a;
-border-left:3px solid #4CAF50; /* 🔥 VERDE */
+background:rgba(255,255,255,0.05);
+border-left:3px solid #22c55e;
+color:white;
 }
 
 /* ALERT COLORS */
 
-.alert-critica{
-color:#ff4d4d;
-font-weight:bold;
-}
-
-.alert-alta{
-color:#ff9800;
-font-weight:bold;
-}
-
-.alert-media{
-color:#ffd54f;
-font-weight:bold;
-}
+.alert-critica{color:#ef4444;}
+.alert-alta{color:#f97316;}
+.alert-media{color:#eab308;}
 
 /* CONTENT */
 
@@ -171,6 +146,7 @@ padding:30px;
 .user-info{
 font-size:14px;
 opacity:0.9;
+color:#cbd5f5;
 }
 
 /* RESPONSIVE */
