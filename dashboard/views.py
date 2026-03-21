@@ -9,18 +9,19 @@ from django.db.models.functions import TruncMonth
 
 def home(request):
 
+    hoy = date.today()
+
+    # 🔥 CONTADORES GENERALES
     clientes = Client.objects.count()
     polizas = Policy.objects.count()
     usuarios = User.objects.count()
 
-    hoy = date.today()
-
-    policies_db = Policy.objects.all()
+    # 🔥 POLIZAS
+    policies_db = Policy.objects.select_related("client").all()
 
     polizas_por_vencer = []
     clientes_llamar = []
 
-    # 🔴 RADAR
     vencidas = 0
     vencen_7 = 0
     vencen_15 = 0
@@ -34,15 +35,13 @@ def home(request):
             vencidas += 1
             continue
 
-        polizas_por_vencer.append(
-            {
-                "cliente": p.client,
-                "numero": p.policy_number,
-                "compania": p.company,
-                "vencimiento": p.end_date,
-                "dias": dias,
-            }
-        )
+        polizas_por_vencer.append({
+            "cliente": p.client,
+            "numero": p.policy_number,
+            "compania": p.company,
+            "vencimiento": p.end_date,
+            "dias": dias,
+        })
 
         if dias <= 7:
             vencen_7 += 1
@@ -50,21 +49,19 @@ def home(request):
             fecha = p.end_date.strftime("%d/%m/%Y")
 
             mensaje = (
-                f"Hola {p.client.full_name}, "
+                f"Hola {p.client.nombre_completo()}, "
                 f"tu póliza N° {p.policy_number} de {p.company} "
                 f"vence el {fecha}. "
                 f"¿Querés que avancemos con la renovación?"
             )
 
-            clientes_llamar.append(
-                {
-                    "cliente": p.client,
-                    "numero": p.policy_number,
-                    "telefono": getattr(p.client, "phone", ""),
-                    "dias": dias,
-                    "mensaje": mensaje,
-                }
-            )
+            clientes_llamar.append({
+                "cliente": p.client,
+                "numero": p.policy_number,
+                "telefono": getattr(p.client, "phone", ""),
+                "dias": dias,
+                "mensaje": mensaje,
+            })
 
         elif dias <= 15:
             vencen_15 += 1
@@ -72,8 +69,7 @@ def home(request):
         elif dias <= 30:
             vencen_30 += 1
 
-    # 🔥 💰 DEUDA Y COBRANZA (NUEVO PRO)
-
+    # 🔥 💰 COBRANZA
     pagos = Payment.objects.all()
 
     deuda_total = pagos.filter(
@@ -93,10 +89,9 @@ def home(request):
     ).count()
 
     # ⭐ SCORE CLIENTES
-
-    clientes_score_db = Client.objects.annotate(total_polizas=Count("policy")).order_by(
-        "-total_polizas"
-    )
+    clientes_score_db = Client.objects.annotate(
+        total_polizas=Count("policy")
+    ).order_by("-total_polizas")
 
     clientes_score = []
 
@@ -109,29 +104,23 @@ def home(request):
         else:
             score = "⭐ Cliente Básico"
 
-        clientes_score.append(
-            {
-                "cliente": c,
-                "polizas": c.total_polizas,
-                "score": score,
-            }
-        )
+        clientes_score.append({
+            "cliente": c,
+            "polizas": c.total_polizas,
+            "score": score,
+        })
 
     # 🏢 PRODUCCIÓN POR COMPAÑÍA
-
     produccion_companias = (
-        Policy.objects.values("company").annotate(total=Count("id")).order_by("-total")
+        Policy.objects.values("company")
+        .annotate(total=Count("id"))
+        .order_by("-total")
     )
 
-    companias = []
-    cantidades = []
-
-    for c in produccion_companias:
-        companias.append(c["company"])
-        cantidades.append(c["total"])
+    companias = [c["company"] for c in produccion_companias]
+    cantidades = [c["total"] for c in produccion_companias]
 
     # 📈 CRECIMIENTO
-
     crecimiento = (
         Policy.objects.annotate(mes=TruncMonth("start_date"))
         .values("mes")
@@ -139,12 +128,8 @@ def home(request):
         .order_by("mes")
     )
 
-    meses = []
-    crecimiento_totales = []
-
-    for c in crecimiento:
-        meses.append(c["mes"].strftime("%b %Y"))
-        crecimiento_totales.append(c["total"])
+    meses = [c["mes"].strftime("%b %Y") for c in crecimiento]
+    crecimiento_totales = [c["total"] for c in crecimiento]
 
     context = {
         "clientes": clientes,
@@ -152,7 +137,7 @@ def home(request):
         "usuarios": usuarios,
         "alertas": len(polizas_por_vencer),
 
-        # 🔥 💰 NUEVO
+        # 💰 COBRANZA
         "deuda_total": deuda_total,
         "cuotas_vencidas": cuotas_vencidas,
         "proximos_pagos": proximos_pagos,
@@ -167,7 +152,7 @@ def home(request):
         "polizas_por_vencer": polizas_por_vencer,
         "clientes_score": clientes_score,
         "clientes_llamar": clientes_llamar,
-        "produccion_companias": produccion_companias,
+
         "companias": companias,
         "cantidades": cantidades,
         "meses": meses,
