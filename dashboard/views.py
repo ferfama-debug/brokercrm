@@ -43,31 +43,70 @@ def home(request):
             "dias": dias,
         })
 
+        telefono = getattr(p.client, "phone", "")
+
+        # 🔴 URGENTE (7 días)
         if dias <= 7:
             vencen_7 += 1
 
             fecha = p.end_date.strftime("%d/%m/%Y")
 
             mensaje = (
-                f"Hola {p.client.nombre_completo()}, "
-                f"tu póliza N° {p.policy_number} de {p.company} "
-                f"vence el {fecha}. "
-                f"¿Querés que avancemos con la renovación?"
+                f"Hola {p.client.nombre_completo()}, te escribo de Fuerza Natural Broker. "
+                f"Tu póliza N° {p.policy_number} de {p.company} vence el {fecha}. "
+                f"Podemos renovarla hoy mismo para que no pierdas cobertura. ¿Avanzamos?"
             )
 
             clientes_llamar.append({
                 "cliente": p.client,
                 "numero": p.policy_number,
-                "telefono": getattr(p.client, "phone", ""),
+                "telefono": telefono,
                 "dias": dias,
                 "mensaje": mensaje,
+                "prioridad": "URGENTE",
             })
 
+        # 🟠 IMPORTANTE (15 días)
         elif dias <= 15:
             vencen_15 += 1
 
+            fecha = p.end_date.strftime("%d/%m/%Y")
+
+            mensaje = (
+                f"Hola {p.client.nombre_completo()}, ¿cómo estás? "
+                f"Te aviso que tu póliza N° {p.policy_number} de {p.company} "
+                f"vence el {fecha}. Si querés podemos ir gestionando la renovación con tiempo."
+            )
+
+            clientes_llamar.append({
+                "cliente": p.client,
+                "numero": p.policy_number,
+                "telefono": telefono,
+                "dias": dias,
+                "mensaje": mensaje,
+                "prioridad": "ALTA",
+            })
+
+        # 🟡 SEGUIMIENTO (30 días)
         elif dias <= 30:
             vencen_30 += 1
+
+            fecha = p.end_date.strftime("%d/%m/%Y")
+
+            mensaje = (
+                f"Hola {p.client.nombre_completo()}, te contacto de Fuerza Natural Broker. "
+                f"Tu póliza N° {p.policy_number} de {p.company} vence el {fecha}. "
+                f"Cuando quieras podemos revisar opciones para la renovación."
+            )
+
+            clientes_llamar.append({
+                "cliente": p.client,
+                "numero": p.policy_number,
+                "telefono": telefono,
+                "dias": dias,
+                "mensaje": mensaje,
+                "prioridad": "MEDIA",
+            })
 
     # 🔥 💰 COBRANZA
     pagos = Payment.objects.all()
