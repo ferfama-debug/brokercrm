@@ -101,7 +101,7 @@ background:#f5f5f5;
 
 <h1 class="title">📊 Panel de control</h1>
 
-<!-- 🔥 CRM PRO (NUEVO ARRIBA) -->
+<!-- 🔥 CRM PRO -->
 
 <h2>🚀 CRM de Ventas (Acción del día)</h2>
 
@@ -212,23 +212,30 @@ WhatsApp
 </div>
 
 
+<!-- 📊 PRODUCCIÓN CORREGIDA -->
+
 <h2>📊 Producción por compañía</h2>
 
 <table>
+
 <tr>
 <th>Compañía</th>
 <th>Pólizas</th>
 </tr>
 
-{% for c in companias %}
+{% for c in produccion_companias %}
 <tr>
-<td>{{ c }}</td>
-<td>{{ cantidades|index:forloop.counter0 }}</td>
+<td>{{ c.company }}</td>
+<td>{{ c.total }}</td>
 </tr>
+{% empty %}
+<tr><td colspan="2">Sin datos</td></tr>
 {% endfor %}
 
 </table>
 
+
+<!-- 📅 VENCIMIENTOS -->
 
 <h2>📅 Pólizas por vencer</h2>
 
@@ -250,6 +257,8 @@ WhatsApp
 <td>{{ p.vencimiento|date:"d/m/Y" }}</td>
 <td>{{ p.dias }}</td>
 </tr>
+{% empty %}
+<tr><td colspan="5">Sin datos</td></tr>
 {% endfor %}
 
 </table>
