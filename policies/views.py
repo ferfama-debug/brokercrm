@@ -8,7 +8,6 @@ from datetime import date
 from django.core.mail import send_mail
 from django.conf import settings
 
-# 🔥 MENSAJES
 from django.contrib import messages
 
 
@@ -201,7 +200,7 @@ def renovar_poliza(request, poliza_id):
     )
 
 
-# 🔴 PAGOS SEGUROS
+# 🔴 PAGOS CON COMPROBANTE (🔥 CLAVE)
 @login_required
 def marcar_pago(request, pago_id):
 
@@ -211,13 +210,32 @@ def marcar_pago(request, pago_id):
         messages.error(request, "❌ No tenés permisos")
         return redirect("clients:clientes")
 
-    pago.estado = "PAGADO"
-    pago.fecha_pago = date.today()
-    pago.save()
+    if request.method == "POST":
 
-    messages.success(request, "💰 Pago registrado correctamente")
+        comprobante = request.FILES.get("comprobante")
 
-    return redirect(f"/clientes/ver/{pago.policy.client.id}/")
+        # 🔥 SUBIR A SUPABASE
+        if comprobante:
+            subir_archivo = get_subir_archivo()
+            comprobante_url = subir_archivo(comprobante, "comprobantes_pagos")
+            pago.comprobante = comprobante_url
+
+        pago.estado = "PAGADO"
+        pago.fecha_pago = date.today()
+        pago.save()
+
+        messages.success(request, "📎 Comprobante cargado y pago registrado")
+
+        return redirect(f"/clientes/ver/{pago.policy.client.id}/")
+
+    # 🔥 SI ES GET → MOSTRAR FORM
+    return render(
+        request,
+        "policies/cargar_comprobante.html",
+        {
+            "pago": pago,
+        },
+    )
 
 
 # 🔴 EMAIL PROFESIONAL + MENSAJE CUPONERA
@@ -246,14 +264,12 @@ Te enviamos tu póliza:
 📅 Vigencia: {poliza.start_date} - {poliza.end_date}
 """
 
-    # 🔥 POLIZA
     if poliza.pdf_poliza:
         mensaje += f"\n📄 Ver póliza:\n{poliza.pdf_poliza}\n"
 
-    # 🔥 CUPONERA (ACA ESTA LA MEJORA CLAVE)
     if poliza.cuponera_pdf:
         mensaje += f"\n💳 Te adjuntamos la cuponera:\n{poliza.cuponera_pdf}\n"
-        mensaje += "\nCuando realices cada pago, por favor envianos el comprobante para registrar la cuota correspondiente.\n"
+        mensaje += "\nCuando realices cada pago, envianos el comprobante para registrar la cuota.\n"
 
     mensaje += "\nFuerza Natural Broker de Seguros"
 
