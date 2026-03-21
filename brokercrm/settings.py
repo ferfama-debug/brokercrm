@@ -34,15 +34,16 @@ JAZZMIN_SETTINGS = {
     "site_header": "Fuerza Natural Broker",
     "site_brand": "Fuerza Natural Broker",
 
-    # 🔥 TU LOGO (RESPETANDO TU RUTA)
+    # 🔥 LOGO
     "site_logo": "images/img/logo.png",
     "login_logo": "images/img/logo.png",
     "site_icon": "images/img/logo.png",
 
+    # 🔥 TEXTOS
     "welcome_sign": "Panel de gestión",
     "copyright": "Fuerza Natural Broker de Seguros",
 
-    # 🔥 MEJOR VISUAL
+    # 🔥 UX
     "navigation_expanded": True,
 }
 
