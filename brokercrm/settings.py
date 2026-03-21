@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from django.core.management.utils import get_random_secret_key
 
-# 🔥 DOTENV SEGURO (NO ROMPE NUNCA)
+# 🔥 DOTENV SEGURO
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -23,6 +23,19 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS", "localhost,127.0.0.1,brokercrm.onrender.com"
 ).split(",")
+
+
+# =========================
+# JAZZMIN (🔥 BRANDING PRO)
+# =========================
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Fuerza Natural Broker",
+    "site_header": "Fuerza Natural Broker",
+    "site_brand": "Fuerza Natural Broker",
+    "welcome_sign": "Bienvenido al sistema",
+    "copyright": "Fuerza Natural Broker de Seguros",
+}
 
 
 # =========================
@@ -211,7 +224,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-# 🔥 VALIDACIÓN SEGURA (CLAVE)
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("⚠️ SUPABASE no configurado correctamente (variables faltantes)")
     SUPABASE_URL = None
