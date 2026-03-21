@@ -9,12 +9,16 @@ body{
 background: radial-gradient(circle at top, #0f172a, #020617);
 }
 
+/* CONTENEDOR */
+
 .dashboard{
 max-width:1300px;
 margin:auto;
 padding:20px;
 color:#e2e8f0;
 }
+
+/* TITULOS */
 
 .title{
 margin-bottom:25px;
@@ -30,7 +34,24 @@ p,td,th,span{
 color:#cbd5f5;
 }
 
-/* PRIORIDADES */
+/* BOTON COBRANZA 🔥 */
+
+.btn-cobranza{
+background:linear-gradient(135deg,#ef4444,#b91c1c);
+color:white;
+padding:12px 20px;
+border-radius:10px;
+border:none;
+font-weight:bold;
+cursor:pointer;
+margin-bottom:20px;
+}
+
+.btn-cobranza:hover{
+transform:scale(1.05);
+}
+
+/* CRM PRO */
 
 .prioridad-urgente{color:#ef4444;font-weight:bold;}
 .prioridad-alta{color:#f97316;font-weight:bold;}
@@ -45,6 +66,11 @@ padding:6px 12px;
 border-radius:8px;
 border:none;
 cursor:pointer;
+transition:0.2s;
+}
+
+.btn-copiar:hover{
+transform:scale(1.05);
 }
 
 .btn-whatsapp{
@@ -72,6 +98,11 @@ padding:22px;
 border-radius:16px;
 border:1px solid rgba(255,255,255,0.1);
 text-align:center;
+transition:0.3s;
+}
+
+.radar:hover{
+transform:translateY(-5px);
 }
 
 .radar span{
@@ -99,27 +130,32 @@ text-align:left;
 
 th{
 background:rgba(255,255,255,0.08);
+color:#e2e8f0;
+}
+
+tr{
+border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
 tr:hover{
 background:rgba(255,255,255,0.05);
 }
 
-/* BLOQUES COBRANZA */
+/* GRAFICOS */
 
-.cobranza-box{
-border:1px solid rgba(255,255,255,0.1);
-border-radius:12px;
-padding:15px;
+.grafico-box{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+padding:20px;
+border-radius:16px;
 margin-bottom:30px;
 }
 
-.cobranza-urgente{
-border-left:5px solid #ef4444;
-}
+/* SEPARADORES */
 
-.cobranza-proxima{
-border-left:5px solid #f97316;
+h2{
+margin-top:40px;
+margin-bottom:10px;
 }
 
 </style>
@@ -129,81 +165,22 @@ border-left:5px solid #f97316;
 
 <h1 class="title">📊 Panel de control</h1>
 
-<!-- 🔥 COBRANZAS URGENTES -->
-
-<h2>🔴 Cobranzas urgentes (vencidas)</h2>
-
-<div class="cobranza-box cobranza-urgente">
-
-<table>
-<tr>
-<th>Cliente</th>
-<th>Póliza</th>
-<th>Días</th>
-<th>Acción</th>
-</tr>
-
-{% for c in cobranzas_urgentes %}
-<tr>
-<td>{{ c.cliente }}</td>
-<td>{{ c.numero }}</td>
-<td>{{ c.dias }}</td>
-<td>
-<button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">Copiar</button>
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
-</td>
-</tr>
-{% empty %}
-<tr><td colspan="4">Sin cobranzas urgentes</td></tr>
-{% endfor %}
-
-</table>
-
-</div>
-
-
-<!-- 🟠 COBRANZAS PRÓXIMAS -->
-
-<h2>🟠 Próximos a vencer</h2>
-
-<div class="cobranza-box cobranza-proxima">
-
-<table>
-<tr>
-<th>Cliente</th>
-<th>Póliza</th>
-<th>Días</th>
-<th>Acción</th>
-</tr>
-
-{% for c in cobranzas_proximas %}
-<tr>
-<td>{{ c.cliente }}</td>
-<td>{{ c.numero }}</td>
-<td>{{ c.dias }}</td>
-<td>
-<button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">Copiar</button>
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
-</td>
-</tr>
-{% empty %}
-<tr><td colspan="4">Sin pagos próximos</td></tr>
-{% endfor %}
-
-</table>
-
-</div>
-
+<!-- 🔥 NUEVO BOTON -->
+<button class="btn-cobranza" onclick="ejecutarCobranza()">
+🚀 Ejecutar cobranza del día
+</button>
 
 <!-- CRM -->
 
 <h2>🚀 CRM de Ventas</h2>
+<p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
 
 <table>
 <tr>
 <th>Cliente</th>
 <th>Póliza</th>
 <th>Días</th>
+<th>Prioridad</th>
 <th>Acción</th>
 </tr>
 
@@ -212,6 +189,17 @@ border-left:5px solid #f97316;
 <td>{{ c.cliente }}</td>
 <td>{{ c.numero }}</td>
 <td>{{ c.dias }}</td>
+
+<td>
+{% if c.prioridad == "URGENTE" %}
+<span class="prioridad-urgente">🔴 URGENTE</span>
+{% elif c.prioridad == "ALTA" %}
+<span class="prioridad-alta">🟠 ALTA</span>
+{% else %}
+<span class="prioridad-media">🟡 MEDIA</span>
+{% endif %}
+</td>
+
 <td>
 <button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">Copiar</button>
 <a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
@@ -219,7 +207,6 @@ border-left:5px solid #f97316;
 </tr>
 {% endfor %}
 </table>
-
 
 <!-- FINANZAS -->
 
@@ -229,7 +216,6 @@ border-left:5px solid #f97316;
 <div class="radar"><h3>🟡 Cobros</h3><span>$ {{ proximos_pagos }}</span></div>
 <div class="radar"><h3>📄 Pendientes</h3><span>{{ cuotas_pendientes }}</span></div>
 </div>
-
 
 <!-- GRAFICOS -->
 
@@ -242,7 +228,6 @@ border-left:5px solid #f97316;
 <div class="grafico-box">
 <canvas id="graficoCrecimiento"></canvas>
 </div>
-
 
 <!-- CLIENTES -->
 
@@ -258,7 +243,6 @@ border-left:5px solid #f97316;
 </tr>
 {% endfor %}
 </table>
-
 
 <!-- VENCIMIENTOS -->
 
@@ -285,13 +269,48 @@ border-left:5px solid #f97316;
 
 </div>
 
-
 <script>
 
 function copiarMensaje(texto){
 navigator.clipboard.writeText(texto);
 alert("Mensaje copiado");
 }
+
+/* 🔥 SOLO AGREGO ESTO */
+
+function ejecutarCobranza(){
+
+    const cobranzas = [
+        {% for c in cobranzas_urgentes %}
+        {
+            telefono: "{{ c.telefono }}",
+            mensaje: `{{ c.mensaje|escapejs }}`
+        },
+        {% endfor %}
+    ];
+
+    if(cobranzas.length === 0){
+        alert("No hay cobranzas hoy");
+        return;
+    }
+
+    let i = 0;
+
+    function abrir(){
+        if(i >= cobranzas.length) return;
+
+        let url = "https://wa.me/" + cobranzas[i].telefono + "?text=" + encodeURIComponent(cobranzas[i].mensaje);
+
+        window.open(url, "_blank");
+
+        i++;
+        setTimeout(abrir, 800);
+    }
+
+    abrir();
+}
+
+/* tus graficos intactos */
 
 const companias = JSON.parse('{{ companias|safe }}');
 const cantidades = JSON.parse('{{ cantidades|safe }}');
