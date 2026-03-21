@@ -6,7 +6,7 @@ from django.db.models.functions import ExtractMonth
 import json
 
 from clients.models import Client
-from policies.models import Policy
+from policies.models import Policy, Payment
 from django.contrib.auth import get_user_model
 from alerts.services import generate_expiration_alerts
 
@@ -34,6 +34,10 @@ def home(request):
     clientes_llamar = []
     pagos_cuponera = []
 
+    # 🔥 NUEVO: COBRANZA INTELIGENTE
+    cobranzas_urgentes = []
+    cobranzas_proximas = []
+
     vencen_semana = 0
     alertas = 0
     vencen_7 = 0
@@ -47,7 +51,7 @@ def home(request):
         if dias >= 0:
 
             mensaje = (
-                f"Hola {p.client.first_name}, te escribo de Fuerza Natural Brokers. "
+                f"Hola {p.client.first_name}, te escribo de Fuerza Natural Broker. "
                 f"Tu póliza {p.policy_number} de {p.company} vence el {p.end_date}. "
                 f"Si querés podemos renovarla o revisar mejores opciones."
             )
@@ -86,6 +90,53 @@ def home(request):
                 )
 
         # =========================
+        # 🔥 COBRANZA REAL (NUEVO)
+        # =========================
+
+        for pago in p.pagos.all():
+
+            telefono = getattr(p.client, "phone", "")
+            dias_pago = (pago.fecha_vencimiento - hoy).days
+
+            # 🔴 VENCIDOS
+            if pago.estado == "VENCIDO":
+
+                mensaje = (
+                    f"Hola {p.client.first_name}, te escribo de Fuerza Natural Broker. "
+                    f"Tenés una cuota vencida de la póliza {p.policy_number} ({p.company}). "
+                    f"¿Podés enviarnos el comprobante así la registramos?"
+                )
+
+                cobranzas_urgentes.append(
+                    {
+                        "cliente": p.client,
+                        "numero": p.policy_number,
+                        "telefono": telefono,
+                        "mensaje": mensaje,
+                        "dias": dias_pago,
+                    }
+                )
+
+            # 🟠 POR VENCER (5 días)
+            elif pago.estado == "PENDIENTE" and 0 <= dias_pago <= 5:
+
+                mensaje = (
+                    f"Hola {p.client.first_name}, te recordamos una cuota próxima a vencer "
+                    f"de tu póliza {p.policy_number} ({p.company}). "
+                    f"Vence el {pago.fecha_vencimiento}."
+                )
+
+                cobranzas_proximas.append(
+                    {
+                        "cliente": p.client,
+                        "numero": p.policy_number,
+                        "telefono": telefono,
+                        "mensaje": mensaje,
+                        "dias": dias_pago,
+                    }
+                )
+
+        # =========================
         # PAGOS DE CUPONERA
         # =========================
 
@@ -118,9 +169,13 @@ def home(request):
                             "fecha": proximo_pago,
                             "telefono": getattr(p.client, "phone", ""),
                             "mensaje": mensaje_pago,
-                            "pdf": p.cuponera_pdf.url,
+                            "pdf": p.cuponera_pdf,
                         }
                     )
+
+    # =========================
+    # RESTO (NO SE TOCA)
+    # =========================
 
     mes_actual = datetime.now().month
     anio_actual = datetime.now().year
@@ -144,9 +199,6 @@ def home(request):
     companias = [c["company"] for c in produccion_companias]
     cantidades = [c["total"] for c in produccion_companias]
 
-    companias_json = json.dumps(companias)
-    cantidades_json = json.dumps(cantidades)
-
     crecimiento = (
         Policy.objects.annotate(mes=ExtractMonth("start_date"))
         .values("mes")
@@ -156,15 +208,6 @@ def home(request):
 
     meses = [c["mes"] for c in crecimiento]
     totales = [c["total"] for c in crecimiento]
-
-    meses_json = json.dumps(meses)
-    totales_json = json.dumps(totales)
-
-    ranking_companias = (
-        Policy.objects.values("company")
-        .annotate(total=Count("id"))
-        .order_by("-total")[:5]
-    )
 
     clientes_query = (
         Client.objects.annotate(total_polizas=Count("policy"))
@@ -195,25 +238,30 @@ def home(request):
         "polizas": Policy.objects.count(),
         "alertas": alertas,
         "usuarios": User.objects.count(),
+
         "polizas_por_vencer": polizas_por_vencer,
         "clientes_llamar": clientes_llamar,
         "pagos_cuponera": pagos_cuponera,
+
+        # 🔥 NUEVO
+        "cobranzas_urgentes": cobranzas_urgentes,
+        "cobranzas_proximas": cobranzas_proximas,
+
         "vencen_semana": vencen_semana,
         "vencen_7": vencen_7,
         "vencen_15": vencen_15,
         "vencen_30": vencen_30,
+
         "produccion_mes": produccion_mes,
         "renovaciones_mes": renovaciones_mes,
         "produccion_companias": produccion_companias,
-        "companias": companias_json,
-        "cantidades": cantidades_json,
-        "meses": meses_json,
-        "crecimiento_totales": totales_json,
+        "companias": json.dumps(companias),
+        "cantidades": json.dumps(cantidades),
+        "meses": json.dumps(meses),
+        "crecimiento_totales": json.dumps(totales),
+
         "clientes_score": clientes_score,
-        "ranking_companias": ranking_companias,
-        "oportunidades": [],
-        "ventas_cruzadas": [],
-        "no_renovaron": [],
+
         "buscar": buscar,
     }
 
