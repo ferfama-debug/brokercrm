@@ -33,8 +33,14 @@ border:none;
 cursor:pointer;
 }
 
-.btn-copiar:hover{
-background:#125ea7;
+.btn-whatsapp{
+background:#25D366;
+color:white;
+padding:6px 12px;
+border-radius:6px;
+text-decoration:none;
+font-size:13px;
+font-weight:bold;
 }
 
 /* TARJETAS */
@@ -52,24 +58,11 @@ padding:22px;
 border-radius:12px;
 box-shadow:0 3px 10px rgba(0,0,0,0.08);
 text-align:center;
-transition:0.2s;
 color:#222;
 }
 
 .radar span{
 font-size:34px;
-font-weight:bold;
-}
-
-/* BOTONES */
-
-.btn-whatsapp{
-background:#25D366;
-color:white;
-padding:6px 12px;
-border-radius:6px;
-text-decoration:none;
-font-size:13px;
 font-weight:bold;
 }
 
@@ -94,6 +87,14 @@ th{
 background:#f5f5f5;
 }
 
+.grafico-box{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+margin-bottom:30px;
+}
+
 </style>
 
 
@@ -105,9 +106,9 @@ background:#f5f5f5;
 
 <h2>🚀 CRM de Ventas (Acción del día)</h2>
 
-<table>
+<p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
 
-<thead>
+<table>
 <tr>
 <th>Cliente</th>
 <th>Póliza</th>
@@ -115,13 +116,9 @@ background:#f5f5f5;
 <th>Prioridad</th>
 <th>Acción</th>
 </tr>
-</thead>
-
-<tbody>
 
 {% for c in clientes_llamar %}
 <tr>
-
 <td>{{ c.cliente }}</td>
 <td>{{ c.numero }}</td>
 <td>{{ c.dias }}</td>
@@ -137,110 +134,53 @@ background:#f5f5f5;
 </td>
 
 <td>
-
-<button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">
-Copiar
-</button>
-
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">
-WhatsApp
-</a>
-
+<button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">Copiar</button>
+<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
 </td>
-
 </tr>
-{% empty %}
-<tr><td colspan="5">Sin datos</td></tr>
 {% endfor %}
-
-</tbody>
-
 </table>
-
 
 <!-- 💰 FINANZAS -->
 
 <div class="radar-container">
-
-<div class="radar">
-<h3>💰 Deuda total</h3>
-<span>$ {{ deuda_total|default:0 }}</span>
+<div class="radar"><h3>💰 Deuda</h3><span>$ {{ deuda_total }}</span></div>
+<div class="radar"><h3>🔴 Vencidas</h3><span>{{ cuotas_vencidas }}</span></div>
+<div class="radar"><h3>🟡 Cobros</h3><span>$ {{ proximos_pagos }}</span></div>
+<div class="radar"><h3>📄 Pendientes</h3><span>{{ cuotas_pendientes }}</span></div>
 </div>
 
-<div class="radar">
-<h3>🔴 Cuotas vencidas</h3>
-<span>{{ cuotas_vencidas|default:0 }}</span>
-</div>
-
-<div class="radar">
-<h3>🟡 Próximos cobros</h3>
-<span>$ {{ proximos_pagos|default:0 }}</span>
-</div>
-
-<div class="radar">
-<h3>📄 Cuotas pendientes</h3>
-<span>{{ cuotas_pendientes|default:0 }}</span>
-</div>
-
-</div>
-
-
-<!-- ⚠️ ALERTAS -->
-
-<div class="radar-container">
-
-<div class="radar">
-<h3>⛔ Vencidas</h3>
-<span>{{ vencidas|default:0 }}</span>
-</div>
-
-<div class="radar">
-<h3>🔴 7 días</h3>
-<span>{{ vencen_7|default:0 }}</span>
-</div>
-
-<div class="radar">
-<h3>🟠 15 días</h3>
-<span>{{ vencen_15|default:0 }}</span>
-</div>
-
-<div class="radar">
-<h3>🟡 30 días</h3>
-<span>{{ vencen_30|default:0 }}</span>
-</div>
-
-</div>
-
-
-<!-- 📊 PRODUCCIÓN CORREGIDA -->
+<!-- 📊 GRÁFICOS -->
 
 <h2>📊 Producción por compañía</h2>
+<div class="grafico-box">
+<canvas id="graficoCompanias"></canvas>
+</div>
 
+<h2>📈 Crecimiento</h2>
+<div class="grafico-box">
+<canvas id="graficoCrecimiento"></canvas>
+</div>
+
+<!-- ⭐ CLIENTES -->
+
+<h2>🏆 Clientes destacados</h2>
 <table>
+<tr><th>Cliente</th><th>Pólizas</th><th>Valor</th></tr>
 
+{% for c in clientes_score %}
 <tr>
-<th>Compañía</th>
-<th>Pólizas</th>
+<td>{{ c.cliente }}</td>
+<td>{{ c.polizas }}</td>
+<td>{{ c.score }}</td>
 </tr>
-
-{% for c in produccion_companias %}
-<tr>
-<td>{{ c.company }}</td>
-<td>{{ c.total }}</td>
-</tr>
-{% empty %}
-<tr><td colspan="2">Sin datos</td></tr>
 {% endfor %}
-
 </table>
-
 
 <!-- 📅 VENCIMIENTOS -->
 
 <h2>📅 Pólizas por vencer</h2>
-
 <table>
-
 <tr>
 <th>Cliente</th>
 <th>Póliza</th>
@@ -257,20 +197,40 @@ WhatsApp
 <td>{{ p.vencimiento|date:"d/m/Y" }}</td>
 <td>{{ p.dias }}</td>
 </tr>
-{% empty %}
-<tr><td colspan="5">Sin datos</td></tr>
 {% endfor %}
-
 </table>
 
 </div>
 
-
 <script>
+
 function copiarMensaje(texto){
 navigator.clipboard.writeText(texto);
 alert("Mensaje copiado");
 }
+
+const companias = JSON.parse('{{ companias|safe }}');
+const cantidades = JSON.parse('{{ cantidades|safe }}');
+
+new Chart(document.getElementById('graficoCompanias'), {
+type: 'bar',
+data: {
+labels: companias,
+datasets: [{ data: cantidades }]
+}
+});
+
+const meses = JSON.parse('{{ meses|safe }}');
+const totales = JSON.parse('{{ crecimiento_totales|safe }}');
+
+new Chart(document.getElementById('graficoCrecimiento'), {
+type: 'line',
+data: {
+labels: meses,
+datasets: [{ data: totales }]
+}
+});
+
 </script>
 
 {% endblock %}
