@@ -9,16 +9,12 @@ body{
 background: radial-gradient(circle at top, #0f172a, #020617);
 }
 
-/* CONTENEDOR */
-
 .dashboard{
 max-width:1300px;
 margin:auto;
 padding:20px;
 color:#e2e8f0;
 }
-
-/* TITULOS */
 
 .title{
 margin-bottom:25px;
@@ -34,7 +30,7 @@ p,td,th,span{
 color:#cbd5f5;
 }
 
-/* CRM PRO */
+/* PRIORIDADES */
 
 .prioridad-urgente{color:#ef4444;font-weight:bold;}
 .prioridad-alta{color:#f97316;font-weight:bold;}
@@ -49,11 +45,6 @@ padding:6px 12px;
 border-radius:8px;
 border:none;
 cursor:pointer;
-transition:0.2s;
-}
-
-.btn-copiar:hover{
-transform:scale(1.05);
 }
 
 .btn-whatsapp{
@@ -81,11 +72,6 @@ padding:22px;
 border-radius:16px;
 border:1px solid rgba(255,255,255,0.1);
 text-align:center;
-transition:0.3s;
-}
-
-.radar:hover{
-transform:translateY(-5px);
 }
 
 .radar span{
@@ -113,32 +99,27 @@ text-align:left;
 
 th{
 background:rgba(255,255,255,0.08);
-color:#e2e8f0;
-}
-
-tr{
-border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
 tr:hover{
 background:rgba(255,255,255,0.05);
 }
 
-/* GRAFICOS */
+/* BLOQUES COBRANZA */
 
-.grafico-box{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
-padding:20px;
-border-radius:16px;
+.cobranza-box{
+border:1px solid rgba(255,255,255,0.1);
+border-radius:12px;
+padding:15px;
 margin-bottom:30px;
 }
 
-/* SEPARADORES */
+.cobranza-urgente{
+border-left:5px solid #ef4444;
+}
 
-h2{
-margin-top:40px;
-margin-bottom:10px;
+.cobranza-proxima{
+border-left:5px solid #f97316;
 }
 
 </style>
@@ -148,17 +129,81 @@ margin-bottom:10px;
 
 <h1 class="title">📊 Panel de control</h1>
 
-<!-- CRM -->
+<!-- 🔥 COBRANZAS URGENTES -->
 
-<h2>🚀 CRM de Ventas</h2>
-<p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
+<h2>🔴 Cobranzas urgentes (vencidas)</h2>
+
+<div class="cobranza-box cobranza-urgente">
 
 <table>
 <tr>
 <th>Cliente</th>
 <th>Póliza</th>
 <th>Días</th>
-<th>Prioridad</th>
+<th>Acción</th>
+</tr>
+
+{% for c in cobranzas_urgentes %}
+<tr>
+<td>{{ c.cliente }}</td>
+<td>{{ c.numero }}</td>
+<td>{{ c.dias }}</td>
+<td>
+<button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">Copiar</button>
+<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="4">Sin cobranzas urgentes</td></tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+
+<!-- 🟠 COBRANZAS PRÓXIMAS -->
+
+<h2>🟠 Próximos a vencer</h2>
+
+<div class="cobranza-box cobranza-proxima">
+
+<table>
+<tr>
+<th>Cliente</th>
+<th>Póliza</th>
+<th>Días</th>
+<th>Acción</th>
+</tr>
+
+{% for c in cobranzas_proximas %}
+<tr>
+<td>{{ c.cliente }}</td>
+<td>{{ c.numero }}</td>
+<td>{{ c.dias }}</td>
+<td>
+<button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">Copiar</button>
+<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="4">Sin pagos próximos</td></tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+
+<!-- CRM -->
+
+<h2>🚀 CRM de Ventas</h2>
+
+<table>
+<tr>
+<th>Cliente</th>
+<th>Póliza</th>
+<th>Días</th>
 <th>Acción</th>
 </tr>
 
@@ -167,17 +212,6 @@ margin-bottom:10px;
 <td>{{ c.cliente }}</td>
 <td>{{ c.numero }}</td>
 <td>{{ c.dias }}</td>
-
-<td>
-{% if c.prioridad == "URGENTE" %}
-<span class="prioridad-urgente">🔴 URGENTE</span>
-{% elif c.prioridad == "ALTA" %}
-<span class="prioridad-alta">🟠 ALTA</span>
-{% else %}
-<span class="prioridad-media">🟡 MEDIA</span>
-{% endif %}
-</td>
-
 <td>
 <button class="btn-copiar" onclick="copiarMensaje(`{{ c.mensaje|escapejs }}`)">Copiar</button>
 <a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
@@ -185,6 +219,7 @@ margin-bottom:10px;
 </tr>
 {% endfor %}
 </table>
+
 
 <!-- FINANZAS -->
 
@@ -194,6 +229,7 @@ margin-bottom:10px;
 <div class="radar"><h3>🟡 Cobros</h3><span>$ {{ proximos_pagos }}</span></div>
 <div class="radar"><h3>📄 Pendientes</h3><span>{{ cuotas_pendientes }}</span></div>
 </div>
+
 
 <!-- GRAFICOS -->
 
@@ -206,6 +242,7 @@ margin-bottom:10px;
 <div class="grafico-box">
 <canvas id="graficoCrecimiento"></canvas>
 </div>
+
 
 <!-- CLIENTES -->
 
@@ -221,6 +258,7 @@ margin-bottom:10px;
 </tr>
 {% endfor %}
 </table>
+
 
 <!-- VENCIMIENTOS -->
 
@@ -246,6 +284,7 @@ margin-bottom:10px;
 </table>
 
 </div>
+
 
 <script>
 
