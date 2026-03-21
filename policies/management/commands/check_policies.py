@@ -13,44 +13,52 @@ class Command(BaseCommand):
         hoy = timezone.now().date()
         objetivo = hoy + timedelta(days=2)
 
+        self.stdout.write(f"📅 Ejecutando chequeo para fecha objetivo: {objetivo}")
+
         # 🔥 SOLO 2 DÍAS ANTES Y NO ENVIADAS
         policies = Policy.objects.filter(
             end_date=objetivo,
             email_vencimiento_enviado=False
-        )
+        ).select_related("client")
 
         if not policies.exists():
-            self.stdout.write("No hay pólizas para enviar hoy")
+            self.stdout.write("✔ No hay pólizas para enviar hoy")
             return
 
-        for policy in policies:
-            self.stdout.write(f"⚠️ Póliza por vencer: {policy}")
+        self.stdout.write(f"🔎 Se encontraron {policies.count()} pólizas para notificar")
 
+        for policy in policies:
             cliente = policy.client
 
-            # 🔴 SI NO TIENE EMAIL → SALTEA
+            self.stdout.write(f"⚠️ Procesando póliza: {policy.policy_number}")
+
+            # 🔴 SIN EMAIL → SALTA
             if not cliente.email:
                 self.stdout.write(
-                    f"❌ Cliente sin email: {cliente.nombre_completo()}"
+                    self.style.WARNING(
+                        f"❌ Cliente sin email: {cliente.nombre_completo()}"
+                    )
                 )
                 continue
 
             asunto = f"⚠️ Tu póliza está por vencer ({policy.policy_number})"
 
+            fecha_vencimiento = policy.end_date.strftime("%d/%m/%Y")
+
             mensaje = f"""
 Hola {cliente.first_name},
 
-Tu póliza está por vencer:
+Te recordamos que tu póliza está próxima a vencer:
 
 📌 Compañía: {policy.company}
 📄 Número: {policy.policy_number}
-📅 Vencimiento: {policy.end_date}
+📅 Vencimiento: {fecha_vencimiento}
 """
 
             if policy.pdf_poliza:
                 mensaje += f"\n📎 Ver póliza:\n{policy.pdf_poliza}\n"
 
-            mensaje += "\nPor favor contactanos para renovarla.\n\nFuerza Natural Broker"
+            mensaje += "\nPodés contactarnos para renovarla.\n\nFuerza Natural Broker de Seguros"
 
             try:
                 send_mail(
@@ -61,9 +69,9 @@ Tu póliza está por vencer:
                     fail_silently=False,
                 )
 
-                # 🔥 MARCAR COMO ENVIADO
+                # 🔥 MARCAR COMO ENVIADO (PRO)
                 policy.email_vencimiento_enviado = True
-                policy.save()
+                policy.save(update_fields=["email_vencimiento_enviado"])
 
                 self.stdout.write(
                     self.style.SUCCESS(
@@ -74,7 +82,7 @@ Tu póliza está por vencer:
             except Exception as e:
                 self.stdout.write(
                     self.style.ERROR(
-                        f"❌ Error enviando email: {str(e)}"
+                        f"❌ Error enviando email ({policy.policy_number}): {str(e)}"
                     )
                 )
 
