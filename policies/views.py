@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from .models import Policy, Payment
 from clients.models import Client
 from datetime import date
@@ -10,22 +12,40 @@ from django.conf import settings
 from django.contrib import messages
 
 
-# 🔥 IMPORT LAZY (SOLUCIÓN DEFINITIVA)
+# 🔥 IMPORT LAZY
 def get_subir_archivo():
     from core.supabase_client import subir_archivo_supabase
     return subir_archivo_supabase
 
 
+# 🔴 LISTA POLIZAS PRO + MULTIUSUARIO
+@login_required
 def lista_polizas(request):
 
     compania = request.GET.get("compania")
+    buscar = request.GET.get("buscar")
 
-    companias = Policy.objects.values_list("company", flat=True).distinct()
+    # 🔴 MULTIUSUARIO
+    if request.user.is_superuser:
+        clientes = Client.objects.prefetch_related("policy_set")
+    else:
+        clientes = Client.objects.filter(
+            producer=request.user
+        ).prefetch_related("policy_set")
 
-    clientes = Client.objects.prefetch_related("policy_set")
+    # 🔍 BUSCADOR
+    if buscar:
+        clientes = clientes.filter(
+            Q(first_name__icontains=buscar)
+            | Q(last_name__icontains=buscar)
+            | Q(policy__policy_number__icontains=buscar)
+        ).distinct()
 
+    # 🏢 FILTRO COMPAÑÍA
     if compania:
         clientes = clientes.filter(policy__company=compania).distinct()
+
+    companias = Policy.objects.values_list("company", flat=True).distinct()
 
     return render(
         request,
@@ -34,18 +54,32 @@ def lista_polizas(request):
             "clientes": clientes,
             "companias": companias,
             "compania_seleccionada": compania,
+            "buscar": buscar,
         },
     )
 
 
+# 🔴 CREAR POLIZA SEGURA
+@login_required
 def crear_poliza(request):
 
-    clientes = Client.objects.all().order_by("last_name", "first_name")
+    if request.user.is_superuser:
+        clientes = Client.objects.all()
+    else:
+        clientes = Client.objects.filter(producer=request.user)
+
+    clientes = clientes.order_by("last_name", "first_name")
+
     cliente_id = request.GET.get("cliente")
 
     if request.method == "POST":
 
         client = get_object_or_404(Client, id=request.POST.get("client"))
+
+        # 🔴 SEGURIDAD
+        if not request.user.is_superuser and client.producer != request.user:
+            messages.error(request, "❌ No tenés permisos para este cliente")
+            return redirect("clients:clientes")
 
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
@@ -104,9 +138,16 @@ def crear_poliza(request):
     )
 
 
+# 🔴 RENOVAR POLIZA SEGURA
+@login_required
 def renovar_poliza(request, poliza_id):
 
     poliza = get_object_or_404(Policy, id=poliza_id)
+
+    # 🔴 SEGURIDAD
+    if not request.user.is_superuser and poliza.client.producer != request.user:
+        messages.error(request, "❌ No tenés permisos")
+        return redirect("clients:clientes")
 
     if request.method == "POST":
 
@@ -165,9 +206,15 @@ def renovar_poliza(request, poliza_id):
     )
 
 
+# 🔴 PAGOS SEGUROS
+@login_required
 def marcar_pago(request, pago_id):
 
     pago = get_object_or_404(Payment, id=pago_id)
+
+    if not request.user.is_superuser and pago.policy.client.producer != request.user:
+        messages.error(request, "❌ No tenés permisos")
+        return redirect("clients:clientes")
 
     pago.estado = "PAGADO"
     pago.fecha_pago = date.today()
@@ -178,11 +225,16 @@ def marcar_pago(request, pago_id):
     return redirect(f"/clientes/ver/{pago.policy.client.id}/")
 
 
-# 🔥 EMAIL PROFESIONAL
+# 🔴 EMAIL PROFESIONAL SEGURO
+@login_required
 def enviar_poliza(request, poliza_id):
 
     poliza = get_object_or_404(Policy, id=poliza_id)
     cliente = poliza.client
+
+    if not request.user.is_superuser and cliente.producer != request.user:
+        messages.error(request, "❌ No tenés permisos")
+        return redirect("clients:clientes")
 
     if not cliente.email:
         messages.error(request, "❌ El cliente no tiene email cargado")
@@ -216,7 +268,7 @@ Te enviamos tu póliza:
             fail_silently=False,
         )
 
-        messages.success(request, f"✅ Email enviado correctamente a {cliente.email}")
+        messages.success(request, f"✅ Email enviado a {cliente.email}")
 
     except Exception as e:
         print("ERROR EMAIL:", e)
