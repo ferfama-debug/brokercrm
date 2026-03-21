@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Case, When, IntegerField
-from datetime import date
+from datetime import date, timedelta
 
 from .models import Client
 from .forms import ClientForm
@@ -12,9 +12,15 @@ from policies.models import Policy
 def lista_clientes(request):
 
     buscar = request.GET.get("buscar", "")
+    estado = request.GET.get("estado", "")
 
-    clientes = Client.objects.all()
+    # 🔴 MULTIUSUARIO
+    if request.user.is_superuser:
+        clientes = Client.objects.all()
+    else:
+        clientes = Client.objects.filter(producer=request.user)
 
+    # 🔍 BUSCADOR
     if buscar:
         clientes = clientes.filter(
             Q(first_name__icontains=buscar)
@@ -24,6 +30,21 @@ def lista_clientes(request):
             | Q(email__icontains=buscar)
         )
 
+    hoy = date.today()
+    limite = hoy + timedelta(days=30)
+
+    # 🔥 FILTROS POR ESTADO
+    if estado == "ACTIVOS":
+        clientes = clientes.filter(policy__end_date__gt=hoy).distinct()
+
+    elif estado == "VENCIDOS":
+        clientes = clientes.filter(policy__end_date__lt=hoy).distinct()
+
+    elif estado == "POR_VENCER":
+        clientes = clientes.filter(
+            policy__end_date__range=(hoy, limite)
+        ).distinct()
+
     clientes = clientes.order_by("last_name", "first_name")
 
     return render(
@@ -32,6 +53,7 @@ def lista_clientes(request):
         {
             "clientes": clientes,
             "buscar": buscar,
+            "estado": estado,
         },
     )
 
@@ -39,7 +61,11 @@ def lista_clientes(request):
 @login_required
 def ver_cliente(request, cliente_id):
 
-    cliente = get_object_or_404(Client, id=cliente_id)
+    # 🔴 SEGURIDAD MULTIUSUARIO
+    if request.user.is_superuser:
+        cliente = get_object_or_404(Client, id=cliente_id)
+    else:
+        cliente = get_object_or_404(Client, id=cliente_id, producer=request.user)
 
     hoy = date.today()
 
@@ -96,7 +122,12 @@ def crear_cliente(request):
         form = ClientForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            cliente = form.save(commit=False)
+
+            # 🔴 ASIGNAR PRODUCTOR AUTOMÁTICO
+            cliente.producer = request.user
+
+            cliente.save()
             return redirect("clients:clientes")
 
     else:
@@ -114,7 +145,10 @@ def crear_cliente(request):
 @login_required
 def editar_cliente(request, cliente_id):
 
-    cliente = get_object_or_404(Client, id=cliente_id)
+    if request.user.is_superuser:
+        cliente = get_object_or_404(Client, id=cliente_id)
+    else:
+        cliente = get_object_or_404(Client, id=cliente_id, producer=request.user)
 
     if request.method == "POST":
 
@@ -138,6 +172,10 @@ def editar_cliente(request, cliente_id):
 
 @login_required
 def eliminar_cliente(request, id):
+
+    # 🔴 SOLO ADMIN PUEDE ELIMINAR
+    if not request.user.is_superuser:
+        return redirect("clients:clientes")
 
     cliente = get_object_or_404(Client, id=id)
 
