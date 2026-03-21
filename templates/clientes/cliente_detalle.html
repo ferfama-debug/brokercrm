@@ -2,18 +2,9 @@
 
 {% block content %}
 
-<!-- 🔥 MENSAJES -->
 {% if messages %}
   {% for message in messages %}
-    <div style="
-      background:#d4edda;
-      color:#155724;
-      padding:12px;
-      margin-bottom:15px;
-      border-radius:6px;
-      font-weight:500;
-      box-shadow:0 2px 5px rgba(0,0,0,0.08);
-    ">
+    <div style="background:#d4edda;color:#155724;padding:12px;margin-bottom:15px;border-radius:6px;">
       {{ message }}
     </div>
   {% endfor %}
@@ -24,9 +15,7 @@
 .cliente-info{
 display:grid;
 grid-template-columns:180px 1fr;
-row-gap:10px;
-column-gap:20px;
-font-size:15px;
+gap:10px 20px;
 }
 
 .resumen{
@@ -38,216 +27,155 @@ flex-wrap:wrap;
 
 .resumen-card{
 background:white;
-padding:18px;
+padding:15px;
 border-radius:8px;
 box-shadow:0 2px 6px rgba(0,0,0,0.08);
-width:200px;
+width:180px;
 text-align:center;
 }
 
-.tabla-polizas{
+.tabla{
 width:100%;
 border-collapse:collapse;
 font-size:14px;
+background:white;
 }
 
-.tabla-polizas th{
+.tabla th{
 background:#2c3e50;
 color:white;
 padding:10px;
 }
 
-.tabla-polizas td{
+.tabla td{
 padding:10px;
 border-bottom:1px solid #eee;
 }
 
-.grupo-poliza td{
+.grupo{
 background:#34495e;
 color:white;
 font-weight:bold;
 }
 
-.btn-mini{
+.btn{
 padding:5px 8px;
 border-radius:4px;
 font-size:12px;
-border:none;
-cursor:pointer;
 color:white;
 text-decoration:none;
+display:inline-block;
 }
 
-.btn-ver{ background:#455a64; }
-.btn-descargar{ background:#1976d2; }
-.btn-email{ background:#8e24aa; }
-.btn-renovar{ background:#2e7d32; }
-.btn-pago{ background:#1565c0; }
+.btn-ver{background:#455a64;}
+.btn-email{background:#8e24aa;}
+.btn-renovar{background:#2e7d32;}
+.btn-pago{background:#1565c0;}
+.btn-ok{background:#2e7d32;}
+.btn-warning{background:#ef6c00;}
 
-.estado-pagado{ color:#2e7d32; font-weight:bold; }
-.estado-pendiente{ color:#ef6c00; font-weight:bold; }
-.estado-vencido{ color:#c62828; font-weight:bold; }
+.estado-pagado{color:#2e7d32;font-weight:bold;}
+.estado-pendiente{color:#ef6c00;font-weight:bold;}
+.estado-vencido{color:#c62828;font-weight:bold;}
 
-.tabla-pagos{
+.subtabla{
 width:100%;
 margin-top:10px;
 border-collapse:collapse;
 font-size:13px;
 }
 
-.tabla-pagos th{
+.subtabla th{
 background:#607d8b;
 color:white;
 padding:6px;
 }
 
-.tabla-pagos td{
+.subtabla td{
 padding:6px;
 border-bottom:1px solid #eee;
 }
 
 </style>
 
-
-<h1 class="title">Cliente</h1>
-
-<div class="card">
+<h1>Cliente</h1>
 
 <div class="cliente-info">
-
-<strong>Nombre:</strong>
-<span>{{ cliente.first_name }} {{ cliente.last_name }}</span>
-
-<strong>DNI:</strong>
-<span>{{ cliente.dni|default:"—" }}</span>
-
-<strong>Email:</strong>
-<span>{{ cliente.email|default:"—" }}</span>
-
-<strong>Teléfono:</strong>
-<span>{{ cliente.phone|default:"—" }}</span>
-
+<strong>Nombre:</strong> <span>{{ cliente.first_name }} {{ cliente.last_name }}</span>
+<strong>DNI:</strong> <span>{{ cliente.dni|default:"—" }}</span>
+<strong>Email:</strong> <span>{{ cliente.email|default:"—" }}</span>
+<strong>Teléfono:</strong> <span>{{ cliente.phone|default:"—" }}</span>
 </div>
-
-</div>
-
 
 <div class="resumen">
-
-<div class="resumen-card">
-<strong>Pólizas activas</strong>
-<h2>{{ polizas_activas }}</h2>
+<div class="resumen-card"><strong>Activas</strong><h3>{{ polizas_activas }}</h3></div>
+<div class="resumen-card"><strong>Por vencer</strong><h3>{{ polizas_por_vencer }}</h3></div>
+<div class="resumen-card"><strong>Vencidas</strong><h3>{{ polizas_vencidas }}</h3></div>
 </div>
 
-<div class="resumen-card">
-<strong>Por vencer</strong>
-<h2>{{ polizas_por_vencer }}</h2>
-</div>
+<a href="/polizas/nueva/?cliente={{ cliente.id }}" class="btn btn-renovar">➕ Nueva póliza</a>
 
-<div class="resumen-card">
-<strong>Vencidas</strong>
-<h2>{{ polizas_vencidas }}</h2>
-</div>
+<table class="tabla">
 
-</div>
-
-
-<h2>Pólizas del cliente</h2>
-
-<div style="margin-bottom:20px;">
-<a href="/polizas/nueva/?cliente={{ cliente.id }}" class="btn btn-primary">
-➕ Agregar póliza
-</a>
-</div>
-
-
-<div class="card">
-
-<table class="tabla-polizas">
-
-<thead>
 <tr>
 <th>N°</th>
 <th>Compañía</th>
-<th>Tipo</th>
 <th>Inicio</th>
 <th>Vencimiento</th>
 <th>Pago</th>
 <th>Estado</th>
-<th>Póliza</th>
-<th>Cuponera</th>
 <th>Acciones</th>
 </tr>
-</thead>
 
-<tbody>
+{% regroup polizas by policy_number as grupos %}
 
-{% regroup polizas by policy_number as polizas_agrupadas %}
+{% for grupo in grupos %}
 
-{% for grupo in polizas_agrupadas %}
-
-<tr class="grupo-poliza">
-<td colspan="10">PÓLIZA {{ grupo.grouper }}</td>
+<tr class="grupo">
+<td colspan="7">PÓLIZA {{ grupo.grouper }}</td>
 </tr>
 
-{% for poliza in grupo.list %}
+{% for p in grupo.list %}
 
 <tr>
-
-<td>{{ poliza.policy_number }}</td>
-<td>{{ poliza.company }}</td>
-<td>{{ poliza.tipo_poliza }}</td>
-<td>{{ poliza.start_date }}</td>
-<td>{{ poliza.end_date }}</td>
-<td>{{ poliza.get_forma_pago_display }}</td>
+<td>{{ p.policy_number }}</td>
+<td>{{ p.company }}</td>
+<td>{{ p.start_date }}</td>
+<td>{{ p.end_date }}</td>
+<td>{{ p.get_forma_pago_display }}</td>
 
 <td>
-{% if poliza.estado == "ACTIVA" %}🟢
-{% elif poliza.estado == "POR VENCER" %}🟠
+{% if p.estado == "ACTIVA" %}🟢
+{% elif p.estado == "POR VENCER" %}🟠
 {% else %}🔴{% endif %}
 </td>
 
 <td>
-{% if poliza.pdf_url %}
-<a href="{{ poliza.pdf_url }}" target="_blank" class="btn-mini btn-ver">Ver</a>
-{% else %}—{% endif %}
-</td>
+<a href="/polizas/renovar/{{ p.id }}/" class="btn btn-renovar">Renovar</a>
 
-<td>
-{% if poliza.cuponera_url %}
-<a href="{{ poliza.cuponera_url }}" target="_blank" class="btn-mini btn-descargar">Cuponera</a>
-{% else %}—{% endif %}
-</td>
-
-<td>
-<a href="/polizas/renovar/{{ poliza.id }}/" class="btn-mini btn-renovar">Renovar</a>
-
-<form method="POST" action="/polizas/enviar/{{ poliza.id }}/" style="display:inline;">
+<form method="POST" action="/polizas/enviar/{{ p.id }}/" style="display:inline;">
 {% csrf_token %}
-<button type="submit" class="btn-mini btn-email">Enviar</button>
+<button class="btn btn-email">Enviar</button>
 </form>
 </td>
-
 </tr>
 
-
-<!-- 🔥 CUOTAS SOLO SI ES CUPONERA -->
-
-{% if poliza.forma_pago == "CUPONERA" %}
+{% if p.forma_pago == "CUPONERA" %}
 
 <tr>
-<td colspan="10">
+<td colspan="7">
 
-<table class="tabla-pagos">
+<table class="subtabla">
 
 <tr>
 <th>Cuota</th>
 <th>Vencimiento</th>
 <th>Estado</th>
+<th>Comprobante</th>
 <th>Acción</th>
 </tr>
 
-{% for pago in poliza.pagos.all %}
+{% for pago in p.pagos.all %}
 
 <tr>
 
@@ -265,16 +193,24 @@ border-bottom:1px solid #eee;
 </td>
 
 <td>
+{% if pago.comprobante %}
+<a href="{{ pago.comprobante }}" target="_blank" class="btn btn-ver">Ver</a>
+{% else %}
+—
+{% endif %}
+</td>
+
+<td>
 
 {% if pago.estado != "PAGADO" %}
 
-<a href="/polizas/pago/{{ pago.id }}/" class="btn-mini btn-pago">
-Registrar pago
+<a href="/polizas/pago/{{ pago.id }}/" class="btn btn-pago">
+Cargar
 </a>
 
 {% else %}
 
-✔
+<span class="btn btn-ok">✔</span>
 
 {% endif %}
 
@@ -294,10 +230,6 @@ Registrar pago
 {% endfor %}
 {% endfor %}
 
-</tbody>
-
 </table>
-
-</div>
 
 {% endblock %}
