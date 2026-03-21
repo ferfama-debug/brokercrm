@@ -1,6 +1,9 @@
 name: Check Policy Expirations
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: '0 12 * * *'
   workflow_dispatch:
@@ -15,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🧹 LIMPIAR CACHE PYTHON (CLAVE)
+      - name: 🧹 Limpiar cache Python
         run: |
           echo "Eliminando cache viejo..."
           find . -name "__pycache__" -type d -exec rm -rf {} +
@@ -42,5 +45,5 @@ jobs:
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG: False
         run: |
-          echo "🚀 Ejecutando chequeo limpio (SIN CACHE)"
+          echo "🚀 Ejecutando chequeo limpio (AUTO)"
           python manage.py check_policies
