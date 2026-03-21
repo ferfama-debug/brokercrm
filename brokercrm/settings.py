@@ -26,15 +26,24 @@ ALLOWED_HOSTS = os.environ.get(
 
 
 # =========================
-# JAZZMIN (🔥 BRANDING PRO)
+# JAZZMIN (🔥 BRANDING + LOGO)
 # =========================
 
 JAZZMIN_SETTINGS = {
     "site_title": "Fuerza Natural Broker",
     "site_header": "Fuerza Natural Broker",
     "site_brand": "Fuerza Natural Broker",
-    "welcome_sign": "Bienvenido al sistema",
+
+    # 🔥 TU LOGO (RESPETANDO TU RUTA)
+    "site_logo": "images/img/logo.png",
+    "login_logo": "images/img/logo.png",
+    "site_icon": "images/img/logo.png",
+
+    "welcome_sign": "Panel de gestión",
     "copyright": "Fuerza Natural Broker de Seguros",
+
+    # 🔥 MEJOR VISUAL
+    "navigation_expanded": True,
 }
 
 
