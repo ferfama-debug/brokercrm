@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Policy
 
 
@@ -33,22 +34,26 @@ class PolicyAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(client__producer=request.user)
 
-    # 🔥 ESTADO VISUAL
+    # 🔥 ESTADO CON COLORES REALES
     def estado_colored(self, obj):
         estado = obj.estado
 
         if estado == "VENCIDA":
-            color = "red"
+            color = "#dc3545"  # rojo
         elif estado == "POR VENCER":
-            color = "orange"
+            color = "#fd7e14"  # naranja
         else:
-            color = "green"
+            color = "#28a745"  # verde
 
-        return f"{estado}"
+        return format_html(
+            '<strong style="color: {};">{}</strong>',
+            color,
+            estado
+        )
 
     estado_colored.short_description = "Estado"
 
-    # 🔥 EMAIL ENVIADO
+    # 🔥 EMAIL ENVIADO (ICONO)
     def email_enviado(self, obj):
         return obj.email_vencimiento_enviado
 
