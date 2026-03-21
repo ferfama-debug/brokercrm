@@ -45,10 +45,6 @@ width:200px;
 text-align:center;
 }
 
-.resumen-card h2{
-margin:10px 0 0 0;
-}
-
 .tabla-polizas{
 width:100%;
 border-collapse:collapse;
@@ -59,17 +55,11 @@ font-size:14px;
 background:#2c3e50;
 color:white;
 padding:10px;
-text-align:left;
 }
 
 .tabla-polizas td{
 padding:10px;
 border-bottom:1px solid #eee;
-vertical-align:middle;
-}
-
-.tabla-polizas tr:hover{
-background:#f6f8fb;
 }
 
 .grupo-poliza td{
@@ -78,36 +68,43 @@ color:white;
 font-weight:bold;
 }
 
-.acciones-poliza{
-display:flex;
-gap:6px;
-flex-wrap:wrap;
-align-items:center;
-}
-
 .btn-mini{
 padding:5px 8px;
 border-radius:4px;
 font-size:12px;
 border:none;
 cursor:pointer;
-text-decoration:none;
-display:inline-block;
 color:white;
+text-decoration:none;
 }
 
 .btn-ver{ background:#455a64; }
 .btn-descargar{ background:#1976d2; }
 .btn-email{ background:#8e24aa; }
 .btn-renovar{ background:#2e7d32; }
-
-.btn-mini:hover{
-opacity:0.85;
-}
+.btn-pago{ background:#1565c0; }
 
 .estado-pagado{ color:#2e7d32; font-weight:bold; }
 .estado-pendiente{ color:#ef6c00; font-weight:bold; }
 .estado-vencido{ color:#c62828; font-weight:bold; }
+
+.tabla-pagos{
+width:100%;
+margin-top:10px;
+border-collapse:collapse;
+font-size:13px;
+}
+
+.tabla-pagos th{
+background:#607d8b;
+color:white;
+padding:6px;
+}
+
+.tabla-pagos td{
+padding:6px;
+border-bottom:1px solid #eee;
+}
 
 </style>
 
@@ -150,26 +147,6 @@ opacity:0.85;
 <div class="resumen-card">
 <strong>Vencidas</strong>
 <h2>{{ polizas_vencidas }}</h2>
-</div>
-
-<div class="resumen-card">
-<strong>Deuda vencida</strong>
-<h2>$ {{ cliente.total_deuda_vencida }}</h2>
-</div>
-
-<div class="resumen-card">
-<strong>Próximos pagos</strong>
-<h2>$ {{ cliente.total_deuda_pendiente }}</h2>
-</div>
-
-<div class="resumen-card">
-<strong>Cuotas vencidas</strong>
-<h2>{{ cliente.cuotas_vencidas }}</h2>
-</div>
-
-<div class="resumen-card">
-<strong>Cuotas pendientes</strong>
-<h2>{{ cliente.cuotas_pendientes }}</h2>
 </div>
 
 </div>
@@ -225,55 +202,94 @@ opacity:0.85;
 <td>{{ poliza.get_forma_pago_display }}</td>
 
 <td>
-{% if poliza.estado == "ACTIVA" %}
-🟢
-{% elif poliza.estado == "POR VENCER" %}
-🟠
-{% else %}
-🔴
-{% endif %}
+{% if poliza.estado == "ACTIVA" %}🟢
+{% elif poliza.estado == "POR VENCER" %}🟠
+{% else %}🔴{% endif %}
 </td>
 
 <td>
 {% if poliza.pdf_url %}
-<div class="acciones-poliza">
 <a href="{{ poliza.pdf_url }}" target="_blank" class="btn-mini btn-ver">Ver</a>
-<a href="{{ poliza.pdf_url }}" download class="btn-mini btn-descargar">Descargar</a>
-</div>
-{% else %}
-—
-{% endif %}
+{% else %}—{% endif %}
 </td>
 
 <td>
-{% if poliza.forma_pago == "CUPONERA" and poliza.cuponera_url %}
-<div class="acciones-poliza">
-<a href="{{ poliza.cuponera_url }}" target="_blank" class="btn-mini btn-ver">Ver</a>
-<a href="{{ poliza.cuponera_url }}" download class="btn-mini btn-descargar">Descargar</a>
-</div>
-{% else %}
-—
-{% endif %}
+{% if poliza.cuponera_url %}
+<a href="{{ poliza.cuponera_url }}" target="_blank" class="btn-mini btn-descargar">Cuponera</a>
+{% else %}—{% endif %}
 </td>
 
 <td>
-<div class="acciones-poliza">
+<a href="/polizas/renovar/{{ poliza.id }}/" class="btn-mini btn-renovar">Renovar</a>
 
-<a href="/polizas/renovar/{{ poliza.id }}/" class="btn-mini btn-renovar">
-Renovar
-</a>
-
-<form method="POST" action="/polizas/enviar/{{ poliza.id }}/">
+<form method="POST" action="/polizas/enviar/{{ poliza.id }}/" style="display:inline;">
 {% csrf_token %}
-<button type="submit" class="btn-mini btn-email">
-Enviar
-</button>
+<button type="submit" class="btn-mini btn-email">Enviar</button>
 </form>
-
-</div>
 </td>
 
 </tr>
+
+
+<!-- 🔥 CUOTAS SOLO SI ES CUPONERA -->
+
+{% if poliza.forma_pago == "CUPONERA" %}
+
+<tr>
+<td colspan="10">
+
+<table class="tabla-pagos">
+
+<tr>
+<th>Cuota</th>
+<th>Vencimiento</th>
+<th>Estado</th>
+<th>Acción</th>
+</tr>
+
+{% for pago in poliza.pagos.all %}
+
+<tr>
+
+<td>{{ pago.numero_cuota }}</td>
+<td>{{ pago.fecha_vencimiento }}</td>
+
+<td>
+{% if pago.estado == "PAGADO" %}
+<span class="estado-pagado">Pagado</span>
+{% elif pago.estado == "VENCIDO" %}
+<span class="estado-vencido">Vencido</span>
+{% else %}
+<span class="estado-pendiente">Pendiente</span>
+{% endif %}
+</td>
+
+<td>
+
+{% if pago.estado != "PAGADO" %}
+
+<a href="/polizas/pago/{{ pago.id }}/" class="btn-mini btn-pago">
+Registrar pago
+</a>
+
+{% else %}
+
+✔
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</td>
+</tr>
+
+{% endif %}
 
 {% endfor %}
 {% endfor %}
