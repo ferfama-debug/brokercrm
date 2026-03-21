@@ -5,47 +5,63 @@
 
 <style>
 
+body{
+background: radial-gradient(circle at top, #0f172a, #020617);
+}
+
+/* CONTENEDOR */
+
 .dashboard{
 max-width:1300px;
 margin:auto;
 padding:20px;
-color:#222; /* 🔥 SOLUCIÓN GLOBAL */
+color:#e2e8f0;
 }
+
+/* TITULOS */
 
 .title{
 margin-bottom:25px;
 font-weight:600;
-color:#111;
+color:#f8fafc;
 }
 
-h1,h2,h3,p,span,td,th{
-color:#222; /* 🔥 FUERZA TODO EL TEXTO */
+h1,h2,h3{
+color:#f1f5f9;
+}
+
+p,td,th,span{
+color:#cbd5f5;
 }
 
 /* CRM PRO */
 
-.prioridad-urgente{color:#e53935;font-weight:bold;}
-.prioridad-alta{color:#fb8c00;font-weight:bold;}
-.prioridad-media{color:#fdd835;font-weight:bold;}
+.prioridad-urgente{color:#ef4444;font-weight:bold;}
+.prioridad-alta{color:#f97316;font-weight:bold;}
+.prioridad-media{color:#eab308;font-weight:bold;}
+
+/* BOTONES */
 
 .btn-copiar{
-background:#1976d2;
+background:linear-gradient(135deg,#2563eb,#1e40af);
 color:white;
 padding:6px 12px;
-border-radius:6px;
-font-size:13px;
-font-weight:bold;
+border-radius:8px;
 border:none;
 cursor:pointer;
+transition:0.2s;
+}
+
+.btn-copiar:hover{
+transform:scale(1.05);
 }
 
 .btn-whatsapp{
-background:#25D366;
+background:linear-gradient(135deg,#22c55e,#15803d);
 color:white;
 padding:6px 12px;
-border-radius:6px;
+border-radius:8px;
 text-decoration:none;
-font-size:13px;
 font-weight:bold;
 }
 
@@ -59,18 +75,23 @@ margin-bottom:30px;
 }
 
 .radar{
-background:white;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
 padding:22px;
-border-radius:12px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
+border-radius:16px;
+border:1px solid rgba(255,255,255,0.1);
 text-align:center;
-color:#222;
+transition:0.3s;
+}
+
+.radar:hover{
+transform:translateY(-5px);
 }
 
 .radar span{
 font-size:34px;
 font-weight:bold;
-color:#111;
+color:#f8fafc;
 }
 
 /* TABLAS */
@@ -79,34 +100,45 @@ table{
 width:100%;
 border-collapse:collapse;
 margin-bottom:30px;
-background:white;
-border-radius:10px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+border-radius:12px;
 overflow:hidden;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
-color:#222;
 }
 
 th, td{
-padding:10px;
+padding:12px;
 text-align:left;
-color:#222;
 }
 
 th{
-background:#f5f5f5;
-color:#333;
+background:rgba(255,255,255,0.08);
+color:#e2e8f0;
+}
+
+tr{
+border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
 tr:hover{
-background:#fafafa;
+background:rgba(255,255,255,0.05);
 }
 
+/* GRAFICOS */
+
 .grafico-box{
-background:white;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
 padding:20px;
-border-radius:12px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
+border-radius:16px;
 margin-bottom:30px;
+}
+
+/* SEPARADORES */
+
+h2{
+margin-top:40px;
+margin-bottom:10px;
 }
 
 </style>
@@ -116,10 +148,9 @@ margin-bottom:30px;
 
 <h1 class="title">📊 Panel de control</h1>
 
-<!-- 🔥 CRM PRO -->
+<!-- CRM -->
 
-<h2>🚀 CRM de Ventas (Acción del día)</h2>
-
+<h2>🚀 CRM de Ventas</h2>
 <p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
 
 <table>
@@ -155,7 +186,7 @@ margin-bottom:30px;
 {% endfor %}
 </table>
 
-<!-- 💰 FINANZAS -->
+<!-- FINANZAS -->
 
 <div class="radar-container">
 <div class="radar"><h3>💰 Deuda</h3><span>$ {{ deuda_total }}</span></div>
@@ -164,9 +195,9 @@ margin-bottom:30px;
 <div class="radar"><h3>📄 Pendientes</h3><span>{{ cuotas_pendientes }}</span></div>
 </div>
 
-<!-- 📊 GRÁFICOS -->
+<!-- GRAFICOS -->
 
-<h2>📊 Producción por compañía</h2>
+<h2>📊 Producción</h2>
 <div class="grafico-box">
 <canvas id="graficoCompanias"></canvas>
 </div>
@@ -176,9 +207,9 @@ margin-bottom:30px;
 <canvas id="graficoCrecimiento"></canvas>
 </div>
 
-<!-- ⭐ CLIENTES -->
+<!-- CLIENTES -->
 
-<h2>🏆 Clientes destacados</h2>
+<h2>🏆 Clientes</h2>
 <table>
 <tr><th>Cliente</th><th>Pólizas</th><th>Valor</th></tr>
 
@@ -191,15 +222,15 @@ margin-bottom:30px;
 {% endfor %}
 </table>
 
-<!-- 📅 VENCIMIENTOS -->
+<!-- VENCIMIENTOS -->
 
-<h2>📅 Pólizas por vencer</h2>
+<h2>📅 Vencimientos</h2>
 <table>
 <tr>
 <th>Cliente</th>
 <th>Póliza</th>
 <th>Compañía</th>
-<th>Vencimiento</th>
+<th>Fecha</th>
 <th>Días</th>
 </tr>
 
