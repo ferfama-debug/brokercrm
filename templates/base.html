@@ -7,12 +7,10 @@
 
 <meta charset="UTF-8">
 
-<title>CRM Fuerza Natural Brokers</title>
+<title>CRM Fuerza Natural Broker</title>
 
-<!-- CSS principal del CRM -->
 <link rel="stylesheet" href="{% static 'images/css/crm.css' %}">
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -40,7 +38,10 @@ box-shadow:0 2px 4px rgba(0,0,0,0.2);
 font-weight:bold;
 font-size:18px;
 letter-spacing:0.5px;
+color:#4CAF50; /* 🔥 VERDE MARCA */
 }
+
+/* RIGHT */
 
 .topbar-right{
 display:flex;
@@ -48,7 +49,7 @@ align-items:center;
 gap:20px;
 }
 
-/* CAMPANA ALERTAS */
+/* ALERTAS */
 
 .alert-bell{
 position:relative;
@@ -107,8 +108,6 @@ color:#fdd835;
 font-weight:bold;
 }
 
-/* abrir dropdown */
-
 .alert-bell:hover .alert-dropdown{
 display:block;
 }
@@ -140,7 +139,7 @@ border-left:3px solid transparent;
 
 .sidebar a:hover{
 background:#32465a;
-border-left:3px solid #4cafef;
+border-left:3px solid #4CAF50; /* 🔥 VERDE */
 }
 
 /* ALERT COLORS */
@@ -167,7 +166,7 @@ flex:1;
 padding:30px;
 }
 
-/* USER NAME */
+/* USER */
 
 .user-info{
 font-size:14px;
@@ -190,12 +189,10 @@ width:200px;
 
 <body>
 
-<!-- TOPBAR -->
-
 <div class="topbar">
 
 <div class="logo">
-Fuerza Natural Brokers
+Fuerza Natural Broker
 </div>
 
 <div class="topbar-right">
@@ -236,20 +233,13 @@ No hay alertas
 
 </div>
 
-<!-- LAYOUT -->
-
 <div class="layout">
-
-<!-- SIDEBAR -->
 
 <div class="sidebar">
 
 <a href="/">🏠 Dashboard</a>
-
 <a href="/clientes/">👥 Clientes</a>
-
 <a href="/polizas/">📄 Pólizas</a>
-
 <a href="/polizas/nueva/">➕ Nueva póliza</a>
 
 <a href="/alertas/">
@@ -268,12 +258,9 @@ No hay alertas
 </a>
 
 <a href="/admin/">⚙️ Administración</a>
-
 <a href="/accounts/logout/">🚪 Cerrar sesión</a>
 
 </div>
-
-<!-- CONTENT -->
 
 <div class="content">
 
