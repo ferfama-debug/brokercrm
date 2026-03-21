@@ -87,7 +87,13 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    # 🔥 AHORA SON URLs (SUPABASE)
+    # 🔥 NUEVO CAMPO (CLAVE)
+    email_vencimiento_enviado = models.BooleanField(
+        default=False,
+        verbose_name="Email de vencimiento enviado",
+    )
+
+    # 🔥 URLs (SUPABASE)
     pdf_poliza = models.TextField(
         blank=True,
         null=True,
@@ -143,7 +149,6 @@ class Policy(models.Model):
                 fecha = fecha + relativedelta(months=frecuencia)
                 numero += 1
 
-    # 🔥 AHORA DEVUELVEN DIRECTAMENTE EL LINK
     @property
     def pdf_url(self):
         return self.pdf_poliza
@@ -223,7 +228,6 @@ class Payment(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Monto"
     )
 
-    # 🔥 AHORA TAMBIÉN URL
     comprobante = models.TextField(
         blank=True, null=True, verbose_name="URL comprobante"
     )

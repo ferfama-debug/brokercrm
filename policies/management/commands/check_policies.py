@@ -11,12 +11,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         hoy = timezone.now().date()
-        limite = hoy + timedelta(days=3)
+        objetivo = hoy + timedelta(days=2)
 
-        policies = Policy.objects.filter(end_date__range=(hoy, limite))
+        # 🔥 SOLO 2 DÍAS ANTES Y NO ENVIADAS
+        policies = Policy.objects.filter(
+            end_date=objetivo,
+            email_vencimiento_enviado=False
+        )
 
         if not policies.exists():
-            self.stdout.write("No hay pólizas por vencer")
+            self.stdout.write("No hay pólizas para enviar hoy")
             return
 
         for policy in policies:
@@ -24,7 +28,7 @@ class Command(BaseCommand):
 
             cliente = policy.client
 
-            # 🔴 SI NO TIENE EMAIL → NO ROMPE
+            # 🔴 SI NO TIENE EMAIL → SALTEA
             if not cliente.email:
                 self.stdout.write(
                     f"❌ Cliente sin email: {cliente.nombre_completo()}"
@@ -43,7 +47,6 @@ Tu póliza está por vencer:
 📅 Vencimiento: {policy.end_date}
 """
 
-            # 🔥 LINK DE PÓLIZA
             if policy.pdf_poliza:
                 mensaje += f"\n📎 Ver póliza:\n{policy.pdf_poliza}\n"
 
@@ -57,6 +60,10 @@ Tu póliza está por vencer:
                     [cliente.email],
                     fail_silently=False,
                 )
+
+                # 🔥 MARCAR COMO ENVIADO
+                policy.email_vencimiento_enviado = True
+                policy.save()
 
                 self.stdout.write(
                     self.style.SUCCESS(
