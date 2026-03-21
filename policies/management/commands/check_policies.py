@@ -11,7 +11,8 @@ class Command(BaseCommand):
         hoy = timezone.now().date()
         limite = hoy + timedelta(days=3)
 
-        policies = Policy.objects.filter(vigencia_hasta__range=(hoy, limite))
+        # 🔥 CORRECCIÓN AQUÍ
+        policies = Policy.objects.filter(end_date__range=(hoy, limite))
 
         if not policies.exists():
             self.stdout.write("No hay pólizas por vencer")
