@@ -1,210 +1,338 @@
 {% extends "base.html" %}
-
 {% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Nueva póliza</h1>
+    <p class="page-subtitle">Completá los datos para registrar una nueva póliza</p>
+  </div>
+  <a href="/polizas/" class="btn btn-ghost">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"/>
+      <polyline points="12 19 5 12 12 5"/>
+    </svg>
+    Volver
+  </a>
+</div>
+
+<div class="form-layout">
+  <div class="card form-card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- SECCIÓN: Datos del cliente -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Cliente y póliza
+        </div>
+
+        <div class="form-row">
+          <div class="form-grupo">
+            <label class="form-label">Cliente</label>
+            <select name="client" class="form-control">
+              {% for cliente in clientes %}
+              <option value="{{ cliente.id }}" {% if cliente.id|stringformat:"s" == cliente_id %}selected{% endif %}>
+                {{ cliente }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label class="form-label">N° Póliza</label>
+            <input type="text" name="policy_number" class="form-control" placeholder="Ej: 12345678">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-grupo">
+            <label class="form-label">Compañía</label>
+            <input type="text" name="company" class="form-control" placeholder="Ej: Sancor Seguros">
+          </div>
+          <div class="form-grupo">
+            <label class="form-label">Tipo de póliza</label>
+            <select name="tipo_poliza" class="form-control">
+              <option value="AUTO">Auto</option>
+              <option value="MOTO">Moto</option>
+              <option value="HOGAR">Hogar</option>
+              <option value="VIDA">Vida</option>
+              <option value="COMERCIO">Comercio</option>
+              <option value="AP">Accidentes Personales</option>
+              <option value="RC">Responsabilidad Civil</option>
+              <option value="OTRO">Otro</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- SECCIÓN: Vigencia -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Vigencia
+        </div>
+
+        <div class="form-row">
+          <div class="form-grupo">
+            <label class="form-label">Fecha inicio</label>
+            <input type="date" name="start_date" class="form-control">
+          </div>
+          <div class="form-grupo">
+            <label class="form-label">Fecha vencimiento</label>
+            <input type="date" name="end_date" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- SECCIÓN: Pago -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Forma de pago
+        </div>
+
+        <div class="form-row">
+          <div class="form-grupo">
+            <label class="form-label">Forma de pago</label>
+            <select name="forma_pago" id="forma_pago" class="form-control">
+              <option value="TARJETA">Tarjeta de crédito</option>
+              <option value="CBU">Débito / CBU</option>
+              <option value="CUPONERA">Cuponera de pago</option>
+            </select>
+          </div>
+          <div class="form-grupo" id="grupo_frecuencia" style="display:none;">
+            <label class="form-label">Frecuencia de cuponera</label>
+            <select name="frecuencia_cuponera" class="form-control">
+              <option value="">Seleccione frecuencia</option>
+              <option value="1">Mensual</option>
+              <option value="3">Trimestral</option>
+              <option value="4">Cuatrimestral</option>
+              <option value="6">Semestral</option>
+              <option value="12">Anual</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- SECCIÓN: Archivos -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Documentos
+        </div>
+
+        <div class="form-row">
+          <div class="form-grupo">
+            <label class="form-label">PDF de la póliza</label>
+            <label class="file-drop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+              <span class="file-drop-text">Subir PDF de póliza</span>
+              <span class="file-drop-hint">Hacé clic para seleccionar</span>
+              <input type="file" name="pdf_poliza" accept="application/pdf" class="file-input" onchange="updateFileName(this, 'label-poliza')">
+            </label>
+            <span class="file-name" id="label-poliza"></span>
+          </div>
+          <div class="form-grupo">
+            <label class="form-label">Cuponera de pago <span class="label-opcional">(si corresponde)</span></label>
+            <label class="file-drop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+              <span class="file-drop-text">Subir cuponera PDF</span>
+              <span class="file-drop-hint">Hacé clic para seleccionar</span>
+              <input type="file" name="cuponera_pdf" accept="application/pdf" class="file-input" onchange="updateFileName(this, 'label-cuponera')">
+            </label>
+            <span class="file-name" id="label-cuponera"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="form-actions">
+        <a href="/polizas/" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Guardar póliza
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
 
 <style>
 
-.form-poliza{
-max-width:600px;
+.form-layout {
+  max-width: 820px;
 }
 
-.form-grupo{
-margin-bottom:16px;
+.form-card {
+  padding: 0;
+  overflow: hidden;
 }
 
-.form-grupo label{
-display:block;
-font-weight:bold;
-margin-bottom:6px;
+/* SECCIONES */
+.form-section {
+  padding: 24px 28px;
 }
 
-.form-grupo input,
-.form-grupo select{
-width:100%;
-padding:8px;
-border:1px solid #ddd;
-border-radius:4px;
-font-size:14px;
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.form-section-title svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.form-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0;
+}
+
+/* FILAS DE CAMPOS */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .form-section { padding: 20px 18px; }
+}
+
+.form-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label-opcional {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* FILE DROP */
+.file-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 16px;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+
+.file-drop:hover {
+  background: rgba(52, 211, 100, 0.05);
+  border-color: var(--green-600);
+}
+
+.file-drop svg {
+  width: 24px;
+  height: 24px;
+  color: var(--text-muted);
+}
+
+.file-drop-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.file-drop-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.file-input {
+  display: none;
+}
+
+.file-name {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--green-400);
+  min-height: 16px;
+}
+
+/* ACCIONES */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 28px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-surface);
 }
 
 </style>
 
-
-<h1>➕ Nueva póliza</h1>
-
-
-<div class="card form-poliza">
-
-<form method="post" enctype="multipart/form-data">
-
-{% csrf_token %}
-
-
-<div class="form-grupo">
-
-<label>Cliente</label>
-
-<select name="client">
-
-{% for cliente in clientes %}
-
-{% if cliente.id|stringformat:"s" == cliente_id %}
-
-<option value="{{ cliente.id }}" selected>
-{{ cliente }}
-</option>
-
-{% else %}
-
-<option value="{{ cliente.id }}">
-{{ cliente }}
-</option>
-
-{% endif %}
-
-{% endfor %}
-
-</select>
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>N° Póliza</label>
-
-<input type="text" name="policy_number">
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>Compañía</label>
-
-<input type="text" name="company">
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>Tipo de póliza</label>
-
-<select name="tipo_poliza">
-
-<option value="AUTO">Auto</option>
-<option value="MOTO">Moto</option>
-<option value="HOGAR">Hogar</option>
-<option value="VIDA">Vida</option>
-<option value="COMERCIO">Comercio</option>
-<option value="AP">Accidentes Personales</option>
-<option value="RC">Responsabilidad Civil</option>
-<option value="OTRO">Otro</option>
-
-</select>
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>Fecha inicio</label>
-
-<input type="date" name="start_date">
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>Fecha vencimiento</label>
-
-<input type="date" name="end_date">
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>Forma de pago</label>
-
-<select name="forma_pago" id="forma_pago">
-
-<option value="TARJETA">Tarjeta de crédito</option>
-<option value="CBU">Débito / CBU</option>
-<option value="CUPONERA">Cuponera de pago</option>
-
-</select>
-
-</div>
-
-
-<div class="form-grupo" id="grupo_frecuencia" style="display:none;">
-
-<label>Frecuencia de cuponera</label>
-
-<select name="frecuencia_cuponera">
-
-<option value="">Seleccione frecuencia</option>
-<option value="1">Mensual</option>
-<option value="3">Trimestral</option>
-<option value="4">Cuatrimestral</option>
-<option value="6">Semestral</option>
-<option value="12">Anual</option>
-
-</select>
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>PDF de la póliza</label>
-
-<input type="file" name="pdf_poliza" accept="application/pdf">
-
-</div>
-
-
-<div class="form-grupo">
-
-<label>Cuponera de pago (solo si corresponde)</label>
-
-<input type="file" name="cuponera_pdf" accept="application/pdf">
-
-</div>
-
-
-<button type="submit" class="btn btn-primary">
-Guardar póliza
-</button>
-
-
-</form>
-
-</div>
-
-
 <script>
-
 const formaPago = document.getElementById("forma_pago");
 const grupoFrecuencia = document.getElementById("grupo_frecuencia");
 
-function toggleFrecuencia(){
-
-if(formaPago.value === "CUPONERA"){
-grupoFrecuencia.style.display = "block";
-}else{
-grupoFrecuencia.style.display = "none";
+function toggleFrecuencia() {
+  grupoFrecuencia.style.display = formaPago.value === "CUPONERA" ? "flex" : "none";
+  grupoFrecuencia.style.flexDirection = "column";
+  grupoFrecuencia.style.gap = "6px";
 }
 
+function updateFileName(input, labelId) {
+  const label = document.getElementById(labelId);
+  label.textContent = input.files.length > 0 ? input.files[0].name : "";
 }
 
 formaPago.addEventListener("change", toggleFrecuencia);
-
 window.onload = toggleFrecuencia;
-
 </script>
 
 {% endblock %}

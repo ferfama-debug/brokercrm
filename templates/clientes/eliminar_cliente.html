@@ -1,30 +1,162 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<h1 class="title">Eliminar cliente</h1>
-
-<div class="card" style="max-width:500px;">
-
-<p>
-¿Estás seguro que deseas eliminar al cliente
-<strong>{{ cliente.first_name }} {{ cliente.last_name }}</strong>?
-</p>
-
-<form method="post">
-
-{% csrf_token %}
-
-<button type="submit" class="btn btn-primary">
-Sí, eliminar cliente
-</button>
-
-<a href="{% url 'clients:clientes' %}" class="btn btn-pdf">
-Cancelar
-</a>
-
-</form>
-
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Eliminar cliente</h1>
+    <p class="page-subtitle">Esta acción no se puede deshacer</p>
+  </div>
 </div>
+
+<div class="form-layout">
+  <div class="card form-card">
+
+    <!-- Zona de advertencia -->
+    <div class="danger-zone">
+      <div class="danger-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="danger-texto">
+        <p class="danger-pregunta">
+          ¿Estás seguro que deseás eliminar al cliente
+          <strong>{{ cliente.first_name }} {{ cliente.last_name }}</strong>?
+        </p>
+        <p class="danger-aviso">
+          Se eliminarán también todas las pólizas y datos asociados a este cliente.
+        </p>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="form-actions">
+      <a href="{% url 'clients:clientes' %}" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Cancelar
+      </a>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+          Sí, eliminar cliente
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<style>
+
+.form-layout {
+  max-width: 560px;
+}
+
+.form-card {
+  padding: 0;
+  overflow: hidden;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ZONA DE PELIGRO */
+.danger-zone {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 28px;
+}
+
+.danger-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fca5a5;
+}
+
+.danger-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.danger-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.danger-pregunta {
+  font-size: 14.5px;
+  color: #ecfdf5;
+  line-height: 1.5;
+}
+
+.danger-pregunta strong {
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+.danger-aviso {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ACCIONES */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 28px;
+  border-top: 1px solid rgba(239, 68, 68, 0.12);
+  background: rgba(239, 68, 68, 0.03);
+}
+
+/* BOTÓN DANGER */
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.btn-danger svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fecaca;
+}
+
+</style>
 
 {% endblock %}

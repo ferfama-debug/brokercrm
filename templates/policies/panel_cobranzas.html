@@ -1,143 +1,354 @@
 {% extends "base.html" %}
-
 {% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Panel de Cobranzas</h1>
+    <p class="page-subtitle">Seguimiento de vencimientos y pagos pendientes</p>
+  </div>
+</div>
+
+<!-- COLUMNAS -->
+<div class="cobranzas-grid">
+
+  <!-- VENCIDOS -->
+  <div class="cobranza-col">
+    <div class="col-header col-rojo">
+      <div class="col-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <div class="col-titulo">Vencidos</div>
+        <div class="col-subtitulo">Requieren atención inmediata</div>
+      </div>
+      <span class="col-count">{{ vencidos|length }}</span>
+    </div>
+
+    <div class="col-items">
+      {% for pago in vencidos %}
+      <div class="pago-item pago-rojo">
+        <div class="pago-cliente">{{ pago.policy.client }}</div>
+        <div class="pago-datos">
+          <span class="dato-label">Póliza</span>
+          <span class="dato-val mono-val">{{ pago.policy.policy_number }}</span>
+        </div>
+        <div class="pago-datos">
+          <span class="dato-label">Cuota</span>
+          <span class="dato-val">{{ pago.numero_cuota }}</span>
+        </div>
+        <div class="pago-datos">
+          <span class="dato-label">Venció</span>
+          <span class="dato-val mono-val vencido-fecha">{{ pago.fecha_vencimiento }}</span>
+        </div>
+        <a href="{{ pago.whatsapp_link }}" target="_blank" class="btn-whatsapp">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+          WhatsApp
+        </a>
+      </div>
+      {% empty %}
+      <div class="empty-col">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Sin vencidos</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- HOY -->
+  <div class="cobranza-col">
+    <div class="col-header col-amarillo">
+      <div class="col-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div>
+        <div class="col-titulo">Vence Hoy</div>
+        <div class="col-subtitulo">Pagos del día</div>
+      </div>
+      <span class="col-count">{{ hoy|length }}</span>
+    </div>
+
+    <div class="col-items">
+      {% for pago in hoy %}
+      <div class="pago-item pago-amarillo">
+        <div class="pago-cliente">{{ pago.policy.client }}</div>
+        <div class="pago-datos">
+          <span class="dato-label">Póliza</span>
+          <span class="dato-val mono-val">{{ pago.policy.policy_number }}</span>
+        </div>
+        <div class="pago-datos">
+          <span class="dato-label">Cuota</span>
+          <span class="dato-val">{{ pago.numero_cuota }}</span>
+        </div>
+        <a href="{{ pago.whatsapp_link }}" target="_blank" class="btn-whatsapp">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+          WhatsApp
+        </a>
+      </div>
+      {% empty %}
+      <div class="empty-col">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Sin pagos hoy</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- PRÓXIMOS -->
+  <div class="cobranza-col">
+    <div class="col-header col-verde">
+      <div class="col-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <div>
+        <div class="col-titulo">Próximos</div>
+        <div class="col-subtitulo">Vencimientos cercanos</div>
+      </div>
+      <span class="col-count">{{ proximos|length }}</span>
+    </div>
+
+    <div class="col-items">
+      {% for pago in proximos %}
+      <div class="pago-item pago-verde">
+        <div class="pago-cliente">{{ pago.policy.client }}</div>
+        <div class="pago-datos">
+          <span class="dato-label">Póliza</span>
+          <span class="dato-val mono-val">{{ pago.policy.policy_number }}</span>
+        </div>
+        <div class="pago-datos">
+          <span class="dato-label">Cuota</span>
+          <span class="dato-val">{{ pago.numero_cuota }}</span>
+        </div>
+        <div class="pago-datos">
+          <span class="dato-label">Vence</span>
+          <span class="dato-val mono-val">{{ pago.fecha_vencimiento }}</span>
+        </div>
+        <a href="{{ pago.whatsapp_link }}" target="_blank" class="btn-whatsapp">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+          WhatsApp
+        </a>
+      </div>
+      {% empty %}
+      <div class="empty-col">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Sin próximos vencimientos</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
 
 <style>
 
-.container-cobranzas{
-max-width:1200px;
-margin:auto;
-padding:20px;
+/* GRID DE COLUMNAS */
+.cobranzas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: start;
 }
 
-.titulo{
-font-size:28px;
-font-weight:bold;
-margin-bottom:20px;
-color:#fff;
+@media (max-width: 960px) { .cobranzas-grid { grid-template-columns: 1fr; } }
+
+/* COLUMNA */
+.cobranza-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:20px;
+/* HEADER DE COLUMNA */
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
 }
 
-.card{
-padding:15px;
-border-radius:12px;
-color:#fff;
+.col-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.vencidos{background:#7f1d1d;}
-.hoy{background:#92400e;}
-.proximos{background:#065f46;}
-
-.card h3{
-margin-bottom:10px;
+.col-header-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
-.item{
-background:rgba(255,255,255,0.1);
-padding:10px;
-margin-bottom:10px;
-border-radius:8px;
+.col-rojo    .col-header-icon { background: rgba(239,68,68,0.12);  color: #fca5a5; }
+.col-amarillo .col-header-icon { background: rgba(245,158,11,0.12); color: #fcd34d; }
+.col-verde   .col-header-icon { background: rgba(34,197,94,0.12);  color: var(--green-400); }
+
+.col-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ecfdf5;
+  line-height: 1.2;
 }
 
-.btn{
-display:inline-block;
-margin-top:5px;
-padding:5px 10px;
-background:#22c55e;
-color:#000;
-border-radius:6px;
-text-decoration:none;
-font-size:12px;
+.col-subtitulo {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
 }
 
-.btn:hover{
-background:#16a34a;
+.col-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.col-rojo    .col-count { color: #fca5a5; }
+.col-amarillo .col-count { color: #fcd34d; }
+.col-verde   .col-count { color: var(--green-400); }
+
+/* ITEMS */
+.col-items {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ITEM DE PAGO */
+.pago-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.18s;
+}
+
+.pago-item:hover { border-color: var(--border-strong); }
+
+.pago-rojo    { border-left: 3px solid #ef4444; }
+.pago-amarillo { border-left: 3px solid #f59e0b; }
+.pago-verde   { border-left: 3px solid var(--green-500); }
+
+.pago-cliente {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ecfdf5;
+  margin-bottom: 2px;
+}
+
+.pago-datos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.dato-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.dato-val {
+  font-size: 12.5px;
+  color: #ecfdf5;
+  text-align: right;
+}
+
+.mono-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #ecfdf5;
+}
+
+.vencido-fecha {
+  color: #fca5a5;
+}
+
+/* BOTÓN WHATSAPP */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 7px 12px;
+  background: rgba(37, 211, 102, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(37, 211, 102, 0.2);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.18s;
+  align-self: flex-start;
+}
+
+.btn-whatsapp svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.btn-whatsapp:hover {
+  background: rgba(37, 211, 102, 0.22);
+  border-color: rgba(37, 211, 102, 0.4);
+  color: #86efac;
+}
+
+/* EMPTY */
+.empty-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.empty-col svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
 </style>
-
-
-<div class="container-cobranzas">
-
-<div class="titulo">💰 Panel de Cobranzas</div>
-
-<div class="grid">
-
-<!-- 🔴 VENCIDOS -->
-<div class="card vencidos">
-<h3>🔴 Vencidos</h3>
-
-{% for pago in vencidos %}
-<div class="item">
-<strong>{{ pago.policy.client }}</strong><br>
-Póliza: {{ pago.policy.policy_number }}<br>
-Cuota: {{ pago.numero_cuota }}<br>
-Venció: {{ pago.fecha_vencimiento }}
-
-<br>
-
-<a href="{{ pago.whatsapp_link }}" target="_blank" class="btn">
-📲 WhatsApp
-</a>
-
-</div>
-{% empty %}
-<p>No hay vencidos</p>
-{% endfor %}
-
-</div>
-
-
-<!-- 🟡 HOY -->
-<div class="card hoy">
-<h3>🟡 Vence Hoy</h3>
-
-{% for pago in hoy %}
-<div class="item">
-<strong>{{ pago.policy.client }}</strong><br>
-Póliza: {{ pago.policy.policy_number }}<br>
-Cuota: {{ pago.numero_cuota }}<br>
-
-<a href="{{ pago.whatsapp_link }}" target="_blank" class="btn">
-📲 WhatsApp
-</a>
-
-</div>
-{% empty %}
-<p>No hay pagos hoy</p>
-{% endfor %}
-
-</div>
-
-
-<!-- 🟢 PROXIMOS -->
-<div class="card proximos">
-<h3>🟢 Próximos</h3>
-
-{% for pago in proximos %}
-<div class="item">
-<strong>{{ pago.policy.client }}</strong><br>
-Póliza: {{ pago.policy.policy_number }}<br>
-Cuota: {{ pago.numero_cuota }}<br>
-Vence: {{ pago.fecha_vencimiento }}
-
-<a href="{{ pago.whatsapp_link }}" target="_blank" class="btn">
-📲 WhatsApp
-</a>
-
-</div>
-{% empty %}
-<p>No hay próximos vencimientos</p>
-{% endfor %}
-
-</div>
-
-</div>
-</div>
 
 {% endblock %}

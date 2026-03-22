@@ -1,244 +1,301 @@
 {% extends "base.html" %}
-
 {% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Pólizas por cliente</h1>
+    <p class="page-subtitle">Expandí cada cliente para ver sus pólizas activas</p>
+  </div>
+</div>
+
+<!-- FILTRO -->
+<div class="card" style="margin-bottom: 20px;">
+  <form method="get" class="filtro-form">
+    <label class="form-label" style="margin-bottom:0;">Filtrar por compañía</label>
+    <select name="compania" class="form-control filtro-select" onchange="this.form.submit()">
+      <option value="">Todas las compañías</option>
+      {% for c in companias %}
+      <option value="{{ c }}" {% if compania_seleccionada == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<!-- LISTA DE CLIENTES -->
+<div class="clientes-lista">
+  {% for cliente in clientes %}
+  <div class="cliente-box">
+
+    <div class="cliente-header" onclick="togglePolizas('cliente{{ cliente.id }}', this)">
+      <div class="cliente-header-left">
+        <div class="cliente-avatar-lg">
+          {{ cliente|truncatechars:2|upper }}
+        </div>
+        <span class="cliente-nombre-texto">{{ cliente }}</span>
+      </div>
+      <div class="cliente-header-right">
+        <span class="polizas-count">
+          {{ cliente.policy_set.all|length }} póliza{{ cliente.policy_set.all|length|pluralize }}
+        </span>
+        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="polizas-wrap" id="cliente{{ cliente.id }}">
+      {% if cliente.policy_set.all|length > 0 %}
+      <div class="table-wrap" style="border-radius:0; border:none; box-shadow:none;">
+        <table class="tabla-polizas">
+          <thead>
+            <tr>
+              <th>N° Póliza</th>
+              <th>Compañía</th>
+              <th>Tipo</th>
+              <th>Inicio</th>
+              <th>Vencimiento</th>
+              <th>Estado</th>
+              <th>Póliza</th>
+              <th>Cuponera</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for poliza in cliente.policy_set.all %}
+            {% if not compania_seleccionada or poliza.company == compania_seleccionada %}
+            <tr>
+              <td><span class="mono-val">{{ poliza.policy_number }}</span></td>
+              <td>{{ poliza.company }}</td>
+              <td><span class="tipo-pill">{{ poliza.tipo_poliza }}</span></td>
+              <td><span class="mono-val">{{ poliza.start_date }}</span></td>
+              <td><span class="mono-val">{{ poliza.end_date }}</span></td>
+              <td>
+                {% if poliza.estado == "ACTIVA" %}
+                  <span class="badge badge-green">ACTIVA</span>
+                {% elif poliza.estado == "POR VENCER" %}
+                  <span class="badge badge-yellow">POR VENCER</span>
+                {% else %}
+                  <span class="badge badge-red">VENCIDA</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if poliza.pdf_poliza %}
+                  <span class="badge badge-green">Cargada</span>
+                {% else %}
+                  <span class="badge badge-gray">Sin archivo</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if poliza.cuponera_pdf %}
+                  <span class="badge badge-green">Cargada</span>
+                {% else %}
+                  <span class="badge badge-gray">Sin archivo</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-polizas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+        </svg>
+        <span>Este cliente no tiene pólizas.</span>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
 
 <style>
 
-.filtro-compania{
-margin-bottom:20px;
-display:flex;
-align-items:center;
-gap:10px;
-flex-wrap:wrap;
+/* FILTRO */
+.filtro-form {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.filtro-compania select{
-padding:6px;
-border-radius:4px;
-border:1px solid #ddd;
+.filtro-select {
+  max-width: 280px;
+  margin-bottom: 0 !important;
 }
 
-.cliente-box{
-background:white;
-margin-bottom:15px;
-border-radius:8px;
-overflow:hidden;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+/* LISTA */
+.clientes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.cliente-header{
-background:#2c3e50;
-color:white;
-padding:12px 15px;
-cursor:pointer;
-font-weight:bold;
-font-size:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+/* CAJA DE CLIENTE */
+.cliente-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.2s;
 }
 
-.cliente-header:hover{
-background:#34495e;
+.cliente-box:hover {
+  border-color: var(--border-strong);
 }
 
-.polizas{
-display:none;
-padding:15px;
+/* HEADER CLIENTE */
+.cliente-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.18s;
+  gap: 12px;
 }
 
-.tabla-polizas{
-width:100%;
-border-collapse:collapse;
-font-size:14px;
+.cliente-header:hover {
+  background: rgba(52, 211, 100, 0.05);
 }
 
-.tabla-polizas th{
-background:#34495e;
-color:white;
-padding:10px;
-text-align:left;
+.cliente-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.tabla-polizas td{
-padding:10px;
-border-bottom:1px solid #eee;
+.cliente-avatar-lg {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-700), var(--green-900));
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-300);
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 
-.tabla-polizas tr:hover{
-background:#f6f8fb;
+.cliente-nombre-texto {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ecfdf5;
 }
 
-.estado-activa{
-color:#2e7d32;
-font-weight:bold;
+.cliente-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.estado-vencer{
-color:#ef6c00;
-font-weight:bold;
+.polizas-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 
-.estado-vencida{
-color:#c62828;
-font-weight:bold;
+.chevron-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
 }
 
-.boton-whatsapp{
-background:#25D366;
-color:white;
-padding:6px 10px;
-border-radius:4px;
-text-decoration:none;
-font-size:13px;
+.chevron-icon.open {
+  transform: rotate(180deg);
 }
 
-.boton-whatsapp:hover{
-background:#1ebe5b;
+/* PANEL DE PÓLIZAS */
+.polizas-wrap {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+
+/* TABLA PÓLIZAS */
+.tabla-polizas {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabla-polizas thead th {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabla-polizas tbody td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: #ecfdf5 !important;
+  background: transparent !important;
+  vertical-align: middle;
+}
+
+.tabla-polizas tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla-polizas tbody tr:hover td {
+  background: rgba(52, 211, 100, 0.04) !important;
+}
+
+.mono-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #ecfdf5 !important;
+}
+
+.tipo-pill {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* EMPTY */
+.empty-polizas {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.empty-polizas svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
 </style>
 
-
-<h1>📄 Pólizas por cliente</h1>
-
-
-<form method="get" class="filtro-compania">
-
-<label><strong>Filtrar por compañía:</strong></label>
-
-<select name="compania" onchange="this.form.submit()">
-
-<option value="">Todas las compañías</option>
-
-{% for c in companias %}
-<option value="{{ c }}" {% if compania_seleccionada == c %}selected{% endif %}>
-{{ c }}
-</option>
-{% endfor %}
-
-</select>
-
-</form>
-
-
-{% for cliente in clientes %}
-
-<div class="cliente-box">
-
-<div class="cliente-header" onclick="togglePolizas('cliente{{ cliente.id }}')">
-<span>▶ {{ cliente }}</span>
-</div>
-
-
-<div class="polizas" id="cliente{{ cliente.id }}">
-
-{% if cliente.policy_set.all|length > 0 %}
-
-<table class="tabla-polizas">
-
-<thead>
-<tr>
-<th>N° Póliza</th>
-<th>Compañía</th>
-<th>Tipo</th>
-<th>Inicio</th>
-<th>Vencimiento</th>
-<th>Estado</th>
-<th>Póliza</th>
-<th>Cuponera</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for poliza in cliente.policy_set.all %}
-
-{% if not compania_seleccionada or poliza.company == compania_seleccionada %}
-
-<tr>
-
-<td>{{ poliza.policy_number }}</td>
-
-<td>{{ poliza.company }}</td>
-
-<td>{{ poliza.tipo_poliza }}</td>
-
-<td>{{ poliza.start_date }}</td>
-
-<td>{{ poliza.end_date }}</td>
-
-<td>
-
-{% if poliza.estado == "ACTIVA" %}
-<span class="estado-activa">ACTIVA</span>
-
-{% elif poliza.estado == "POR VENCER" %}
-<span class="estado-vencer">POR VENCER</span>
-
-{% else %}
-<span class="estado-vencida">VENCIDA</span>
-{% endif %}
-
-</td>
-
-<td>
-
-{% if poliza.pdf_poliza %}
-    <span>Archivo cargado</span>
-{% else %}
-    Sin póliza
-{% endif %}
-
-</td>
-
-<td>
-
-{% if poliza.cuponera_pdf %}
-    <span>Cuponera cargada</span>
-{% else %}
-    Sin cuponera
-{% endif %}
-
-</td>
-
-</tr>
-
-{% endif %}
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-{% else %}
-
-<p>Este cliente no tiene pólizas.</p>
-
-{% endif %}
-
-</div>
-
-</div>
-
-{% endfor %}
-
-
 <script>
-
-function togglePolizas(id){
-
-var div = document.getElementById(id);
-
-if(div.style.display === "none" || div.style.display === ""){
-div.style.display = "block";
-}else{
-div.style.display = "none";
+function togglePolizas(id, headerEl) {
+  var wrap = document.getElementById(id);
+  var chevron = headerEl.querySelector('.chevron-icon');
+  var isOpen = wrap.style.display === 'block';
+  wrap.style.display = isOpen ? 'none' : 'block';
+  chevron.classList.toggle('open', !isOpen);
 }
-
-}
-
 </script>
 
 {% endblock %}

@@ -1,23 +1,180 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<h1 class="title">Editar cliente</h1>
-
-<div class="card" style="max-width:500px;">
-
-<form method="post">
-
-{% csrf_token %}
-
-{{ form.as_p }}
-
-<button type="submit" class="btn btn-primary">
-Guardar cambios
-</button>
-
-</form>
-
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Editar cliente</h1>
+    <p class="page-subtitle">Modificá los datos del cliente</p>
+  </div>
+  <a href="/clientes/" class="btn btn-ghost">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"/>
+      <polyline points="12 19 5 12 12 5"/>
+    </svg>
+    Volver
+  </a>
 </div>
+
+<div class="form-layout">
+  <div class="card form-card">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Datos del cliente
+        </div>
+
+        <div class="django-form">
+          {{ form.as_p }}
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/clientes/" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Guardar cambios
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<style>
+
+.form-layout {
+  max-width: 600px;
+}
+
+.form-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.form-section {
+  padding: 24px 28px;
+}
+
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.form-section-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Estiliza los campos generados por form.as_p */
+.django-form p {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.django-form p:last-child {
+  margin-bottom: 0;
+}
+
+.django-form label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.django-form input[type="text"],
+.django-form input[type="email"],
+.django-form input[type="number"],
+.django-form input[type="tel"],
+.django-form input[type="password"],
+.django-form input[type="date"],
+.django-form input[type="url"],
+.django-form select,
+.django-form textarea {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: #ecfdf5;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.django-form input::placeholder,
+.django-form textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.django-form input:focus,
+.django-form select:focus,
+.django-form textarea:focus {
+  border-color: var(--green-600);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+.django-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234d7c60' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+.django-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.django-form .errorlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.django-form .errorlist li {
+  font-size: 12px;
+  color: #fca5a5;
+  padding: 4px 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 28px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+@media (max-width: 600px) {
+  .form-section { padding: 18px; }
+  .form-actions { padding: 16px 18px; }
+}
+
+</style>
 
 {% endblock %}
