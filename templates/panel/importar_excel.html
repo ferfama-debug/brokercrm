@@ -1,51 +1,197 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<div class="dashboard">
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Importar cartera</h1>
+    <p class="page-subtitle">Subí un archivo Excel con clientes y pólizas</p>
+  </div>
+  <a href="/" class="btn btn-ghost">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"/>
+      <polyline points="12 19 5 12 12 5"/>
+    </svg>
+    Volver al panel
+  </a>
+</div>
 
-<h1>Importar cartera desde Excel</h1>
+<div class="form-layout">
+  <div class="card form-card">
 
-<p>Subí un archivo Excel con la cartera de clientes y pólizas.</p>
+    <div class="form-section">
+      <div class="form-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        Archivo Excel
+      </div>
 
-<form method="post" enctype="multipart/form-data">
+      <!-- INFO -->
+      <div class="import-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p>El archivo debe ser <span class="mono-val">.xlsx</span> o <span class="mono-val">.xls</span> con los datos de clientes y pólizas en el formato correcto.</p>
+      </div>
 
-{% csrf_token %}
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
 
-<input type="file" name="archivo" required>
+        <div class="form-grupo">
+          <label class="form-label">Seleccionar archivo</label>
+          <label class="file-drop" id="file-drop-area">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 16 12 12 8 16"/>
+              <line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            </svg>
+            <span class="file-drop-text">Subir archivo Excel</span>
+            <span class="file-drop-hint">Hacé clic para seleccionar .xlsx o .xls</span>
+            <input
+              type="file"
+              name="archivo"
+              accept=".xlsx,.xls"
+              required
+              class="file-input"
+              onchange="updateFileName(this)"
+            >
+          </label>
+          <span class="file-name" id="file-label"></span>
+        </div>
 
-<button type="submit" class="btn-importar">
-📥 Importar cartera
-</button>
+        <div class="form-actions" style="border-top: none; padding: 0; margin-top: 8px; justify-content: flex-start;">
+          <button type="submit" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Importar cartera
+          </button>
+        </div>
 
-</form>
+      </form>
+    </div>
 
-<br>
-
-<a href="/">⬅ Volver al panel</a>
-
+  </div>
 </div>
 
 <style>
 
-.dashboard{
-padding:40px;
+.form-layout { max-width: 560px; }
+
+.form-card {
+  padding: 0;
+  overflow: hidden;
 }
 
-.btn-importar{
-background:#4CAF50;
-color:white;
-padding:10px 15px;
-border:none;
-border-radius:6px;
-margin-top:10px;
-cursor:pointer;
+.form-section { padding: 28px; }
+
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
 }
 
-.btn-importar:hover{
-background:#3e8e41;
+.form-section-title svg { width: 14px; height: 14px; }
+
+/* INFO */
+.import-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(52, 211, 100, 0.05);
+  border: 1px solid rgba(52, 211, 100, 0.12);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.import-info svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--green-400);
+}
+
+.import-info .mono-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--green-400);
+}
+
+/* FILE DROP */
+.form-grupo { display: flex; flex-direction: column; gap: 8px; }
+
+.file-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 20px;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+
+.file-drop:hover {
+  background: rgba(52, 211, 100, 0.05);
+  border-color: var(--green-600);
+}
+
+.file-drop svg {
+  width: 28px;
+  height: 28px;
+  color: var(--text-muted);
+}
+
+.file-drop-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.file-drop-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.file-input { display: none; }
+
+.file-name {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--green-400);
+  min-height: 16px;
+  padding-left: 2px;
 }
 
 </style>
+
+<script>
+function updateFileName(input) {
+  const label = document.getElementById('file-label');
+  label.textContent = input.files.length > 0 ? input.files[0].name : '';
+}
+</script>
 
 {% endblock %}

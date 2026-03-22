@@ -377,6 +377,24 @@ body {
   border: 1px solid var(--border-strong);
 }
 
+.nav-badge-critica {
+  background: rgba(239,68,68,0.15);
+  color: #fca5a5;
+  border-color: rgba(239,68,68,0.3);
+}
+
+.nav-badge-alta {
+  background: rgba(245,158,11,0.15);
+  color: #fcd34d;
+  border-color: rgba(245,158,11,0.3);
+}
+
+.nav-badge-media {
+  background: rgba(234,179,8,0.12);
+  color: #fef08a;
+  border-color: rgba(234,179,8,0.25);
+}
+
 /* Divisor en sidebar */
 .sidebar-divider {
   height: 1px;
@@ -847,7 +865,12 @@ select.form-control {
         </svg>
         <span>Alertas</span>
         {% if alert_count > 0 %}
-        <span class="nav-badge">{{ alert_count }}</span>
+        <span class="nav-badge
+          {% if alert_color == 'critica' %}nav-badge-critica
+          {% elif alert_color == 'alta' %}nav-badge-alta
+          {% elif alert_color == 'media' %}nav-badge-media
+          {% endif %}
+        ">{{ alert_count }}</span>
         {% endif %}
       </a>
 
