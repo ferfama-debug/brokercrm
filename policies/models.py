@@ -87,13 +87,11 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    # 🔥 NUEVO CAMPO (CLAVE)
     email_vencimiento_enviado = models.BooleanField(
         default=False,
         verbose_name="Email de vencimiento enviado",
     )
 
-    # 🔥 URLs (SUPABASE)
     pdf_poliza = models.TextField(
         blank=True,
         null=True,
@@ -144,7 +142,9 @@ class Policy(models.Model):
 
             while fecha <= fecha_fin:
                 Payment.objects.create(
-                    policy=self, numero_cuota=numero, fecha_vencimiento=fecha
+                    policy=self,
+                    numero_cuota=numero,
+                    fecha_vencimiento=fecha
                 )
                 fecha = fecha + relativedelta(months=frecuencia)
                 numero += 1
@@ -206,31 +206,59 @@ class Payment(models.Model):
 
     ESTADOS = [
         ("PENDIENTE", "Pendiente"),
+        ("PROXIMO", "Próximo a vencer"),
+        ("HOY", "Vence hoy"),
         ("PAGADO", "Pagado"),
         ("VENCIDO", "Vencido"),
     ]
 
     policy = models.ForeignKey(
-        Policy, on_delete=models.CASCADE, related_name="pagos", verbose_name="Póliza"
+        Policy,
+        on_delete=models.CASCADE,
+        related_name="pagos",
+        verbose_name="Póliza",
     )
 
     numero_cuota = models.IntegerField(verbose_name="Número de cuota")
 
     fecha_vencimiento = models.DateField(verbose_name="Fecha de vencimiento")
 
-    fecha_pago = models.DateField(blank=True, null=True, verbose_name="Fecha de pago")
+    fecha_pago = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Fecha de pago"
+    )
 
     estado = models.CharField(
-        max_length=10, choices=ESTADOS, default="PENDIENTE", verbose_name="Estado"
+        max_length=10,
+        choices=ESTADOS,
+        default="PENDIENTE",
+        verbose_name="Estado",
     )
 
     monto = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Monto"
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Monto",
     )
 
     comprobante = models.TextField(
-        blank=True, null=True, verbose_name="URL comprobante"
+        blank=True,
+        null=True,
+        verbose_name="URL comprobante",
     )
+
+    # 🔥 NUEVO
+    recordatorio_enviado = models.BooleanField(
+        default=False,
+        verbose_name="Recordatorio enviado",
+    )
+
+    @property
+    def dias_restantes(self):
+        return (self.fecha_vencimiento - date.today()).days
 
     @property
     def estado_calculado(self):
@@ -238,10 +266,37 @@ class Payment(models.Model):
 
         if self.fecha_pago:
             return "PAGADO"
-        elif self.fecha_vencimiento < hoy:
+
+        dias = (self.fecha_vencimiento - hoy).days
+
+        if dias < 0:
             return "VENCIDO"
+        elif dias == 0:
+            return "HOY"
+        elif dias <= 3:
+            return "PROXIMO"
         else:
             return "PENDIENTE"
+
+    # 🔥 MENSAJE AUTOMÁTICO
+    def mensaje_whatsapp(self):
+        cliente = self.policy.client.nombre_completo()
+        numero_poliza = self.policy.policy_number
+        fecha = self.fecha_vencimiento.strftime("%d/%m/%Y")
+
+        return (
+            f"Hola {cliente}, te recordamos que la cuota {self.numero_cuota} "
+            f"de tu póliza {numero_poliza} vence el {fecha}. "
+            "Por favor, realizá el pago para evitar suspensión de cobertura. "
+            "Cualquier duda estamos para ayudarte."
+        )
+
+    # 🔥 LINK WHATSAPP
+    def whatsapp_link(self):
+        telefono = getattr(self.policy.client, "telefono", "")
+        mensaje = self.mensaje_whatsapp().replace(" ", "%20")
+
+        return f"https://wa.me/{telefono}?text={mensaje}"
 
     def save(self, *args, **kwargs):
         self.estado = self.estado_calculado
