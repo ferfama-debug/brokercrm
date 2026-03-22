@@ -1,358 +1,324 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block content %}
 
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Panel de control</h1>
+    <p class="page-subtitle">Resumen general de cobranzas y producción</p>
+  </div>
+</div>
+
+<!-- ==================== KPIs ==================== -->
+<div class="kpi-grid">
+
+  <div class="kpi-card kpi-red">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Vencidos</span>
+      <span class="kpi-value">{{ cobranzas_vencidas|default:"0" }}</span>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-yellow">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Vencen hoy</span>
+      <span class="kpi-value">{{ cobranzas_hoy|default:"0" }}</span>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-green">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+        <polyline points="16 7 22 7 22 13"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Próximos</span>
+      <span class="kpi-value">{{ cobranzas_proximos|default:"0" }}</span>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <span class="kpi-label">Deuda total</span>
+      <span class="kpi-value kpi-value--mono">$ {{ deuda_total|default:"0" }}</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== GRÁFICOS ==================== -->
+<div class="charts-grid">
+
+  <div class="card chart-card">
+    <div class="chart-card-header">
+      <div>
+        <h2>Producción por compañía</h2>
+        <p class="chart-subtitle">Pólizas activas por aseguradora</p>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="graficoCompanias"></canvas>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="chart-card-header">
+      <div>
+        <h2>Crecimiento mensual</h2>
+        <p class="chart-subtitle">Evolución de pólizas en el año</p>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="graficoCrecimiento"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== ESTILOS ==================== -->
 <style>
 
-body{
-background: radial-gradient(circle at top, #0f172a, #020617);
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
-.dashboard{
-max-width:1300px;
-margin:auto;
-padding:20px;
-color:#e2e8f0;
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+/* KPI CARD */
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
 }
 
-.title{
-margin-bottom:25px;
-font-weight:600;
-color:#f8fafc;
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
 }
 
-h1,h2,h3{
-color:#f1f5f9;
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
 }
 
-p,td,th,span{
-color:#cbd5f5;
+.kpi-red::before   { background: #ef4444; }
+.kpi-yellow::before{ background: #f59e0b; }
+.kpi-green::before { background: var(--green-500); }
+.kpi-blue::before  { background: #3b82f6; }
+
+/* Icono de la KPI */
+.kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* 🔥 BOTONES */
-
-.btn-cobranza{
-background:linear-gradient(135deg,#ef4444,#b91c1c);
-color:white;
-padding:12px 20px;
-border-radius:10px;
-border:none;
-font-weight:bold;
-cursor:pointer;
-margin-bottom:20px;
+.kpi-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
-.btn-cobranza:hover{
-transform:scale(1.05);
+.kpi-red    .kpi-icon { background: rgba(239,68,68,0.1);  color: #fca5a5; }
+.kpi-yellow .kpi-icon { background: rgba(245,158,11,0.1); color: #fcd34d; }
+.kpi-green  .kpi-icon { background: rgba(34,197,94,0.1);  color: var(--green-400); }
+.kpi-blue   .kpi-icon { background: rgba(59,130,246,0.1); color: #93c5fd; }
+
+/* Textos KPI */
+.kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.btn-panel{
-background:linear-gradient(135deg,#22c55e,#15803d);
-color:white;
-padding:10px 18px;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;
-margin-left:10px;
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-.btn-panel:hover{
-transform:scale(1.05);
+.kpi-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
-/* CRM */
-
-.prioridad-urgente{color:#ef4444;font-weight:bold;}
-.prioridad-alta{color:#f97316;font-weight:bold;}
-.prioridad-media{color:#eab308;font-weight:bold;}
-
-.btn-copiar{
-background:linear-gradient(135deg,#2563eb,#1e40af);
-color:white;
-padding:6px 12px;
-border-radius:8px;
-border:none;
-cursor:pointer;
-transition:0.2s;
+.kpi-value--mono {
+  font-family: var(--font-mono);
+  font-size: 22px;
 }
 
-.btn-copiar:hover{
-transform:scale(1.05);
+/* CHARTS GRID */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.btn-whatsapp{
-background:linear-gradient(135deg,#22c55e,#15803d);
-color:white;
-padding:6px 12px;
-border-radius:8px;
-text-decoration:none;
-font-weight:bold;
+@media (max-width: 860px) { .charts-grid { grid-template-columns: 1fr; } }
+
+/* CHART CARD */
+.chart-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-/* TARJETAS */
-
-.radar-container{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:20px;
-margin-bottom:30px;
+.chart-card-header h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
 }
 
-.radar{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
-padding:22px;
-border-radius:16px;
-border:1px solid rgba(255,255,255,0.1);
-text-align:center;
-transition:0.3s;
+.chart-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-.radar:hover{
-transform:translateY(-5px);
-}
-
-.radar span{
-font-size:34px;
-font-weight:bold;
-color:#f8fafc;
-}
-
-/* 🔥 COLORES COBRANZA */
-
-.vencido{border:1px solid #ef4444;}
-.hoy{border:1px solid #f97316;}
-.proximo{border:1px solid #22c55e;}
-
-/* TABLAS */
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-bottom:30px;
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
-border-radius:12px;
-overflow:hidden;
-}
-
-th, td{
-padding:12px;
-text-align:left;
-}
-
-th{
-background:rgba(255,255,255,0.08);
-color:#e2e8f0;
-}
-
-tr{
-border-bottom:1px solid rgba(255,255,255,0.05);
-}
-
-tr:hover{
-background:rgba(255,255,255,0.05);
-}
-
-.grafico-box{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
-padding:20px;
-border-radius:16px;
-margin-bottom:30px;
-}
-
-h2{
-margin-top:40px;
-margin-bottom:10px;
+.chart-wrap {
+  position: relative;
+  height: 220px;
 }
 
 </style>
 
-
-<div class="dashboard">
-
-<h1 class="title">📊 Panel de control</h1>
-
-<button class="btn-cobranza" onclick="ejecutarCobranza()">
-🚀 Ejecutar cobranza del día
-</button>
-
-<!-- ✅ CORRECCIÓN PRO -->
-<a href="{% url 'panel_cobranzas' %}" class="btn-panel">
-📊 Ver panel completo
-</a>
-
-<!-- 🔥 NUEVO BLOQUE COBRANZAS -->
-<div class="radar-container">
-
-<div class="radar vencido">
-<h3>🔴 Vencidos</h3>
-<span>{{ cobranzas_vencidas }}</span>
-</div>
-
-<div class="radar hoy">
-<h3>🟡 Hoy</h3>
-<span>{{ cobranzas_hoy }}</span>
-</div>
-
-<div class="radar proximo">
-<h3>🟢 Próximos</h3>
-<span>{{ cobranzas_proximos }}</span>
-</div>
-
-<div class="radar">
-<h3>💰 Total deuda</h3>
-<span>$ {{ deuda_total }}</span>
-</div>
-
-</div>
-
-
-<h2>🚀 CRM de Ventas</h2>
-<p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
-
-<table>
-<tr>
-<th>Cliente</th>
-<th>Póliza</th>
-<th>Días</th>
-<th>Prioridad</th>
-<th>Acción</th>
-</tr>
-
-{% for c in clientes_llamar %}
-<tr>
-<td>{{ c.cliente }}</td>
-<td>{{ c.numero }}</td>
-<td>{{ c.dias }}</td>
-
-<td>
-{% if c.prioridad == "URGENTE" %}
-<span class="prioridad-urgente">🔴 URGENTE</span>
-{% elif c.prioridad == "ALTA" %}
-<span class="prioridad-alta">🟠 ALTA</span>
-{% else %}
-<span class="prioridad-media">🟡 MEDIA</span>
-{% endif %}
-</td>
-
-<td>
-<button class="btn-copiar" onclick="copiarMensaje('{{ c.mensaje|escapejs }}')">Copiar</button>
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
-</td>
-</tr>
-{% endfor %}
-</table>
-
-<h2>📊 Producción</h2>
-<div class="grafico-box">
-<canvas id="graficoCompanias"></canvas>
-</div>
-
-<h2>📈 Crecimiento</h2>
-<div class="grafico-box">
-<canvas id="graficoCrecimiento"></canvas>
-</div>
-
-<h2>🏆 Clientes</h2>
-<table>
-<tr><th>Cliente</th><th>Pólizas</th><th>Valor</th></tr>
-
-{% for c in clientes_score %}
-<tr>
-<td>{{ c.cliente }}</td>
-<td>{{ c.polizas }}</td>
-<td>{{ c.score }}</td>
-</tr>
-{% endfor %}
-</table>
-
-<h2>📅 Vencimientos</h2>
-<table>
-<tr>
-<th>Cliente</th>
-<th>Póliza</th>
-<th>Compañía</th>
-<th>Fecha</th>
-<th>Días</th>
-</tr>
-
-{% for p in polizas_por_vencer %}
-<tr>
-<td>{{ p.cliente }}</td>
-<td>{{ p.numero }}</td>
-<td>{{ p.compania }}</td>
-<td>{{ p.vencimiento|date:"d/m/Y" }}</td>
-<td>{{ p.dias }}</td>
-</tr>
-{% endfor %}
-</table>
-
-</div>
-
+<!-- ==================== CHART.JS ==================== -->
 <script>
+(function () {
 
-function copiarMensaje(texto){
-navigator.clipboard.writeText(texto);
-alert("Mensaje copiado");
-}
+  const companias = JSON.parse('{{ companias|safe }}');
+  const cantidades = JSON.parse('{{ cantidades|safe }}');
+  const meses     = JSON.parse('{{ meses|safe }}');
+  const totales   = JSON.parse('{{ crecimiento_totales|safe }}');
 
-function ejecutarCobranza(){
+  /* Colores compartidos */
+  const green      = '#22c55e';
+  const greenLight = 'rgba(34,197,94,0.15)';
+  const greenFade  = 'rgba(34,197,94,0)';
+  const gridColor  = 'rgba(52,211,100,0.06)';
+  const textColor  = '#4d7c60';
 
-    const cobranzas = [];
-
-    {% for c in cobranzas_urgentes %}
-    cobranzas.push({
-        telefono: "{{ c.telefono|default:'' }}",
-        mensaje: "{{ c.mensaje|escapejs }}"
-    });
-    {% endfor %}
-
-    if(cobranzas.length === 0){
-        alert("No hay cobranzas hoy");
-        return;
+  const baseOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0a1610',
+        borderColor: 'rgba(52,211,100,0.2)',
+        borderWidth: 1,
+        titleColor: '#86efac',
+        bodyColor: '#ecfdf5',
+        padding: 10,
+        cornerRadius: 8,
+      }
+    },
+    scales: {
+      x: {
+        grid:  { color: gridColor },
+        ticks: { color: textColor, font: { size: 11, family: "'DM Sans', sans-serif" } },
+        border:{ color: 'transparent' }
+      },
+      y: {
+        grid:  { color: gridColor },
+        ticks: { color: textColor, font: { size: 11, family: "'DM Sans', sans-serif" }, stepSize: 1 },
+        border:{ color: 'transparent' },
+        beginAtZero: true
+      }
     }
+  };
 
-    let i = 0;
+  /* --- Gráfico de barras: Producción --- */
+  new Chart(document.getElementById('graficoCompanias'), {
+    type: 'bar',
+    data: {
+      labels: companias,
+      datasets: [{
+        data: cantidades,
+        backgroundColor: 'rgba(34,197,94,0.25)',
+        borderColor: green,
+        borderWidth: 1.5,
+        borderRadius: 6,
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(34,197,94,0.4)',
+      }]
+    },
+    options: baseOptions
+  });
 
-    function abrir(){
-        if(i >= cobranzas.length) return;
+  /* --- Gráfico de línea: Crecimiento --- */
+  const ctxLine = document.getElementById('graficoCrecimiento');
+  const gradLine = ctxLine.getContext('2d').createLinearGradient(0, 0, 0, 220);
+  gradLine.addColorStop(0, greenLight);
+  gradLine.addColorStop(1, greenFade);
 
-        let url = "https://wa.me/" + cobranzas[i].telefono + "?text=" + encodeURIComponent(cobranzas[i].mensaje);
+  new Chart(ctxLine, {
+    type: 'line',
+    data: {
+      labels: meses,
+      datasets: [{
+        data: totales,
+        borderColor: green,
+        borderWidth: 2,
+        backgroundColor: gradLine,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: green,
+        pointBorderColor: '#050d0a',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: baseOptions
+  });
 
-        window.open(url, "_blank");
-
-        i++;
-        setTimeout(abrir, 800);
-    }
-
-    abrir();
-}
-
-const companias = JSON.parse('{{ companias|safe }}');
-const cantidades = JSON.parse('{{ cantidades|safe }}');
-
-new Chart(document.getElementById('graficoCompanias'), {
-type: 'bar',
-data: {
-labels: companias,
-datasets: [{ data: cantidades }]
-}
-});
-
-const meses = JSON.parse('{{ meses|safe }}');
-const totales = JSON.parse('{{ crecimiento_totales|safe }}');
-
-new Chart(document.getElementById('graficoCrecimiento'), {
-type: 'line',
-data: {
-labels: meses,
-datasets: [{ data: totales }]
-}
-});
-
+})();
 </script>
 
 {% endblock %}

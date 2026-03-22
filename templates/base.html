@@ -6,206 +6,698 @@
 <head>
 
 <meta charset="UTF-8">
-<title>CRM Fuerza Natural Broker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuerza Natural Broker — CRM</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="{% static 'images/css/crm.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
-/* =========================
-   BASE PRO
-========================= */
+/* =============================================
+   TOKENS
+============================================= */
 
-body{
-margin:0;
-font-family:Inter, Arial, Helvetica, sans-serif;
-background:#0b1220;
-color:#e5e7eb;
+:root {
+  --bg-base:       #050d0a;
+  --bg-surface:    #0a1610;
+  --bg-card:       #0f2018;
+  --bg-card-hover: #132619;
+  --bg-sidebar:    #060f0b;
+
+  --border:        rgba(52, 211, 100, 0.08);
+  --border-strong: rgba(52, 211, 100, 0.18);
+
+  --green-100: #d1fae5;
+  --green-300: #6ee7b7;
+  --green-400: #34d364;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-900: #052e16;
+
+  --text-primary:   #ecfdf5;
+  --text-secondary: #86efac;
+  --text-muted:     #4d7c60;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  --sidebar-w: 248px;
+  --topbar-h:  60px;
+
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.35);
+  --shadow-glow: 0 0 0 1px rgba(52, 211, 100, 0.12), 0 8px 32px rgba(22, 163, 74, 0.08);
 }
 
-/* =========================
-   CONTENIDO (MEJOR ESPACIADO)
-========================= */
+/* =============================================
+   RESET & BASE
+============================================= */
 
-.content{
-flex:1;
-padding:40px; /* 🔥 más aire */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.content{
-color:#e5e7eb;
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* =========================
-   TOPBAR (MAS PREMIUM)
-========================= */
+/* =============================================
+   TOPBAR
+============================================= */
 
-.topbar{
-height:60px;
-background:rgba(15,23,42,0.7);
-backdrop-filter:blur(12px);
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 30px;
-border-bottom:1px solid rgba(255,255,255,0.05);
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--topbar-h);
+  background: rgba(5, 13, 10, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 0 0;
+  z-index: 100;
 }
 
-.logo{
-font-weight:600;
-font-size:16px;
-letter-spacing:0.5px;
-color:#22c55e;
+/* Logo en el topbar — ocupa el ancho del sidebar */
+.topbar-brand {
+  width: var(--sidebar-w);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
-/* =========================
+.brand-isotipo {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brand-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-400);
+  letter-spacing: 0.02em;
+}
+
+.brand-sub {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Controles derecha del topbar */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Campana de alertas ---- */
+.alert-bell-wrap {
+  position: relative;
+}
+
+.alert-bell-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.alert-bell-btn:hover {
+  background: rgba(52, 211, 100, 0.07);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.alert-bell-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.alert-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  background: var(--green-400);
+  border-radius: 50%;
+  border: 2px solid var(--bg-base);
+}
+
+/* Dropdown de alertas */
+.alert-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  z-index: 200;
+}
+
+.alert-bell-wrap:hover .alert-dropdown,
+.alert-bell-wrap:focus-within .alert-dropdown {
+  display: block;
+}
+
+.alert-dropdown-header {
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.alert-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.alert-item:last-child { border-bottom: none; }
+.alert-item:hover { background: rgba(52, 211, 100, 0.05); }
+
+.alert-item.warning { border-left: 3px solid #f59e0b; }
+.alert-item.danger  { border-left: 3px solid #ef4444; }
+.alert-item.info    { border-left: 3px solid var(--green-500); }
+
+/* ---- Usuario ---- */
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: default;
+  transition: all 0.2s;
+}
+
+.user-chip:hover {
+  border-color: var(--border-strong);
+  background: rgba(52, 211, 100, 0.05);
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-700), var(--green-900));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-300);
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* =============================================
    LAYOUT
-========================= */
+============================================= */
 
-.layout{
-display:flex;
-min-height:calc(100vh - 60px);
+.layout {
+  display: flex;
+  min-height: 100vh;
+  padding-top: var(--topbar-h);
 }
 
-/* =========================
-   SIDEBAR (MEJOR HOVER)
-========================= */
+/* =============================================
+   SIDEBAR
+============================================= */
 
-.sidebar{
-width:240px;
-background:#020617;
-border-right:1px solid rgba(255,255,255,0.04);
-padding-top:20px;
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 0 24px;
+  display: flex;
+  flex-direction: column;
+  z-index: 90;
 }
 
-.sidebar a{
-display:block;
-color:#94a3b8;
-padding:14px 25px;
-text-decoration:none;
-font-size:14px;
-border-left:3px solid transparent;
-transition:all 0.2s ease;
+/* Scroll suave */
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* Grupos del nav */
+.nav-group {
+  margin-bottom: 4px;
 }
 
-.sidebar a:hover{
-background:rgba(34,197,94,0.12);
-border-left:3px solid #22c55e;
-color:#ffffff;
-transform:translateX(4px); /* 🔥 detalle pro */
+.nav-group-label {
+  padding: 12px 20px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-/* =========================
-   CARDS (GRAN MEJORA 🔥)
-========================= */
-
-.dashboard div,
-.radar,
-.grafico-box,
-table{
-background:#0f172a !important;
-border:1px solid rgba(255,255,255,0.05) !important;
-border-radius:16px;
-color:#e5e7eb !important;
-box-shadow:
-0 10px 30px rgba(0,0,0,0.35),
-0 2px 6px rgba(0,0,0,0.2);
-transition:0.2s;
+/* Items del nav */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: all 0.18s ease;
+  position: relative;
 }
 
-/* 🔥 HOVER SUAVE EN CARDS */
-.dashboard div:hover,
-.radar:hover,
-.grafico-box:hover{
-transform:translateY(-3px);
-box-shadow:
-0 15px 40px rgba(0,0,0,0.45),
-0 4px 10px rgba(0,0,0,0.25);
+.nav-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.18s;
 }
 
-/* =========================
-   TITULOS
-========================= */
-
-h1,h2,h3{
-color:#f8fafc !important;
-font-weight:600;
+.nav-item:hover {
+  color: var(--text-primary);
+  background: rgba(52, 211, 100, 0.06);
+  border-left-color: var(--green-700);
 }
 
-/* =========================
+.nav-item:hover svg {
+  opacity: 1;
+}
+
+.nav-item.active {
+  color: var(--green-400);
+  background: rgba(52, 211, 100, 0.09);
+  border-left-color: var(--green-400);
+  font-weight: 500;
+}
+
+.nav-item.active svg {
+  opacity: 1;
+}
+
+/* Badge de alertas en nav */
+.nav-badge {
+  margin-left: auto;
+  background: var(--green-900);
+  color: var(--green-400);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  border-radius: 99px;
+  border: 1px solid var(--border-strong);
+}
+
+/* Divisor en sidebar */
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 20px;
+}
+
+/* Item de logout (abajo del todo) */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-item.danger:hover {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.07);
+  border-left-color: #ef4444;
+}
+
+/* =============================================
+   CONTENIDO PRINCIPAL
+============================================= */
+
+.content {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  padding: 32px 36px;
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+/* =============================================
+   TIPOGRAFÍA GLOBAL
+============================================= */
+
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* =============================================
+   CARDS
+============================================= */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-glow);
+}
+
+/* =============================================
    TABLAS
-========================= */
+============================================= */
 
-table{
-overflow:hidden;
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
-/* header */
-th{
-background:#020617 !important;
-color:#94a3b8 !important;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
 }
 
-/* contenido */
-td{
-background:#ffffff !important;
-color:#111827 !important;
+thead th {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
 }
 
-/* hover */
-tr{
-transition:0.2s;
+tbody td {
+  padding: 12px 16px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  vertical-align: middle;
 }
 
-tr:hover td{
-background:#2563eb !important;
-color:#ffffff !important;
+tbody tr:last-child td {
+  border-bottom: none;
 }
 
-/* =========================
-   BOTONES BASE 🔥
-========================= */
-
-button,
-.btn,
-a.btn{
-border:none;
-border-radius:10px;
-padding:8px 14px;
-font-weight:500;
-cursor:pointer;
-transition:all 0.2s ease;
+tbody tr {
+  transition: background 0.15s;
 }
 
-/* hover botones */
-button:hover,
-a.btn:hover{
-transform:translateY(-1px);
-opacity:0.95;
+tbody tr:hover td {
+  background: rgba(52, 211, 100, 0.04);
 }
 
-/* =========================
-   ALERTAS
-========================= */
+/* =============================================
+   BOTONES
+============================================= */
 
-.alert-dropdown{
-background:#020617;
-border:1px solid rgba(255,255,255,0.05);
-border-radius:10px;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  white-space: nowrap;
 }
 
-/* USER */
-
-.user-info{
-font-size:13px;
-color:#94a3b8;
+.btn svg {
+  width: 14px;
+  height: 14px;
 }
 
-/* RESPONSIVE */
+.btn-primary {
+  background: var(--green-600);
+  color: #fff;
+}
 
-@media (max-width:900px){
-.sidebar{width:200px;}
+.btn-primary:hover {
+  background: var(--green-500);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.35);
+}
+
+.btn-secondary {
+  background: rgba(52, 211, 100, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: rgba(52, 211, 100, 0.14);
+  border-color: var(--border-strong);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+  background: rgba(52, 211, 100, 0.07);
+  color: var(--text-secondary);
+}
+
+/* =============================================
+   BADGES / PILLS
+============================================= */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.badge-green {
+  background: rgba(22, 163, 74, 0.15);
+  color: var(--green-400);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+}
+
+.badge-yellow {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-red {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-gray {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* =============================================
+   INPUTS Y FORMULARIOS
+============================================= */
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--text-primary);
+  transition: border-color 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.form-control:focus {
+  border-color: var(--green-600);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234d7c60' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+/* =============================================
+   PÁGINA — HEADER DE SECCIÓN
+============================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+
+@media (max-width: 960px) {
+  :root { --sidebar-w: 64px; }
+
+  .nav-group-label,
+  .nav-item span,
+  .nav-badge,
+  .brand-text,
+  .sidebar-divider {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 12px;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .nav-item svg { width: 20px; height: 20px; }
+
+  .topbar-brand {
+    justify-content: center;
+    padding: 0 12px;
+  }
+
+  .content { padding: 20px 16px; }
+}
+
+@media (max-width: 600px) {
+  .user-name { display: none; }
+  .content { padding: 16px 12px; }
 }
 
 </style>
@@ -214,66 +706,170 @@ color:#94a3b8;
 
 <body>
 
-<div class="topbar">
+<!-- ==================== TOPBAR ==================== -->
+<header class="topbar">
 
-<div class="logo">
-Fuerza Natural Broker
-</div>
+  <a href="/" class="topbar-brand">
 
-<div class="topbar-right">
+    <!-- Isotipo SVG: hoja estilizada + inicial F -->
+    <svg class="brand-isotipo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="#0a1f12"/>
+      <!-- Hoja -->
+      <path d="M16 6 C16 6, 26 10, 26 20 C26 26, 20 28, 16 26 C12 28, 6 26, 6 20 C6 10, 16 6 Z"
+            fill="#15803d" opacity="0.9"/>
+      <!-- Nervio central de la hoja -->
+      <path d="M16 26 L16 10" stroke="#34d364" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Nervios laterales -->
+      <path d="M16 20 Q12 18, 9 19" stroke="#34d364" stroke-width="0.8" stroke-linecap="round" opacity="0.7"/>
+      <path d="M16 16 Q20 14, 23 15" stroke="#34d364" stroke-width="0.8" stroke-linecap="round" opacity="0.7"/>
+      <path d="M16 23 Q20 21, 23 22" stroke="#34d364" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+    </svg>
 
-<div class="alert-bell">
-🔔 <span>{{ alert_count }}</span>
+    <div class="brand-text">
+      <span class="brand-name">Fuerza Natural</span>
+      <span class="brand-sub">Broker CRM</span>
+    </div>
 
-<div class="alert-dropdown">
-<div class="alert-dropdown-header">Últimas alertas</div>
+  </a>
 
-{% for alerta in ultimas_alertas %}
-<div class="alert-item {{ alerta.level|lower }}">
-{{ alerta.message }}
-</div>
-{% empty %}
-<div class="alert-item">No hay alertas</div>
-{% endfor %}
+  <div class="topbar-right">
 
-</div>
-</div>
+    <!-- Campana de alertas -->
+    <div class="alert-bell-wrap">
+      <button class="alert-bell-btn" aria-label="Ver alertas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        {% if alert_count > 0 %}
+        <span class="alert-badge"></span>
+        {% endif %}
+      </button>
 
-<div class="user-info">
-👤 {{ request.user.username }}
-</div>
+      <div class="alert-dropdown">
+        <div class="alert-dropdown-header">
+          Alertas
+          {% if alert_count > 0 %}
+          &nbsp;·&nbsp; {{ alert_count }} nueva{{ alert_count|pluralize }}
+          {% endif %}
+        </div>
+        {% for alerta in ultimas_alertas %}
+        <div class="alert-item {{ alerta.level|lower }}">{{ alerta.message }}</div>
+        {% empty %}
+        <div class="alert-item" style="color: var(--text-muted)">Sin alertas pendientes</div>
+        {% endfor %}
+      </div>
+    </div>
 
-</div>
+    <!-- Usuario -->
+    <div class="user-chip">
+      <div class="user-avatar">
+        {{ request.user.username|first|upper }}
+      </div>
+      <span class="user-name">{{ request.user.username }}</span>
+    </div>
 
-</div>
+  </div>
 
+</header>
+
+<!-- ==================== LAYOUT ==================== -->
 <div class="layout">
 
-<div class="sidebar">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
 
-<a href="/">🏠 Dashboard</a>
-<a href="/clientes/">👥 Clientes</a>
-<a href="/polizas/">📄 Pólizas</a>
-<a href="/polizas/nueva/">➕ Nueva póliza</a>
+    <div class="nav-group">
+      <div class="nav-group-label">Principal</div>
 
-<a href="/alertas/">
-🔔 Alertas ({{ alert_count }})
-</a>
+      <a href="/" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+    </div>
 
-<a href="/admin/">⚙️ Administración</a>
-<a href="/accounts/logout/">🚪 Cerrar sesión</a>
+    <div class="nav-group">
+      <div class="nav-group-label">Gestión</div>
 
-</div>
+      <a href="/clientes/" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>Clientes</span>
+      </a>
 
-<div class="content">
+      <a href="/polizas/" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span>Pólizas</span>
+      </a>
 
-{% block content %}
-{% endblock %}
+      <a href="/polizas/nueva/" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <span>Nueva póliza</span>
+      </a>
+    </div>
 
-</div>
+    <div class="nav-group">
+      <div class="nav-group-label">Sistema</div>
+
+      <a href="/alertas/" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span>Alertas</span>
+        {% if alert_count > 0 %}
+        <span class="nav-badge">{{ alert_count }}</span>
+        {% endif %}
+      </a>
+
+      <a href="/admin/" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+        </svg>
+        <span>Administración</span>
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-footer">
+      <a href="/accounts/logout/" class="nav-item danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Cerrar sesión</span>
+      </a>
+    </div>
+
+  </nav>
+
+  <!-- CONTENIDO -->
+  <main class="content">
+    {% block content %}
+    {% endblock %}
+  </main>
 
 </div>
 
 </body>
-
 </html>
