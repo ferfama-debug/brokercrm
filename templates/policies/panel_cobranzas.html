@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+.container-cobranzas{
+max-width:1200px;
+margin:auto;
+padding:20px;
+}
+
+.titulo{
+font-size:28px;
+font-weight:bold;
+margin-bottom:20px;
+color:#fff;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:20px;
+}
+
+.card{
+padding:15px;
+border-radius:12px;
+color:#fff;
+}
+
+.vencidos{background:#7f1d1d;}
+.hoy{background:#92400e;}
+.proximos{background:#065f46;}
+
+.card h3{
+margin-bottom:10px;
+}
+
+.item{
+background:rgba(255,255,255,0.1);
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+}
+
+.btn{
+display:inline-block;
+margin-top:5px;
+padding:5px 10px;
+background:#22c55e;
+color:#000;
+border-radius:6px;
+text-decoration:none;
+font-size:12px;
+}
+
+.btn:hover{
+background:#16a34a;
+}
+
+</style>
+
+
+<div class="container-cobranzas">
+
+<div class="titulo">💰 Panel de Cobranzas</div>
+
+<div class="grid">
+
+<!-- 🔴 VENCIDOS -->
+<div class="card vencidos">
+<h3>🔴 Vencidos</h3>
+
+{% for pago in vencidos %}
+<div class="item">
+<strong>{{ pago.policy.client }}</strong><br>
+Póliza: {{ pago.policy.policy_number }}<br>
+Cuota: {{ pago.numero_cuota }}<br>
+Venció: {{ pago.fecha_vencimiento }}
+
+<br>
+
+<a href="{{ pago.whatsapp_link }}" target="_blank" class="btn">
+📲 WhatsApp
+</a>
+
+</div>
+{% empty %}
+<p>No hay vencidos</p>
+{% endfor %}
+
+</div>
+
+
+<!-- 🟡 HOY -->
+<div class="card hoy">
+<h3>🟡 Vence Hoy</h3>
+
+{% for pago in hoy %}
+<div class="item">
+<strong>{{ pago.policy.client }}</strong><br>
+Póliza: {{ pago.policy.policy_number }}<br>
+Cuota: {{ pago.numero_cuota }}<br>
+
+<a href="{{ pago.whatsapp_link }}" target="_blank" class="btn">
+📲 WhatsApp
+</a>
+
+</div>
+{% empty %}
+<p>No hay pagos hoy</p>
+{% endfor %}
+
+</div>
+
+
+<!-- 🟢 PROXIMOS -->
+<div class="card proximos">
+<h3>🟢 Próximos</h3>
+
+{% for pago in proximos %}
+<div class="item">
+<strong>{{ pago.policy.client }}</strong><br>
+Póliza: {{ pago.policy.policy_number }}<br>
+Cuota: {{ pago.numero_cuota }}<br>
+Vence: {{ pago.fecha_vencimiento }}
+
+<a href="{{ pago.whatsapp_link }}" target="_blank" class="btn">
+📲 WhatsApp
+</a>
+
+</div>
+{% empty %}
+<p>No hay próximos vencimientos</p>
+{% endfor %}
+
+</div>
+
+</div>
+</div>
+
+{% endblock %}

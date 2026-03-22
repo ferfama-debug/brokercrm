@@ -9,16 +9,12 @@ body{
 background: radial-gradient(circle at top, #0f172a, #020617);
 }
 
-/* CONTENEDOR */
-
 .dashboard{
 max-width:1300px;
 margin:auto;
 padding:20px;
 color:#e2e8f0;
 }
-
-/* TITULOS */
 
 .title{
 margin-bottom:25px;
@@ -34,7 +30,7 @@ p,td,th,span{
 color:#cbd5f5;
 }
 
-/* BOTON COBRANZA 🔥 */
+/* 🔥 BOTONES */
 
 .btn-cobranza{
 background:linear-gradient(135deg,#ef4444,#b91c1c);
@@ -51,13 +47,25 @@ margin-bottom:20px;
 transform:scale(1.05);
 }
 
-/* CRM PRO */
+.btn-panel{
+background:linear-gradient(135deg,#22c55e,#15803d);
+color:white;
+padding:10px 18px;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+margin-left:10px;
+}
+
+.btn-panel:hover{
+transform:scale(1.05);
+}
+
+/* CRM */
 
 .prioridad-urgente{color:#ef4444;font-weight:bold;}
 .prioridad-alta{color:#f97316;font-weight:bold;}
 .prioridad-media{color:#eab308;font-weight:bold;}
-
-/* BOTONES */
 
 .btn-copiar{
 background:linear-gradient(135deg,#2563eb,#1e40af);
@@ -111,6 +119,12 @@ font-weight:bold;
 color:#f8fafc;
 }
 
+/* 🔥 COLORES COBRANZA */
+
+.vencido{border:1px solid #ef4444;}
+.hoy{border:1px solid #f97316;}
+.proximo{border:1px solid #22c55e;}
+
 /* TABLAS */
 
 table{
@@ -141,8 +155,6 @@ tr:hover{
 background:rgba(255,255,255,0.05);
 }
 
-/* GRAFICOS */
-
 .grafico-box{
 background:rgba(255,255,255,0.05);
 backdrop-filter:blur(10px);
@@ -150,8 +162,6 @@ padding:20px;
 border-radius:16px;
 margin-bottom:30px;
 }
-
-/* SEPARADORES */
 
 h2{
 margin-top:40px;
@@ -168,6 +178,36 @@ margin-bottom:10px;
 <button class="btn-cobranza" onclick="ejecutarCobranza()">
 🚀 Ejecutar cobranza del día
 </button>
+
+<a href="/policies/cobranzas/" class="btn-panel">
+📊 Ver panel completo
+</a>
+
+<!-- 🔥 NUEVO BLOQUE COBRANZAS -->
+<div class="radar-container">
+
+<div class="radar vencido">
+<h3>🔴 Vencidos</h3>
+<span>{{ cobranzas_vencidas }}</span>
+</div>
+
+<div class="radar hoy">
+<h3>🟡 Hoy</h3>
+<span>{{ cobranzas_hoy }}</span>
+</div>
+
+<div class="radar proximo">
+<h3>🟢 Próximos</h3>
+<span>{{ cobranzas_proximos }}</span>
+</div>
+
+<div class="radar">
+<h3>💰 Total deuda</h3>
+<span>$ {{ deuda_total }}</span>
+</div>
+
+</div>
+
 
 <h2>🚀 CRM de Ventas</h2>
 <p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
@@ -204,13 +244,6 @@ margin-bottom:10px;
 </tr>
 {% endfor %}
 </table>
-
-<div class="radar-container">
-<div class="radar"><h3>💰 Deuda</h3><span>$ {{ deuda_total }}</span></div>
-<div class="radar"><h3>🔴 Vencidas</h3><span>{{ cuotas_vencidas }}</span></div>
-<div class="radar"><h3>🟡 Cobros</h3><span>$ {{ proximos_pagos }}</span></div>
-<div class="radar"><h3>📄 Pendientes</h3><span>{{ cuotas_pendientes }}</span></div>
-</div>
 
 <h2>📊 Producción</h2>
 <div class="grafico-box">

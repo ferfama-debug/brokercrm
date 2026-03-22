@@ -2,7 +2,7 @@ from django.shortcuts import render
 from clients.models import Client
 from policies.models import Policy, Payment
 from django.contrib.auth.models import User
-from datetime import date
+from datetime import date, timedelta
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 
@@ -10,6 +10,7 @@ from django.db.models.functions import TruncMonth
 def home(request):
 
     hoy = date.today()
+    en_3_dias = hoy + timedelta(days=3)
 
     # 🔥 CONTADORES GENERALES
     clientes = Client.objects.count()
@@ -104,21 +105,39 @@ def home(request):
                 "orden": 3
             })
 
-    # 🔥 ORDEN AUTOMÁTICO (CLAVE NIVEL 3)
+    # 🔥 ORDEN AUTOMÁTICO
     clientes_llamar = sorted(clientes_llamar, key=lambda x: (x["orden"], x["dias"]))
 
-    # 🔥 FILTRO INTELIGENTE (SOLO URGENTES SI EXISTEN)
     urgentes = [c for c in clientes_llamar if c["prioridad"] == "URGENTE"]
 
     if urgentes:
         clientes_llamar = urgentes
 
-    # 🔥 CONTADOR DEL DÍA
     clientes_hoy = len(clientes_llamar)
 
-    # 💰 COBRANZA
-    pagos = Payment.objects.all()
+    # =========================================
+    # 💰 COBRANZAS (🔥 NUEVO BLOQUE IMPORTANTE)
+    # =========================================
 
+    pagos = Payment.objects.select_related("policy", "policy__client")
+
+    cobranzas_vencidas = pagos.filter(
+        fecha_vencimiento__lt=hoy,
+        fecha_pago__isnull=True
+    ).count()
+
+    cobranzas_hoy = pagos.filter(
+        fecha_vencimiento=hoy,
+        fecha_pago__isnull=True
+    ).count()
+
+    cobranzas_proximos = pagos.filter(
+        fecha_vencimiento__gt=hoy,
+        fecha_vencimiento__lte=en_3_dias,
+        fecha_pago__isnull=True
+    ).count()
+
+    # 💰 TOTALES (dejamos lo tuyo intacto)
     deuda_total = pagos.filter(
         estado="VENCIDO"
     ).aggregate(total=Sum("monto"))["total"] or 0
@@ -134,6 +153,12 @@ def home(request):
         estado="PENDIENTE",
         fecha_vencimiento__gte=hoy
     ).count()
+
+    # 🔥 PARA BOTÓN AUTOMÁTICO
+    cobranzas_urgentes = pagos.filter(
+        fecha_vencimiento__lte=hoy,
+        fecha_pago__isnull=True
+    )
 
     # ⭐ SCORE
     clientes_score_db = Client.objects.annotate(
@@ -184,7 +209,13 @@ def home(request):
         "usuarios": usuarios,
         "alertas": len(polizas_por_vencer),
 
-        "clientes_hoy": clientes_hoy,  # 🔥 NUEVO
+        "clientes_hoy": clientes_hoy,
+
+        # 🔥 COBRANZAS NUEVAS
+        "cobranzas_vencidas": cobranzas_vencidas,
+        "cobranzas_hoy": cobranzas_hoy,
+        "cobranzas_proximos": cobranzas_proximos,
+        "cobranzas_urgentes": cobranzas_urgentes,
 
         # 💰
         "deuda_total": deuda_total,
