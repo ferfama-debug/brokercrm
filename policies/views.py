@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Policy, Payment
 from clients.models import Client
-from datetime import date
+from datetime import date, timedelta
 
 from django.core.mail import send_mail
 from django.conf import settings
@@ -15,6 +15,49 @@ from django.contrib import messages
 def get_subir_archivo():
     from core.supabase_client import subir_archivo_supabase
     return subir_archivo_supabase
+
+
+# ================================
+# 🔴 PANEL DE COBRANZAS (NUEVO 🔥)
+# ================================
+@login_required
+def panel_cobranzas(request):
+
+    hoy = date.today()
+    en_3_dias = hoy + timedelta(days=3)
+
+    if request.user.is_superuser:
+        pagos = Payment.objects.select_related("policy", "policy__client")
+    else:
+        pagos = Payment.objects.filter(
+            policy__client__producer=request.user
+        ).select_related("policy", "policy__client")
+
+    vencidos = pagos.filter(
+        fecha_vencimiento__lt=hoy,
+        fecha_pago__isnull=True
+    )
+
+    hoy_vencen = pagos.filter(
+        fecha_vencimiento=hoy,
+        fecha_pago__isnull=True
+    )
+
+    proximos = pagos.filter(
+        fecha_vencimiento__gt=hoy,
+        fecha_vencimiento__lte=en_3_dias,
+        fecha_pago__isnull=True
+    )
+
+    return render(
+        request,
+        "policies/panel_cobranzas.html",
+        {
+            "vencidos": vencidos,
+            "hoy": hoy_vencen,
+            "proximos": proximos,
+        },
+    )
 
 
 # 🔴 LISTA POLIZAS PRO + MULTIUSUARIO
@@ -200,7 +243,7 @@ def renovar_poliza(request, poliza_id):
     )
 
 
-# 🔴 PAGOS CON COMPROBANTE (🔥 CLAVE)
+# 🔴 PAGOS CON COMPROBANTE
 @login_required
 def marcar_pago(request, pago_id):
 
@@ -214,7 +257,6 @@ def marcar_pago(request, pago_id):
 
         comprobante = request.FILES.get("comprobante")
 
-        # 🔥 SUBIR A SUPABASE
         if comprobante:
             subir_archivo = get_subir_archivo()
             comprobante_url = subir_archivo(comprobante, "comprobantes_pagos")
@@ -222,13 +264,13 @@ def marcar_pago(request, pago_id):
 
         pago.estado = "PAGADO"
         pago.fecha_pago = date.today()
+        pago.recordatorio_enviado = True  # 🔥 evita volver a avisar
         pago.save()
 
         messages.success(request, "📎 Comprobante cargado y pago registrado")
 
         return redirect(f"/clientes/ver/{pago.policy.client.id}/")
 
-    # 🔥 SI ES GET → MOSTRAR FORM
     return render(
         request,
         "policies/cargar_comprobante.html",
@@ -238,7 +280,7 @@ def marcar_pago(request, pago_id):
     )
 
 
-# 🔴 EMAIL PROFESIONAL + MENSAJE CUPONERA
+# 🔴 EMAIL PROFESIONAL
 @login_required
 def enviar_poliza(request, poliza_id):
 
