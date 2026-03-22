@@ -231,22 +231,23 @@
 }
 
 .tabla-polizas thead th {
-  background: var(--bg-surface);
-  color: var(--text-muted);
+  background: #0a1610 !important;
+  color: #4d7c60 !important;
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 10px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(52, 211, 100, 0.08);
 }
 
-.tabla-polizas tbody td {
+.tabla-polizas tbody td,
+.tabla-polizas tbody td * {
   padding: 11px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(52, 211, 100, 0.08);
   color: #ecfdf5 !important;
-  background: transparent !important;
+  background: #0f2018 !important;
   vertical-align: middle;
 }
 
@@ -254,8 +255,9 @@
   border-bottom: none;
 }
 
-.tabla-polizas tbody tr:hover td {
-  background: rgba(52, 211, 100, 0.04) !important;
+.tabla-polizas tbody tr:hover td,
+.tabla-polizas tbody tr:hover td * {
+  background: #132619 !important;
 }
 
 .mono-val {
@@ -266,7 +268,7 @@
 
 .tipo-pill {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #86efac !important;
 }
 
 /* EMPTY */
