@@ -9,7 +9,11 @@
 </div>
 
 <!-- FILTROS -->
+<<<<<<< HEAD
 <div class="filtros-wrap">
+=======
+<div style="margin-bottom:20px; display:flex; gap:8px; flex-wrap:wrap;">
+>>>>>>> 202c118d (cambios)
   <a href="{% url 'alerts:alertas' %}" class="filtro-btn filtro-all">Todas</a>
   <a href="?nivel=CRITICA" class="filtro-btn filtro-critica">Críticas</a>
   <a href="?nivel=ALTA" class="filtro-btn filtro-alta">Altas</a>
@@ -18,6 +22,7 @@
 
 <!-- CLIENTES CON DEUDA -->
 {% if clientes_con_deuda %}
+<<<<<<< HEAD
 <div class="alerta-seccion">
   <div class="seccion-header seccion-rojo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -27,10 +32,19 @@
     </svg>
     Clientes con deuda
     <span class="seccion-count">{{ clientes_con_deuda|length }}</span>
+=======
+<div class="alerta-seccion" style="margin-bottom:16px;">
+  <div class="seccion-header seccion-rojo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    Clientes con deuda
+>>>>>>> 202c118d (cambios)
   </div>
   <div class="seccion-items">
     {% for cliente in clientes_con_deuda %}
     <div class="alerta-item alerta-item-rojo">
+<<<<<<< HEAD
       <div class="alerta-item-left">
         <div class="alerta-avatar">{{ cliente.first_name|first|upper }}{{ cliente.last_name|first|upper }}</div>
         <div class="alerta-info">
@@ -49,6 +63,20 @@
         <a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{ cliente.first_name }},%20tenés%20deuda%20pendiente%20en%20tu%20póliza.%20¿Querés%20que%20te%20ayude%20a%20regularizarla?"
            target="_blank" class="btn-whatsapp">
           <svg viewBox="0 0 24 24" fill="currentColor">
+=======
+      <div class="alerta-left">
+        <div class="alerta-avatar">{{ cliente.first_name|first|upper }}{{ cliente.last_name|first|upper }}</div>
+        <div>
+          <div class="alerta-nombre">{{ cliente }}</div>
+          <div class="alerta-meta">Deuda: <strong style="color:#fca5a5;font-family:var(--font-mono);">${{ cliente.total_deuda_vencida }}</strong></div>
+        </div>
+      </div>
+      <div class="alerta-acciones">
+        <a href="/clientes/ver/{{ cliente.id }}/" class="btn btn-secondary btn-sm">Ver cliente</a>
+        <a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{ cliente.first_name }},%20tenés%20deuda%20pendiente%20en%20tu%20póliza.%20¿Querés%20que%20te%20ayude%20a%20regularizarla?"
+           target="_blank" class="btn-whatsapp btn-whatsapp-sm">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+>>>>>>> 202c118d (cambios)
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
             <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
           </svg>
@@ -63,6 +91,7 @@
 
 <!-- PÓLIZAS POR VENCER -->
 {% if polizas_por_vencer %}
+<<<<<<< HEAD
 <div class="alerta-seccion">
   <div class="seccion-header seccion-amarillo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -71,10 +100,19 @@
     </svg>
     Pólizas por vencer
     <span class="seccion-count">{{ polizas_por_vencer|length }}</span>
+=======
+<div class="alerta-seccion" style="margin-bottom:16px;">
+  <div class="seccion-header seccion-amarillo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    Pólizas por vencer
+>>>>>>> 202c118d (cambios)
   </div>
   <div class="seccion-items">
     {% for poliza in polizas_por_vencer %}
     <div class="alerta-item alerta-item-amarillo">
+<<<<<<< HEAD
       <div class="alerta-item-left">
         <div class="alerta-avatar alerta-avatar-amarillo">
           {{ poliza.client.first_name|first|upper }}{{ poliza.client.last_name|first|upper }}
@@ -98,6 +136,20 @@
         <a href="https://wa.me/{{ poliza.client.phone|cut:' '|cut:'-' }}?text=Hola {{ poliza.client.first_name }},%20tu%20póliza%20N°%20{{ poliza.policy_number }}%20vence%20el%20{{ poliza.end_date }}.%20¿Querés%20renovarla?"
            target="_blank" class="btn-whatsapp">
           <svg viewBox="0 0 24 24" fill="currentColor">
+=======
+      <div class="alerta-left">
+        <div class="alerta-avatar alerta-avatar-amarillo">{{ poliza.client.first_name|first|upper }}{{ poliza.client.last_name|first|upper }}</div>
+        <div>
+          <div class="alerta-nombre">{{ poliza.client }}</div>
+          <div class="alerta-meta">Póliza <span style="font-family:var(--font-mono);">{{ poliza.policy_number }}</span> · Vence {{ poliza.end_date }}</div>
+        </div>
+      </div>
+      <div class="alerta-acciones">
+        <a href="/clientes/ver/{{ poliza.client.id }}/?poliza={{ poliza.id }}" class="btn btn-secondary btn-sm">Ver</a>
+        <a href="https://wa.me/{{ poliza.client.phone|cut:' '|cut:'-' }}?text=Hola {{ poliza.client.first_name }},%20tu%20póliza%20N°%20{{ poliza.policy_number }}%20vence%20el%20{{ poliza.end_date }}.%20¿Querés%20renovarla?"
+           target="_blank" class="btn-whatsapp btn-whatsapp-sm">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+>>>>>>> 202c118d (cambios)
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
             <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
           </svg>
@@ -112,6 +164,7 @@
 
 <!-- ALERTAS MANUALES -->
 <div class="table-wrap">
+<<<<<<< HEAD
   <div class="tabla-header">
     <div class="tabla-titulo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -120,6 +173,14 @@
       </svg>
       Alertas manuales
     </div>
+=======
+  <div class="tabla-header-titulo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+    Alertas manuales
+>>>>>>> 202c118d (cambios)
   </div>
   <table class="tabla-alertas">
     <thead>
@@ -135,9 +196,15 @@
     <tbody>
       {% for alerta in alertas %}
       <tr>
+<<<<<<< HEAD
         <td><span class="mono-val">{{ alerta.created_at|date:"d/m/Y H:i" }}</span></td>
         <td>{{ alerta.policy.client }}</td>
         <td><span class="mono-val">{{ alerta.policy.policy_number }}</span></td>
+=======
+        <td>{{ alerta.created_at|date:"d/m/Y H:i" }}</td>
+        <td>{{ alerta.policy.client }}</td>
+        <td>{{ alerta.policy.policy_number }}</td>
+>>>>>>> 202c118d (cambios)
         <td>{{ alerta.message }}</td>
         <td>
           {% if alerta.level == "CRITICA" %}
@@ -149,6 +216,7 @@
           {% endif %}
         </td>
         <td>
+<<<<<<< HEAD
           <div class="acciones">
             <a href="{% url 'clients:ver_cliente' alerta.policy.client.id %}?poliza={{ alerta.policy.id }}" class="btn btn-secondary btn-sm">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -160,6 +228,13 @@
             <a href="https://wa.me/{{ alerta.policy.client.phone|cut:' '|cut:'-' }}?text=Hola {{ alerta.policy.client.first_name }},%20te%20contacto%20por%20tu%20póliza%20N°%20{{ alerta.policy.policy_number }}.%20{{ alerta.message }}"
                target="_blank" class="btn-whatsapp btn-whatsapp-sm">
               <svg viewBox="0 0 24 24" fill="currentColor">
+=======
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <a href="{% url 'clients:ver_cliente' alerta.policy.client.id %}?poliza={{ alerta.policy.id }}" class="btn btn-secondary btn-sm">Ver cliente</a>
+            <a href="https://wa.me/{{ alerta.policy.client.phone|cut:' '|cut:'-' }}?text=Hola {{ alerta.policy.client.first_name }},%20te%20contacto%20por%20tu%20póliza%20N°%20{{ alerta.policy.policy_number }}.%20{{ alerta.message }}"
+               target="_blank" class="btn-whatsapp btn-whatsapp-sm">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+>>>>>>> 202c118d (cambios)
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
                 <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
               </svg>
@@ -170,6 +245,7 @@
       </tr>
       {% empty %}
       <tr>
+<<<<<<< HEAD
         <td colspan="6">
           <div class="empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -179,6 +255,10 @@
             </svg>
             <p>No hay alertas activas.</p>
           </div>
+=======
+        <td colspan="6" style="text-align:center;padding:32px;color:#4d7c60;">
+          No hay alertas activas.
+>>>>>>> 202c118d (cambios)
         </td>
       </tr>
       {% endfor %}
@@ -189,6 +269,7 @@
 <style>
 
 /* FILTROS */
+<<<<<<< HEAD
 .filtros-wrap {
   display: flex;
   gap: 8px;
@@ -196,12 +277,15 @@
   margin-bottom: 24px;
 }
 
+=======
+>>>>>>> 202c118d (cambios)
 .filtro-btn {
   padding: 6px 16px;
   border-radius: 99px;
   font-size: 12.5px;
   font-weight: 500;
   text-decoration: none;
+<<<<<<< HEAD
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
@@ -221,17 +305,41 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: 16px;
+=======
+  border: 1px solid rgba(52,211,100,0.08);
+  color: #4d7c60;
+  transition: all 0.18s;
+}
+.filtro-btn:hover      { border-color: rgba(52,211,100,0.18); color: #86efac; }
+.filtro-all:hover      { background: rgba(52,211,100,0.08); }
+.filtro-critica:hover  { background: rgba(239,68,68,0.08);  color: #fca5a5; border-color: rgba(239,68,68,0.2); }
+.filtro-alta:hover     { background: rgba(245,158,11,0.08); color: #fcd34d; border-color: rgba(245,158,11,0.2); }
+.filtro-media:hover    { background: rgba(234,179,8,0.08);  color: #fef08a; border-color: rgba(234,179,8,0.2); }
+
+/* SECCIONES */
+.alerta-seccion {
+  background: #0f2018;
+  border: 1px solid rgba(52,211,100,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+>>>>>>> 202c118d (cambios)
 }
 
 .seccion-header {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 10px;
   padding: 13px 20px;
+=======
+  gap: 8px;
+  padding: 12px 18px;
+>>>>>>> 202c118d (cambios)
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+<<<<<<< HEAD
   border-bottom: 1px solid var(--border);
 }
 
@@ -254,12 +362,22 @@
 }
 
 /* ITEM DE ALERTA */
+=======
+  border-bottom: 1px solid rgba(52,211,100,0.08);
+}
+.seccion-rojo    { color: #fca5a5; background: rgba(239,68,68,0.06); }
+.seccion-amarillo { color: #fcd34d; background: rgba(245,158,11,0.06); }
+
+.seccion-items { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+>>>>>>> 202c118d (cambios)
 .alerta-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 12px 14px;
+<<<<<<< HEAD
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -292,12 +410,34 @@
   flex-shrink: 0;
 }
 
+=======
+  background: #0a1610;
+  border: 1px solid rgba(52,211,100,0.08);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+.alerta-item-rojo    { border-left: 3px solid #ef4444; }
+.alerta-item-amarillo { border-left: 3px solid #f59e0b; }
+
+.alerta-left { display: flex; align-items: center; gap: 12px; }
+
+.alerta-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-700), var(--green-900));
+  border: 1px solid rgba(52,211,100,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: #6ee7b7;
+  flex-shrink: 0;
+}
+>>>>>>> 202c118d (cambios)
 .alerta-avatar-amarillo {
   background: linear-gradient(135deg, #78350f, #451a03);
   color: #fcd34d;
   border-color: rgba(245,158,11,0.2);
 }
 
+<<<<<<< HEAD
 .alerta-info {
   display: flex;
   flex-direction: column;
@@ -345,10 +485,23 @@
   display: flex;
   align-items: center;
   gap: 8px;
+=======
+.alerta-nombre { font-size: 13.5px; font-weight: 500; color: #ecfdf5; }
+.alerta-meta   { font-size: 12px; color: #4d7c60; margin-top: 2px; }
+.alerta-acciones { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+/* TABLA ALERTAS */
+.tabla-header-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+>>>>>>> 202c118d (cambios)
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+<<<<<<< HEAD
   color: var(--text-muted);
 }
 
@@ -357,24 +510,45 @@
 .tabla-alertas {
   width: 100%;
   border-collapse: collapse;
+=======
+  color: #4d7c60;
+  background: #0a1610;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
+}
+
+.tabla-alertas {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+>>>>>>> 202c118d (cambios)
   font-size: 13px;
 }
 
 .tabla-alertas thead th {
+<<<<<<< HEAD
   background: var(--bg-surface);
   color: var(--text-muted);
+=======
+  background: #0a1610;
+  color: #4d7c60;
+>>>>>>> 202c118d (cambios)
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 10px 16px;
   text-align: left;
+<<<<<<< HEAD
   border-bottom: 1px solid var(--border);
+=======
+  border-bottom: 1px solid rgba(52,211,100,0.08);
+>>>>>>> 202c118d (cambios)
 }
 
 .tabla-alertas tbody td {
   padding: 12px 16px;
   color: #ecfdf5 !important;
+<<<<<<< HEAD
   background: transparent !important;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
@@ -388,6 +562,15 @@
   font-size: 12px;
   color: #ecfdf5;
 }
+=======
+  background: #0f2018 !important;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
+  vertical-align: middle;
+}
+.tabla-alertas tbody tr:nth-child(even) td { background: #0c1a13 !important; }
+.tabla-alertas tbody tr:last-child td { border-bottom: none !important; }
+.tabla-alertas tbody tr:hover td { background: #132619 !important; }
+>>>>>>> 202c118d (cambios)
 
 /* WHATSAPP */
 .btn-whatsapp {
@@ -395,15 +578,23 @@
   align-items: center;
   gap: 6px;
   padding: 7px 12px;
+<<<<<<< HEAD
   background: rgba(37,211,102,0.12);
   color: #4ade80;
   border: 1px solid rgba(37,211,102,0.2);
   border-radius: var(--radius-sm);
+=======
+  background: rgba(37,211,102,0.12) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(37,211,102,0.2);
+  border-radius: 8px;
+>>>>>>> 202c118d (cambios)
   text-decoration: none;
   font-size: 12px;
   font-weight: 500;
   transition: all 0.18s;
 }
+<<<<<<< HEAD
 
 .btn-whatsapp svg { width: 14px; height: 14px; flex-shrink: 0; }
 .btn-whatsapp:hover { background: rgba(37,211,102,0.22); border-color: rgba(37,211,102,0.4); }
@@ -426,6 +617,12 @@
 
 .empty-state svg { width: 32px; height: 32px; opacity: 0.4; }
 .empty-state p { font-size: 14px; }
+=======
+.btn-whatsapp:hover { background: rgba(37,211,102,0.22) !important; }
+.btn-whatsapp-sm { padding: 5px 10px; font-size: 11.5px; }
+
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+>>>>>>> 202c118d (cambios)
 
 </style>
 

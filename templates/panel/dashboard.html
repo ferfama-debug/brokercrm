@@ -99,6 +99,7 @@
 <!-- ==================== ESTILOS ==================== -->
 <style>
 
+<<<<<<< HEAD
 /* KPI GRID */
 .kpi-grid {
   display: grid;
@@ -134,8 +135,39 @@
 .kpi-card:hover {
   transform: translateY(-2px);
   border-color: var(--border-strong);
+=======
+.dashboard {
+  max-width: 1300px;
+  margin: auto;
+  padding: 20px;
+  color: #e2e8f0;
 }
 
+.title {
+  margin-bottom: 25px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+h1, h2, h3 { color: #f1f5f9; }
+p, td, th, span { color: #ecfdf5; }
+
+/* BOTONES */
+.btn-cobranza {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: transform 0.2s;
+>>>>>>> 202c118d (cambios)
+}
+.btn-cobranza:hover { transform: scale(1.05); }
+
+<<<<<<< HEAD
 .kpi-red::before   { background: #ef4444; }
 .kpi-yellow::before{ background: #f59e0b; }
 .kpi-green::before { background: var(--green-500); }
@@ -184,8 +216,21 @@
   color: var(--text-primary);
   line-height: 1.1;
   letter-spacing: -0.02em;
+=======
+.btn-panel {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 10px;
+  transition: transform 0.2s;
+>>>>>>> 202c118d (cambios)
 }
+.btn-panel:hover { transform: scale(1.05); }
 
+<<<<<<< HEAD
 .kpi-value--mono {
   font-family: var(--font-mono);
   font-size: 22px;
@@ -206,8 +251,54 @@
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 20px;
+=======
+/* CRM */
+.prioridad-urgente { color: #ef4444; font-weight: bold; }
+.prioridad-alta    { color: #f97316; font-weight: bold; }
+.prioridad-media   { color: #eab308; font-weight: bold; }
+
+.btn-copiar {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.btn-copiar:hover { transform: scale(1.05); }
+
+.btn-whatsapp {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
 }
 
+/* TARJETAS KPI */
+.radar-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.radar {
+  background: #0f2018;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(52,211,100,0.08);
+  text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+>>>>>>> 202c118d (cambios)
+}
+.radar:hover { transform: translateY(-4px); border-color: rgba(52,211,100,0.18); }
+.radar h3 { font-size: 13px; color: #4d7c60; margin-bottom: 8px; }
+.radar span { font-size: 34px; font-weight: bold; color: #ecfdf5; display: block; font-family: var(--font-mono); }
+
+<<<<<<< HEAD
 .chart-card-header h2 {
   font-size: 15px;
   font-weight: 600;
@@ -223,11 +314,204 @@
 .chart-wrap {
   position: relative;
   height: 220px;
+=======
+.vencido  { border-top: 3px solid #ef4444 !important; }
+.hoy      { border-top: 3px solid #f97316 !important; }
+.proximo  { border-top: 3px solid #22c55e !important; }
+
+/* TABLAS */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 30px;
+  background: #0f2018;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(52,211,100,0.15);
+}
+
+th {
+  background: #0a1610;
+  color: #4d7c60;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,100,0.15);
+}
+
+th:first-child { border-top-left-radius: 12px; }
+th:last-child  { border-top-right-radius: 12px; }
+
+td {
+  padding: 12px 16px;
+  color: #ecfdf5 !important;
+  background: #0f2018 !important;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
+  vertical-align: middle;
+}
+
+tr:nth-child(even) td { background: #0c1a13 !important; }
+tr:last-child td { border-bottom: none !important; }
+tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+tr:last-child td:last-child  { border-bottom-right-radius: 12px; }
+tr:hover td { background: #132619 !important; }
+
+/* Restaura botones dentro de celdas */
+td .btn-copiar   { background: linear-gradient(135deg,#2563eb,#1e40af) !important; color: white !important; }
+td .btn-whatsapp { background: linear-gradient(135deg,#22c55e,#15803d) !important; color: white !important; }
+
+/* Restaura botones dentro de celdas */
+td .btn-copiar    { background: linear-gradient(135deg,#2563eb,#1e40af) !important; color: white !important; }
+td .btn-whatsapp  { background: linear-gradient(135deg,#22c55e,#15803d) !important; color: white !important; }
+
+.grafico-box {
+  background: #0f2018;
+  border: 1px solid rgba(52,211,100,0.08);
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 30px;
+  height: 200px;
+  position: relative;
+}
+
+h2 { margin-top: 40px; margin-bottom: 10px; }
+
+@media (max-width: 768px) {
+  .radar-container { grid-template-columns: repeat(2, 1fr); }
+>>>>>>> 202c118d (cambios)
 }
 
 </style>
 
+<<<<<<< HEAD
 <!-- ==================== CHART.JS ==================== -->
+=======
+
+<div class="dashboard">
+
+<h1 class="title">Panel de control</h1>
+
+<button class="btn-cobranza" onclick="ejecutarCobranza()">
+Ejecutar cobranza del día
+</button>
+
+<a href="/policies/cobranzas/" class="btn-panel">
+Ver panel completo
+</a>
+
+<!-- 🔥 NUEVO BLOQUE COBRANZAS -->
+<div class="radar-container">
+
+<div class="radar vencido">
+<h3>Vencidos</h3>
+<span>{{ cobranzas_vencidas }}</span>
+</div>
+
+<div class="radar hoy">
+<h3>Hoy</h3>
+<span>{{ cobranzas_hoy }}</span>
+</div>
+
+<div class="radar proximo">
+<h3>Próximos</h3>
+<span>{{ cobranzas_proximos }}</span>
+</div>
+
+<div class="radar">
+<h3>Total deuda</h3>
+<span>$ {{ deuda_total }}</span>
+</div>
+
+</div>
+
+
+<h2>CRM de Ventas</h2>
+<p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
+
+<table>
+<tr>
+<th>Cliente</th>
+<th>Póliza</th>
+<th>Días</th>
+<th>Prioridad</th>
+<th>Acción</th>
+</tr>
+
+{% for c in clientes_llamar %}
+<tr>
+<td>{{ c.cliente }}</td>
+<td>{{ c.numero }}</td>
+<td>{{ c.dias }}</td>
+
+<td>
+{% if c.prioridad == "URGENTE" %}
+<span class="prioridad-urgente">URGENTE</span>
+{% elif c.prioridad == "ALTA" %}
+<span class="prioridad-alta">ALTA</span>
+{% else %}
+<span class="prioridad-media">MEDIA</span>
+{% endif %}
+</td>
+
+<td>
+<button class="btn-copiar" onclick="copiarMensaje('{{ c.mensaje|escapejs }}')">Copiar</button>
+<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Producción</h2>
+<div class="grafico-box">
+<canvas id="graficoCompanias"></canvas>
+</div>
+
+<h2>Crecimiento</h2>
+<div class="grafico-box">
+<canvas id="graficoCrecimiento"></canvas>
+</div>
+
+<h2>Clientes</h2>
+<table>
+<tr><th>Cliente</th><th>Pólizas</th><th>Valor</th></tr>
+
+{% for c in clientes_score %}
+<tr>
+<td>{{ c.cliente }}</td>
+<td>{{ c.polizas }}</td>
+<td>{{ c.score }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Vencimientos</h2>
+<table>
+<tr>
+<th>Cliente</th>
+<th>Póliza</th>
+<th>Compañía</th>
+<th>Fecha</th>
+<th>Días</th>
+</tr>
+
+{% for p in polizas_por_vencer %}
+<tr>
+<td>{{ p.cliente }}</td>
+<td>{{ p.numero }}</td>
+<td>{{ p.compania }}</td>
+<td>{{ p.vencimiento|date:"d/m/Y" }}</td>
+<td>{{ p.dias }}</td>
+</tr>
+{% endfor %}
+</table>
+
+</div>
+
+>>>>>>> 202c118d (cambios)
 <script>
 (function () {
 
@@ -297,6 +581,7 @@
   gradLine.addColorStop(0, greenLight);
   gradLine.addColorStop(1, greenFade);
 
+<<<<<<< HEAD
   new Chart(ctxLine, {
     type: 'line',
     data: {
@@ -317,6 +602,76 @@
     },
     options: baseOptions
   });
+=======
+        let url = "https://wa.me/" + cobranzas[i].telefono + "?text=" + encodeURIComponent(cobranzas[i].mensaje);
+
+        window.open(url, "_blank");
+
+        i++;
+        setTimeout(abrir, 800);
+    }
+
+    abrir();
+}
+
+const companias = JSON.parse('{{ companias|safe }}');
+const cantidades = JSON.parse('{{ cantidades|safe }}');
+
+new Chart(document.getElementById('graficoCompanias'), {
+type: 'bar',
+data: {
+labels: companias,
+datasets: [{
+  data: cantidades,
+  backgroundColor: 'rgba(34,197,94,0.25)',
+  borderColor: '#22c55e',
+  borderWidth: 1.5,
+  borderRadius: 6,
+  borderSkipped: false,
+}]
+},
+options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' } },
+    y: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' }, beginAtZero: true }
+  }
+}
+});
+
+const meses = JSON.parse('{{ meses|safe }}');
+const totales = JSON.parse('{{ crecimiento_totales|safe }}');
+
+new Chart(document.getElementById('graficoCrecimiento'), {
+type: 'line',
+data: {
+labels: meses,
+datasets: [{
+  data: totales,
+  borderColor: '#22c55e',
+  borderWidth: 2,
+  backgroundColor: 'rgba(34,197,94,0.1)',
+  fill: true,
+  tension: 0.4,
+  pointBackgroundColor: '#22c55e',
+  pointBorderColor: '#050d0a',
+  pointBorderWidth: 2,
+  pointRadius: 4,
+}]
+},
+options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' } },
+    y: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' }, beginAtZero: true }
+  }
+}
+});
+>>>>>>> 202c118d (cambios)
 
 })();
 </script>
