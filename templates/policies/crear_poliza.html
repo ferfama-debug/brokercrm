@@ -6,6 +6,7 @@
     <h1 class="page-title">Nueva póliza</h1>
     <p class="page-subtitle">Completá los datos para registrar una nueva póliza</p>
   </div>
+<<<<<<< HEAD
   <a href="/polizas/" class="btn btn-ghost">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <line x1="19" y1="12" x2="5" y2="12"/>
@@ -305,13 +306,191 @@
 
 /* ACCIONES */
 .form-actions {
+=======
+  <a href="/polizas/" class="btn btn-ghost">← Volver</a>
+</div>
+
+<div style="max-width:680px;">
+<div class="card" style="padding:0;overflow:hidden;">
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+
+<div class="form-seccion">
+  <div class="form-seccion-titulo">Cliente y póliza</div>
+
+  <div class="form-grupo">
+    <label class="form-label">Cliente</label>
+    <select name="client" class="form-control">
+      {% for cliente in clientes %}
+      {% if cliente.id|stringformat:"s" == cliente_id %}
+      <option value="{{ cliente.id }}" selected>{{ cliente }}</option>
+      {% else %}
+      <option value="{{ cliente.id }}">{{ cliente }}</option>
+      {% endif %}
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-fila">
+    <div class="form-grupo">
+      <label class="form-label">N° Póliza</label>
+      <input type="text" name="policy_number" class="form-control" placeholder="Ej: 12345678">
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Compañía</label>
+      <input type="text" name="company" class="form-control" placeholder="Ej: Sancor Seguros">
+    </div>
+  </div>
+
+  <div class="form-grupo">
+    <label class="form-label">Tipo de póliza</label>
+    <select name="tipo_poliza" class="form-control">
+      <option value="AUTO">Auto</option>
+      <option value="MOTO">Moto</option>
+      <option value="HOGAR">Hogar</option>
+      <option value="VIDA">Vida</option>
+      <option value="COMERCIO">Comercio</option>
+      <option value="AP">Accidentes Personales</option>
+      <option value="RC">Responsabilidad Civil</option>
+      <option value="OTRO">Otro</option>
+    </select>
+  </div>
+</div>
+
+<div class="form-divider"></div>
+
+<div class="form-seccion">
+  <div class="form-seccion-titulo">Vigencia</div>
+  <div class="form-fila">
+    <div class="form-grupo">
+      <label class="form-label">Fecha inicio</label>
+      <input type="date" name="start_date" class="form-control">
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Fecha vencimiento</label>
+      <input type="date" name="end_date" class="form-control">
+    </div>
+  </div>
+</div>
+
+<div class="form-divider"></div>
+
+<div class="form-seccion">
+  <div class="form-seccion-titulo">Forma de pago</div>
+  <div class="form-fila">
+    <div class="form-grupo">
+      <label class="form-label">Forma de pago</label>
+      <select name="forma_pago" id="forma_pago" class="form-control">
+        <option value="TARJETA">Tarjeta de crédito</option>
+        <option value="CBU">Débito / CBU</option>
+        <option value="CUPONERA">Cuponera de pago</option>
+      </select>
+    </div>
+    <div class="form-grupo" id="grupo_frecuencia" style="display:none;">
+      <label class="form-label">Frecuencia de cuponera</label>
+      <select name="frecuencia_cuponera" class="form-control">
+        <option value="">Seleccione frecuencia</option>
+        <option value="1">Mensual</option>
+        <option value="3">Trimestral</option>
+        <option value="4">Cuatrimestral</option>
+        <option value="6">Semestral</option>
+        <option value="12">Anual</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="form-divider"></div>
+
+<div class="form-seccion">
+  <div class="form-seccion-titulo">Documentos</div>
+  <div class="form-fila">
+    <div class="form-grupo">
+      <label class="form-label">PDF de la póliza</label>
+      <input type="file" name="pdf_poliza" accept="application/pdf" class="form-control-file">
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Cuponera de pago <span style="color:#4d7c60;font-weight:400;">(si corresponde)</span></label>
+      <input type="file" name="cuponera_pdf" accept="application/pdf" class="form-control-file">
+    </div>
+  </div>
+</div>
+
+<div class="form-acciones">
+  <a href="/polizas/" class="btn btn-ghost">Cancelar</a>
+  <button type="submit" class="btn btn-primary">Guardar póliza</button>
+</div>
+
+</form>
+</div>
+</div>
+
+<style>
+
+.form-seccion { padding: 24px 28px; }
+
+.form-seccion-titulo {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4d7c60;
+  margin-bottom: 18px;
+}
+
+.form-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-grupo:last-child { margin-bottom: 0; }
+
+.form-divider {
+  height: 1px;
+  background: rgba(52,211,100,0.08);
+}
+
+.form-control-file {
+  width: 100%;
+  background: #0a1610;
+  border: 1px dashed rgba(52,211,100,0.18);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #86efac;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+.form-control-file:hover { border-color: rgba(52,211,100,0.4); }
+
+.form-acciones {
+>>>>>>> 50d7afbe (cambios)
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
   padding: 20px 28px;
+<<<<<<< HEAD
   border-top: 1px solid var(--border);
   background: var(--bg-surface);
+=======
+  border-top: 1px solid rgba(52,211,100,0.08);
+  background: #0a1610;
+}
+
+@media (max-width: 600px) {
+  .form-fila { grid-template-columns: 1fr; }
+  .form-seccion { padding: 18px; }
+  .form-acciones { padding: 16px 18px; }
+>>>>>>> 50d7afbe (cambios)
 }
 
 </style>
@@ -319,6 +498,7 @@
 <script>
 const formaPago = document.getElementById("forma_pago");
 const grupoFrecuencia = document.getElementById("grupo_frecuencia");
+<<<<<<< HEAD
 
 function toggleFrecuencia() {
   grupoFrecuencia.style.display = formaPago.value === "CUPONERA" ? "flex" : "none";
@@ -331,6 +511,15 @@ function updateFileName(input, labelId) {
   label.textContent = input.files.length > 0 ? input.files[0].name : "";
 }
 
+=======
+function toggleFrecuencia(){
+  if(formaPago.value === "CUPONERA"){
+    grupoFrecuencia.style.display = "block";
+  }else{
+    grupoFrecuencia.style.display = "none";
+  }
+}
+>>>>>>> 50d7afbe (cambios)
 formaPago.addEventListener("change", toggleFrecuencia);
 window.onload = toggleFrecuencia;
 </script>

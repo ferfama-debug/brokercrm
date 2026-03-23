@@ -1,141 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block content %}
 
-<div class="page-header">
-  <div>
-    <h1 class="page-title">Panel de control</h1>
-    <p class="page-subtitle">Resumen general de cobranzas y producción</p>
-  </div>
-</div>
-
-<!-- ==================== KPIs ==================== -->
-<div class="kpi-grid">
-
-  <div class="kpi-card kpi-red">
-    <div class="kpi-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="12"/>
-        <line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-    </div>
-    <div class="kpi-body">
-      <span class="kpi-label">Vencidos</span>
-      <span class="kpi-value">{{ cobranzas_vencidas|default:"0" }}</span>
-    </div>
-  </div>
-
-  <div class="kpi-card kpi-yellow">
-    <div class="kpi-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
-      </svg>
-    </div>
-    <div class="kpi-body">
-      <span class="kpi-label">Vencen hoy</span>
-      <span class="kpi-value">{{ cobranzas_hoy|default:"0" }}</span>
-    </div>
-  </div>
-
-  <div class="kpi-card kpi-green">
-    <div class="kpi-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-        <polyline points="16 7 22 7 22 13"/>
-      </svg>
-    </div>
-    <div class="kpi-body">
-      <span class="kpi-label">Próximos</span>
-      <span class="kpi-value">{{ cobranzas_proximos|default:"0" }}</span>
-    </div>
-  </div>
-
-  <div class="kpi-card kpi-blue">
-    <div class="kpi-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="1" x2="12" y2="23"/>
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-      </svg>
-    </div>
-    <div class="kpi-body">
-      <span class="kpi-label">Deuda total</span>
-      <span class="kpi-value kpi-value--mono">$ {{ deuda_total|default:"0" }}</span>
-    </div>
-  </div>
-
-</div>
-
-<!-- ==================== GRÁFICOS ==================== -->
-<div class="charts-grid">
-
-  <div class="card chart-card">
-    <div class="chart-card-header">
-      <div>
-        <h2>Producción por compañía</h2>
-        <p class="chart-subtitle">Pólizas activas por aseguradora</p>
-      </div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="graficoCompanias"></canvas>
-    </div>
-  </div>
-
-  <div class="card chart-card">
-    <div class="chart-card-header">
-      <div>
-        <h2>Crecimiento mensual</h2>
-        <p class="chart-subtitle">Evolución de pólizas en el año</p>
-      </div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="graficoCrecimiento"></canvas>
-    </div>
-  </div>
-
-</div>
-
-<!-- ==================== ESTILOS ==================== -->
 <style>
 
-<<<<<<< HEAD
-/* KPI GRID */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 28px;
-}
-
-@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 520px) { .kpi-grid { grid-template-columns: 1fr; } }
-
-/* KPI CARD */
-.kpi-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-}
-
-.kpi-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-strong);
-=======
 .dashboard {
   max-width: 1300px;
   margin: auto;
@@ -163,60 +32,9 @@ p, td, th, span { color: #ecfdf5; }
   cursor: pointer;
   margin-bottom: 20px;
   transition: transform 0.2s;
->>>>>>> 202c118d (cambios)
 }
 .btn-cobranza:hover { transform: scale(1.05); }
 
-<<<<<<< HEAD
-.kpi-red::before   { background: #ef4444; }
-.kpi-yellow::before{ background: #f59e0b; }
-.kpi-green::before { background: var(--green-500); }
-.kpi-blue::before  { background: #3b82f6; }
-
-/* Icono de la KPI */
-.kpi-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.kpi-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-.kpi-red    .kpi-icon { background: rgba(239,68,68,0.1);  color: #fca5a5; }
-.kpi-yellow .kpi-icon { background: rgba(245,158,11,0.1); color: #fcd34d; }
-.kpi-green  .kpi-icon { background: rgba(34,197,94,0.1);  color: var(--green-400); }
-.kpi-blue   .kpi-icon { background: rgba(59,130,246,0.1); color: #93c5fd; }
-
-/* Textos KPI */
-.kpi-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.kpi-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.kpi-value {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-=======
 .btn-panel {
   background: linear-gradient(135deg, #22c55e, #15803d);
   color: white;
@@ -226,32 +44,9 @@ p, td, th, span { color: #ecfdf5; }
   font-weight: bold;
   margin-left: 10px;
   transition: transform 0.2s;
->>>>>>> 202c118d (cambios)
 }
 .btn-panel:hover { transform: scale(1.05); }
 
-<<<<<<< HEAD
-.kpi-value--mono {
-  font-family: var(--font-mono);
-  font-size: 22px;
-}
-
-/* CHARTS GRID */
-.charts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 860px) { .charts-grid { grid-template-columns: 1fr; } }
-
-/* CHART CARD */
-.chart-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 20px;
-=======
 /* CRM */
 .prioridad-urgente { color: #ef4444; font-weight: bold; }
 .prioridad-alta    { color: #f97316; font-weight: bold; }
@@ -292,29 +87,11 @@ p, td, th, span { color: #ecfdf5; }
   border: 1px solid rgba(52,211,100,0.08);
   text-align: center;
   transition: transform 0.2s, border-color 0.2s;
->>>>>>> 202c118d (cambios)
 }
 .radar:hover { transform: translateY(-4px); border-color: rgba(52,211,100,0.18); }
 .radar h3 { font-size: 13px; color: #4d7c60; margin-bottom: 8px; }
-.radar span { font-size: 34px; font-weight: bold; color: #ecfdf5; display: block; font-family: var(--font-mono); }
+.radar span { font-size: 34px; font-weight: bold; color: #ecfdf5; display: block; }
 
-<<<<<<< HEAD
-.chart-card-header h2 {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 2px;
-}
-
-.chart-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.chart-wrap {
-  position: relative;
-  height: 220px;
-=======
 .vencido  { border-top: 3px solid #ef4444 !important; }
 .hoy      { border-top: 3px solid #f97316 !important; }
 .proximo  { border-top: 3px solid #22c55e !important; }
@@ -343,30 +120,14 @@ th {
   border-bottom: 1px solid rgba(52,211,100,0.15);
 }
 
-th:first-child { border-top-left-radius: 12px; }
-th:last-child  { border-top-right-radius: 12px; }
-
 td {
   padding: 12px 16px;
   color: #ecfdf5 !important;
   background: #0f2018 !important;
   border-bottom: 1px solid rgba(52,211,100,0.08);
-  vertical-align: middle;
 }
 
-tr:nth-child(even) td { background: #0c1a13 !important; }
-tr:last-child td { border-bottom: none !important; }
-tr:last-child td:first-child { border-bottom-left-radius: 12px; }
-tr:last-child td:last-child  { border-bottom-right-radius: 12px; }
 tr:hover td { background: #132619 !important; }
-
-/* Restaura botones dentro de celdas */
-td .btn-copiar   { background: linear-gradient(135deg,#2563eb,#1e40af) !important; color: white !important; }
-td .btn-whatsapp { background: linear-gradient(135deg,#22c55e,#15803d) !important; color: white !important; }
-
-/* Restaura botones dentro de celdas */
-td .btn-copiar    { background: linear-gradient(135deg,#2563eb,#1e40af) !important; color: white !important; }
-td .btn-whatsapp  { background: linear-gradient(135deg,#22c55e,#15803d) !important; color: white !important; }
 
 .grafico-box {
   background: #0f2018;
@@ -378,18 +139,8 @@ td .btn-whatsapp  { background: linear-gradient(135deg,#22c55e,#15803d) !importa
   position: relative;
 }
 
-h2 { margin-top: 40px; margin-bottom: 10px; }
-
-@media (max-width: 768px) {
-  .radar-container { grid-template-columns: repeat(2, 1fr); }
->>>>>>> 202c118d (cambios)
-}
-
 </style>
 
-<<<<<<< HEAD
-<!-- ==================== CHART.JS ==================== -->
-=======
 
 <div class="dashboard">
 
@@ -399,11 +150,11 @@ h2 { margin-top: 40px; margin-bottom: 10px; }
 Ejecutar cobranza del día
 </button>
 
-<a href="/policies/cobranzas/" class="btn-panel">
+<!-- 🔥 FIX URL -->
+<a href="/polizas/cobranzas/" class="btn-panel">
 Ver panel completo
 </a>
 
-<!-- 🔥 NUEVO BLOQUE COBRANZAS -->
 <div class="radar-container">
 
 <div class="radar vencido">
@@ -427,7 +178,6 @@ Ver panel completo
 </div>
 
 </div>
-
 
 <h2>CRM de Ventas</h2>
 <p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
@@ -459,7 +209,12 @@ Ver panel completo
 
 <td>
 <button class="btn-copiar" onclick="copiarMensaje('{{ c.mensaje|escapejs }}')">Copiar</button>
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
+
+<!-- 🔥 FIX WHATSAPP -->
+<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje|urlencode }}" target="_blank" class="btn-whatsapp">
+WhatsApp
+</a>
+
 </td>
 </tr>
 {% endfor %}
@@ -511,98 +266,34 @@ Ver panel completo
 
 </div>
 
->>>>>>> 202c118d (cambios)
 <script>
-(function () {
 
-  const companias = JSON.parse('{{ companias|safe }}');
-  const cantidades = JSON.parse('{{ cantidades|safe }}');
-  const meses     = JSON.parse('{{ meses|safe }}');
-  const totales   = JSON.parse('{{ crecimiento_totales|safe }}');
+function copiarMensaje(texto){
+navigator.clipboard.writeText(texto);
+alert("Mensaje copiado");
+}
 
-  /* Colores compartidos */
-  const green      = '#22c55e';
-  const greenLight = 'rgba(34,197,94,0.15)';
-  const greenFade  = 'rgba(34,197,94,0)';
-  const gridColor  = 'rgba(52,211,100,0.06)';
-  const textColor  = '#4d7c60';
+function ejecutarCobranza(){
 
-  const baseOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#0a1610',
-        borderColor: 'rgba(52,211,100,0.2)',
-        borderWidth: 1,
-        titleColor: '#86efac',
-        bodyColor: '#ecfdf5',
-        padding: 10,
-        cornerRadius: 8,
-      }
-    },
-    scales: {
-      x: {
-        grid:  { color: gridColor },
-        ticks: { color: textColor, font: { size: 11, family: "'DM Sans', sans-serif" } },
-        border:{ color: 'transparent' }
-      },
-      y: {
-        grid:  { color: gridColor },
-        ticks: { color: textColor, font: { size: 11, family: "'DM Sans', sans-serif" }, stepSize: 1 },
-        border:{ color: 'transparent' },
-        beginAtZero: true
-      }
+    const cobranzas = [];
+
+    {% for c in cobranzas_urgentes %}
+    cobranzas.push({
+        telefono: "{{ c.telefono|default:'' }}",
+        mensaje: "{{ c.mensaje|escapejs }}"
+    });
+    {% endfor %}
+
+    if(cobranzas.length === 0){
+        alert("No hay cobranzas hoy");
+        return;
     }
-  };
 
-  /* --- Gráfico de barras: Producción --- */
-  new Chart(document.getElementById('graficoCompanias'), {
-    type: 'bar',
-    data: {
-      labels: companias,
-      datasets: [{
-        data: cantidades,
-        backgroundColor: 'rgba(34,197,94,0.25)',
-        borderColor: green,
-        borderWidth: 1.5,
-        borderRadius: 6,
-        borderSkipped: false,
-        hoverBackgroundColor: 'rgba(34,197,94,0.4)',
-      }]
-    },
-    options: baseOptions
-  });
+    let i = 0;
 
-  /* --- Gráfico de línea: Crecimiento --- */
-  const ctxLine = document.getElementById('graficoCrecimiento');
-  const gradLine = ctxLine.getContext('2d').createLinearGradient(0, 0, 0, 220);
-  gradLine.addColorStop(0, greenLight);
-  gradLine.addColorStop(1, greenFade);
+    function abrir(){
+        if(i >= cobranzas.length) return;
 
-<<<<<<< HEAD
-  new Chart(ctxLine, {
-    type: 'line',
-    data: {
-      labels: meses,
-      datasets: [{
-        data: totales,
-        borderColor: green,
-        borderWidth: 2,
-        backgroundColor: gradLine,
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: green,
-        pointBorderColor: '#050d0a',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      }]
-    },
-    options: baseOptions
-  });
-=======
         let url = "https://wa.me/" + cobranzas[i].telefono + "?text=" + encodeURIComponent(cobranzas[i].mensaje);
 
         window.open(url, "_blank");
@@ -614,66 +305,13 @@ Ver panel completo
     abrir();
 }
 
-const companias = JSON.parse('{{ companias|safe }}');
-const cantidades = JSON.parse('{{ cantidades|safe }}');
+/* 🔥 FIX GRAFICOS */
+const companias = JSON.parse('{{ companias|escapejs }}');
+const cantidades = JSON.parse('{{ cantidades|escapejs }}');
 
-new Chart(document.getElementById('graficoCompanias'), {
-type: 'bar',
-data: {
-labels: companias,
-datasets: [{
-  data: cantidades,
-  backgroundColor: 'rgba(34,197,94,0.25)',
-  borderColor: '#22c55e',
-  borderWidth: 1.5,
-  borderRadius: 6,
-  borderSkipped: false,
-}]
-},
-options: {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' } },
-    y: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' }, beginAtZero: true }
-  }
-}
-});
+const meses = JSON.parse('{{ meses|escapejs }}');
+const totales = JSON.parse('{{ crecimiento_totales|escapejs }}');
 
-const meses = JSON.parse('{{ meses|safe }}');
-const totales = JSON.parse('{{ crecimiento_totales|safe }}');
-
-new Chart(document.getElementById('graficoCrecimiento'), {
-type: 'line',
-data: {
-labels: meses,
-datasets: [{
-  data: totales,
-  borderColor: '#22c55e',
-  borderWidth: 2,
-  backgroundColor: 'rgba(34,197,94,0.1)',
-  fill: true,
-  tension: 0.4,
-  pointBackgroundColor: '#22c55e',
-  pointBorderColor: '#050d0a',
-  pointBorderWidth: 2,
-  pointRadius: 4,
-}]
-},
-options: {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' } },
-    y: { grid: { color: 'rgba(52,211,100,0.06)' }, ticks: { color: '#4d7c60' }, border: { color: 'transparent' }, beginAtZero: true }
-  }
-}
-});
->>>>>>> 202c118d (cambios)
-
-})();
 </script>
 
 {% endblock %}
