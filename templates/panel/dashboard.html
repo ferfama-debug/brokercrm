@@ -90,7 +90,7 @@ p, td, th, span { color: #ecfdf5; }
 }
 .radar:hover { transform: translateY(-4px); border-color: rgba(52,211,100,0.18); }
 .radar h3 { font-size: 13px; color: #4d7c60; margin-bottom: 8px; }
-.radar span { font-size: 34px; font-weight: bold; color: #ecfdf5; display: block; }
+.radar span { font-size: 34px; font-weight: bold; color: #ecfdf5; display: block; font-family: var(--font-mono); }
 
 .vencido  { border-top: 3px solid #ef4444 !important; }
 .hoy      { border-top: 3px solid #f97316 !important; }
@@ -120,14 +120,26 @@ th {
   border-bottom: 1px solid rgba(52,211,100,0.15);
 }
 
+th:first-child { border-top-left-radius: 12px; }
+th:last-child  { border-top-right-radius: 12px; }
+
 td {
   padding: 12px 16px;
   color: #ecfdf5 !important;
   background: #0f2018 !important;
   border-bottom: 1px solid rgba(52,211,100,0.08);
+  vertical-align: middle;
 }
 
+tr:nth-child(even) td { background: #0c1a13 !important; }
+tr:last-child td { border-bottom: none !important; }
+tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+tr:last-child td:last-child  { border-bottom-right-radius: 12px; }
 tr:hover td { background: #132619 !important; }
+
+/* Botones dentro de tabla */
+td .btn-copiar    { background: linear-gradient(135deg,#2563eb,#1e40af) !important; color: white !important; }
+td .btn-whatsapp  { background: linear-gradient(135deg,#22c55e,#15803d) !important; color: white !important; }
 
 .grafico-box {
   background: #0f2018;
@@ -137,6 +149,12 @@ tr:hover td { background: #132619 !important; }
   margin-bottom: 30px;
   height: 200px;
   position: relative;
+}
+
+h2 { margin-top: 40px; margin-bottom: 10px; }
+
+@media (max-width: 768px) {
+  .radar-container { grid-template-columns: repeat(2, 1fr); }
 }
 
 </style>
@@ -150,8 +168,7 @@ tr:hover td { background: #132619 !important; }
 Ejecutar cobranza del día
 </button>
 
-<!-- 🔥 FIX URL -->
-<a href="/polizas/cobranzas/" class="btn-panel">
+<a href="/policies/cobranzas/" class="btn-panel">
 Ver panel completo
 </a>
 
@@ -159,28 +176,29 @@ Ver panel completo
 
 <div class="radar vencido">
 <h3>Vencidos</h3>
-<span>{{ cobranzas_vencidas }}</span>
+<span>{{ cobranzas_vencidas|default:0 }}</span>
 </div>
 
 <div class="radar hoy">
 <h3>Hoy</h3>
-<span>{{ cobranzas_hoy }}</span>
+<span>{{ cobranzas_hoy|default:0 }}</span>
 </div>
 
 <div class="radar proximo">
 <h3>Próximos</h3>
-<span>{{ cobranzas_proximos }}</span>
+<span>{{ cobranzas_proximos|default:0 }}</span>
 </div>
 
 <div class="radar">
 <h3>Total deuda</h3>
-<span>$ {{ deuda_total }}</span>
+<span>$ {{ deuda_total|default:0 }}</span>
 </div>
 
 </div>
+
 
 <h2>CRM de Ventas</h2>
-<p><strong>Clientes a contactar hoy: {{ clientes_hoy }}</strong></p>
+<p><strong>Clientes a contactar hoy: {{ clientes_hoy|default:0 }}</strong></p>
 
 <table>
 <tr>
@@ -209,14 +227,11 @@ Ver panel completo
 
 <td>
 <button class="btn-copiar" onclick="copiarMensaje('{{ c.mensaje|escapejs }}')">Copiar</button>
-
-<!-- 🔥 FIX WHATSAPP -->
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje|urlencode }}" target="_blank" class="btn-whatsapp">
-WhatsApp
-</a>
-
+<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje|urlencode }}" target="_blank" class="btn-whatsapp">WhatsApp</a>
 </td>
 </tr>
+{% empty %}
+<tr><td colspan="5">No hay clientes para hoy</td></tr>
 {% endfor %}
 </table>
 
@@ -240,6 +255,8 @@ WhatsApp
 <td>{{ c.polizas }}</td>
 <td>{{ c.score }}</td>
 </tr>
+{% empty %}
+<tr><td colspan="3">Sin datos</td></tr>
 {% endfor %}
 </table>
 
@@ -261,6 +278,8 @@ WhatsApp
 <td>{{ p.vencimiento|date:"d/m/Y" }}</td>
 <td>{{ p.dias }}</td>
 </tr>
+{% empty %}
+<tr><td colspan="5">Sin vencimientos</td></tr>
 {% endfor %}
 </table>
 
@@ -269,8 +288,13 @@ WhatsApp
 <script>
 
 function copiarMensaje(texto){
-navigator.clipboard.writeText(texto);
-alert("Mensaje copiado");
+    if(navigator.clipboard){
+        navigator.clipboard.writeText(texto)
+        .then(()=> alert("Mensaje copiado"))
+        .catch(()=> alert("Error al copiar"));
+    } else {
+        alert("Clipboard no soportado");
+    }
 }
 
 function ejecutarCobranza(){
@@ -305,12 +329,58 @@ function ejecutarCobranza(){
     abrir();
 }
 
-/* 🔥 FIX GRAFICOS */
-const companias = JSON.parse('{{ companias|escapejs }}');
-const cantidades = JSON.parse('{{ cantidades|escapejs }}');
+const companias = JSON.parse('{{ companias|default:"[]"|escapejs }}');
+const cantidades = JSON.parse('{{ cantidades|default:"[]"|escapejs }}');
 
-const meses = JSON.parse('{{ meses|escapejs }}');
-const totales = JSON.parse('{{ crecimiento_totales|escapejs }}');
+new Chart(document.getElementById('graficoCompanias'), {
+type: 'bar',
+data: {
+labels: companias,
+datasets: [{
+  data: cantidades,
+  backgroundColor: 'rgba(34,197,94,0.25)',
+  borderColor: '#22c55e',
+  borderWidth: 1.5,
+  borderRadius: 6,
+  borderSkipped: false,
+}]
+},
+options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { color: '#4d7c60' } },
+    y: { ticks: { color: '#4d7c60' }, beginAtZero: true }
+  }
+}
+});
+
+const meses = JSON.parse('{{ meses|default:"[]"|escapejs }}');
+const totales = JSON.parse('{{ crecimiento_totales|default:"[]"|escapejs }}');
+
+new Chart(document.getElementById('graficoCrecimiento'), {
+type: 'line',
+data: {
+labels: meses,
+datasets: [{
+  data: totales,
+  borderColor: '#22c55e',
+  borderWidth: 2,
+  fill: true,
+  tension: 0.4,
+}]
+},
+options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { color: '#4d7c60' } },
+    y: { ticks: { color: '#4d7c60' }, beginAtZero: true }
+  }
+}
+});
 
 </script>
 
