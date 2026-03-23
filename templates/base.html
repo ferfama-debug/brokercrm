@@ -519,24 +519,18 @@ tbody tr:hover td {
 }
 
 /* Neutraliza estilos legacy de crm.css */
-tbody td,
-tbody td * {
-  background: transparent !important;
-  color: #ecfdf5 !important;
-}
+table { background: transparent !important; }
+tbody td { background: #0f2018 !important; color: #ecfdf5 !important; }
+tbody tr:nth-child(even) td { background: #0c1a13 !important; }
+tbody tr:hover td { background: #132619 !important; }
 
-tbody tr:nth-child(even) td {
-  background: transparent !important;
-}
-
-tbody tr:hover td,
-tbody tr:hover td * {
-  background: rgba(52, 211, 100, 0.05) !important;
-}
-
-table {
-  background: transparent !important;
-}
+/* Restaura botones dentro de celdas */
+tbody td .btn-primary   { background: var(--green-600) !important; color: #fff !important; }
+tbody td .btn-secondary { background: rgba(52,211,100,0.08) !important; color: #86efac !important; }
+tbody td .btn-ghost     { background: transparent !important; color: #4d7c60 !important; }
+tbody td .btn-whatsapp  { background: rgba(37,211,102,0.12) !important; color: #4ade80 !important; }
+tbody td .btn-danger    { background: rgba(239,68,68,0.15) !important; color: #fca5a5 !important; }
+tbody td .btn-danger     { background: rgba(239,68,68,0.15) !important; color: #fca5a5 !important; }
 
 /* =============================================
    BOTONES

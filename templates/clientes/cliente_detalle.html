@@ -98,7 +98,6 @@
   {% for grupo in grupos %}
   <div class="poliza-grupo">
 
-    <!-- Header del grupo -->
     <div class="grupo-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -107,7 +106,6 @@
       <span>Póliza <span class="grupo-number">{{ grupo.grouper }}</span></span>
     </div>
 
-    <!-- Filas de póliza -->
     {% for p in grupo.list %}
     <div class="poliza-fila">
       <div class="table-wrap" style="border-radius:0; border:none; box-shadow:none;">
@@ -125,10 +123,10 @@
           </thead>
           <tbody>
             <tr>
-              <td><span class="mono-val">{{ p.policy_number }}</span></td>
+              <td>{{ p.policy_number }}</td>
               <td>{{ p.company }}</td>
-              <td><span class="mono-val">{{ p.start_date }}</span></td>
-              <td><span class="mono-val">{{ p.end_date }}</span></td>
+              <td>{{ p.start_date }}</td>
+              <td>{{ p.end_date }}</td>
               <td>{{ p.get_forma_pago_display }}</td>
               <td>
                 {% if p.estado == "ACTIVA" %}
@@ -141,23 +139,21 @@
               </td>
               <td>
                 <div class="acciones">
-                  <a href="/polizas/renovar/{{ p.id }}/" class="btn btn-secondary btn-sm">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="23 4 23 10 17 10"/>
-                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                    </svg>
-                    Renovar
-                  </a>
+                  <a href="/polizas/renovar/{{ p.id }}/" class="btn btn-secondary btn-sm">Renovar</a>
                   <form method="POST" action="/polizas/enviar/{{ p.id }}/" style="display:inline;">
                     {% csrf_token %}
-                    <button class="btn btn-ghost btn-sm">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                        <polyline points="22,6 12,13 2,6"/>
-                      </svg>
-                      Enviar
-                    </button>
+                    <button class="btn btn-ghost btn-sm">Enviar</button>
                   </form>
+                  {% if cliente.phone %}
+                  <a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola%20{{ cliente.first_name }},%20te%20enviamos%20tu%20póliza%20N°%20{{ p.policy_number }}%20de%20{{ p.company }}."
+                     target="_blank" class="btn-whatsapp btn-whatsapp-sm">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                    </svg>
+                    WhatsApp
+                  </a>
+                  {% endif %}
                 </div>
               </td>
             </tr>
@@ -165,7 +161,6 @@
         </table>
       </div>
 
-      <!-- SUBTABLA CUPONERA -->
       {% if p.forma_pago == "CUPONERA" %}
       <div class="cuponera-wrap">
         <div class="cuponera-header">
@@ -188,8 +183,8 @@
           <tbody>
             {% for pago in p.pagos.all %}
             <tr>
-              <td><span class="mono-val">{{ pago.numero_cuota }}</span></td>
-              <td><span class="mono-val">{{ pago.fecha_vencimiento }}</span></td>
+              <td>{{ pago.numero_cuota }}</td>
+              <td>{{ pago.fecha_vencimiento }}</td>
               <td>
                 {% if pago.estado == "PAGADO" %}
                   <span class="badge badge-green">Pagado</span>
@@ -202,18 +197,11 @@
               <td>
                 {% if pago.comprobante %}
                   <a href="{{ pago.comprobante }}" target="_blank" class="btn btn-ghost btn-sm">Ver</a>
-                {% else %}
-                  <span style="color: var(--text-muted);">—</span>
-                {% endif %}
+                {% else %}—{% endif %}
               </td>
               <td>
                 {% if pago.estado != "PAGADO" %}
-                  <a href="/polizas/pago/{{ pago.id }}/" class="btn btn-secondary btn-sm">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    Cargar
-                  </a>
+                  <a href="/polizas/pago/{{ pago.id }}/" class="btn btn-secondary btn-sm">Cargar</a>
                 {% else %}
                   <span class="badge badge-green">✔ Listo</span>
                 {% endif %}
@@ -233,13 +221,10 @@
 
 <style>
 
-/* MENSAJE OK */
 .mensaje-ok {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.25);
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.25);
   border-left: 3px solid var(--green-500);
   color: var(--green-300);
   padding: 12px 16px;
@@ -247,245 +232,140 @@
   font-size: 13.5px;
   margin-bottom: 20px;
 }
-
 .mensaje-ok svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-/* HEADER CLIENTE */
-.cliente-header-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+.cliente-header-info { display: flex; align-items: center; gap: 16px; }
 
 .cliente-avatar-xl {
-  width: 52px;
-  height: 52px;
+  width: 52px; height: 52px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--green-700), var(--green-900));
   border: 2px solid var(--border-strong);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--green-300);
-  flex-shrink: 0;
-  letter-spacing: 0.02em;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 600; color: var(--green-300);
+  flex-shrink: 0; letter-spacing: 0.02em;
 }
 
-.cliente-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 5px;
-}
+.cliente-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 5px; }
 
 .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12.5px; color: var(--text-muted); font-family: var(--font-mono);
 }
-
 .meta-item svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-/* RESUMEN KPIs */
-.resumen-grid {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-}
+.resumen-grid { display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
 
 .resumen-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  min-width: 160px;
-  position: relative;
-  overflow: hidden;
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 20px;
+  min-width: 160px; position: relative; overflow: hidden;
 }
-
-.resumen-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-}
-
-.resumen-verde::before  { background: var(--green-500); }
+.resumen-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.resumen-verde::before   { background: var(--green-500); }
 .resumen-amarillo::before { background: #f59e0b; }
-.resumen-rojo::before   { background: #ef4444; }
+.resumen-rojo::before    { background: #ef4444; }
 
 .resumen-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-
 .resumen-icon svg { width: 18px; height: 18px; }
-
-.resumen-verde  .resumen-icon { background: rgba(34,197,94,0.1);  color: var(--green-400); }
+.resumen-verde    .resumen-icon { background: rgba(34,197,94,0.1);  color: var(--green-400); }
 .resumen-amarillo .resumen-icon { background: rgba(245,158,11,0.1); color: #fcd34d; }
-.resumen-rojo   .resumen-icon { background: rgba(239,68,68,0.1);  color: #fca5a5; }
+.resumen-rojo     .resumen-icon { background: rgba(239,68,68,0.1);  color: #fca5a5; }
 
 .resumen-body { display: flex; flex-direction: column; gap: 2px; }
+.resumen-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
+.resumen-valor { font-size: 26px; font-weight: 600; color: #ecfdf5; line-height: 1.1; }
 
-.resumen-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.resumen-valor {
-  font-size: 26px;
-  font-weight: 600;
-  color: #ecfdf5;
-  line-height: 1.1;
-}
-
-/* GRUPOS DE PÓLIZAS */
-.polizas-detalle {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+.polizas-detalle { display: flex; flex-direction: column; gap: 16px; }
 
 .poliza-grupo {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
 }
 
 .grupo-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px; background: #0a1610;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #4d7c60;
 }
-
 .grupo-header svg { width: 14px; height: 14px; flex-shrink: 0; }
+.grupo-number { color: var(--green-400); font-family: var(--font-mono); }
 
-.grupo-number {
-  color: var(--green-400);
-  font-family: var(--font-mono);
-}
-
-/* TABLA DETALLE */
-.tabla-detalle {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
+/* TABLA DETALLE — colores fijos para ganarle al crm.css */
+.tabla-detalle { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 .tabla-detalle thead th {
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 10px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
+  background: #0a1610; color: #4d7c60;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em;
+  text-transform: uppercase; padding: 10px 16px; text-align: left;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
 }
 
 .tabla-detalle tbody td {
   padding: 12px 16px;
   color: #ecfdf5 !important;
-  background: transparent !important;
-  border-bottom: 1px solid var(--border);
+  background: #0f2018 !important;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
   vertical-align: middle;
 }
-
+.tabla-detalle tbody tr:nth-child(even) td { background: #0c1a13 !important; }
 .tabla-detalle tbody tr:last-child td { border-bottom: none; }
-.tabla-detalle tbody tr:hover td { background: rgba(52,211,100,0.04) !important; }
+.tabla-detalle tbody tr:hover td { background: #132619 !important; }
 
 /* CUPONERA */
-.cuponera-wrap {
-  border-top: 1px solid var(--border);
-}
+.cuponera-wrap { border-top: 1px solid rgba(52,211,100,0.08); }
 
 .cuponera-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  background: rgba(52, 211, 100, 0.03);
-  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 20px; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: #4d7c60; background: rgba(52,211,100,0.03);
+  border-bottom: 1px solid rgba(52,211,100,0.08);
 }
-
 .cuponera-header svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-.tabla-cuponera {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
+.tabla-cuponera { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
 .tabla-cuponera thead th {
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 8px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
+  background: #0a1610; color: #4d7c60;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+  text-transform: uppercase; padding: 8px 16px; text-align: left;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
 }
 
 .tabla-cuponera tbody td {
   padding: 9px 16px;
   color: #ecfdf5 !important;
-  background: transparent !important;
-  border-bottom: 1px solid var(--border);
+  background: #0f2018 !important;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
   vertical-align: middle;
 }
-
+.tabla-cuponera tbody tr:nth-child(even) td { background: #0c1a13 !important; }
 .tabla-cuponera tbody tr:last-child td { border-bottom: none; }
-.tabla-cuponera tbody tr:hover td { background: rgba(52,211,100,0.03) !important; }
+.tabla-cuponera tbody tr:hover td { background: #132619 !important; }
 
-.mono-val {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: #ecfdf5;
-}
-
-.acciones { display: flex; gap: 6px; flex-wrap: wrap; }
-
-.btn-sm {
-  padding: 5px 10px;
-  font-size: 12px;
-  gap: 4px;
-}
-
+.acciones { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.btn-sm { padding: 5px 10px; font-size: 12px; gap: 4px; }
 .btn-sm svg { width: 12px; height: 12px; }
+
+.btn-whatsapp {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px;
+  background: rgba(37,211,102,0.12) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(37,211,102,0.2);
+  border-radius: var(--radius-sm);
+  text-decoration: none; font-size: 12px; font-weight: 500;
+  transition: all 0.18s;
+}
+.btn-whatsapp:hover { background: rgba(37,211,102,0.22) !important; border-color: rgba(37,211,102,0.4); }
+.btn-whatsapp-sm { padding: 5px 10px; font-size: 11.5px; }
 
 @media (max-width: 700px) {
   .resumen-grid { flex-direction: column; }
