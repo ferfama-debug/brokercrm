@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Póliza {{ poliza.policy_number }}</h1>
+    <p class="page-subtitle">Detalle completo de la póliza</p>
+  </div>
+  <a href="/clientes/ver/{{ poliza.client.id }}/" class="btn btn-ghost">
+    ← Volver
+  </a>
+</div>
+
+<div class="card form-card">
+
+  <!-- DATOS -->
+  <div class="form-section">
+    <div class="form-section-title">Información</div>
+
+    <div class="form-row">
+      <div class="form-grupo">
+        <label>Cliente</label>
+        <div class="dato">{{ poliza.client }}</div>
+      </div>
+
+      <div class="form-grupo">
+        <label>Compañía</label>
+        <div class="dato">{{ poliza.company }}</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-grupo">
+        <label>Tipo</label>
+        <div class="dato">{{ poliza.tipo_poliza }}</div>
+      </div>
+
+      <div class="form-grupo">
+        <label>Forma de pago</label>
+        <div class="dato">{{ poliza.get_forma_pago_display }}</div>
+      </div>
+    </div>
+
+    {% if poliza.forma_pago == "CUPONERA" and poliza.frecuencia_cuponera %}
+    <div class="form-row">
+      <div class="form-grupo">
+        <label>Frecuencia</label>
+        <div class="dato">
+          {% if poliza.frecuencia_cuponera == 1 %}Mensual
+          {% elif poliza.frecuencia_cuponera == 3 %}Trimestral
+          {% elif poliza.frecuencia_cuponera == 6 %}Semestral
+          {% elif poliza.frecuencia_cuponera == 12 %}Anual
+          {% else %}{{ poliza.frecuencia_cuponera }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="form-row">
+      <div class="form-grupo">
+        <label>Inicio</label>
+        <div class="dato">{{ poliza.start_date }}</div>
+      </div>
+
+      <div class="form-grupo">
+        <label>Vencimiento</label>
+        <div class="dato">{{ poliza.end_date }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCUMENTOS -->
+  <div class="form-section">
+    <div class="form-section-title">Documentos</div>
+
+    <div class="form-row">
+
+      {% if poliza.pdf_poliza %}
+        <a href="{{ poliza.pdf_poliza }}" target="_blank" class="btn btn-primary">
+          📄 Ver póliza PDF
+        </a>
+      {% elif poliza.pdf_url %}
+        <a href="{{ poliza.pdf_url }}" target="_blank" class="btn btn-primary">
+          📄 Ver póliza PDF
+        </a>
+      {% else %}
+        <span class="dato">No hay póliza cargada</span>
+      {% endif %}
+
+      {% if poliza.cuponera_pdf %}
+        <a href="{{ poliza.cuponera_pdf }}" target="_blank" class="btn btn-secondary">
+          💳 Ver cuponera
+        </a>
+      {% elif poliza.cuponera_url %}
+        <a href="{{ poliza.cuponera_url }}" target="_blank" class="btn btn-secondary">
+          💳 Ver cuponera
+        </a>
+      {% else %}
+        <span class="dato">No hay cuponera cargada</span>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+.dato {
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  color: #e2e8f0;
+}
+</style>
+
+{% endblock %}

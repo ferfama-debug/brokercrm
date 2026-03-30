@@ -43,12 +43,190 @@
       </div>
     </div>
   </div>
-  <a href="/polizas/nueva/?cliente={{ cliente.id }}" class="btn btn-primary">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+
+  <div class="header-actions">
+    {% if cliente.permite_whatsapp and cliente.telefono_normalizado %}
+    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }},%20%C2%BFc%C3%B3mo%20est%C3%A1s%3F"
+       target="_blank" class="btn btn-whatsapp">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+      </svg>
+      WhatsApp
+    </a>
+
+    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }},%20te%20contacto%20para%20hacer%20seguimiento%20de%20tu%20seguro."
+       target="_blank" class="btn btn-ghost">
+      Seguimiento
+    </a>
+
+    <form method="post" action="{% url 'clients:marcar_contactado' cliente.id %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary">
+        Marcar contactado
+      </button>
+    </form>
+
+    {% if polizas_por_vencer > 0 %}
+    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }},%20tu%20p%C3%B3liza%20est%C3%A1%20pr%C3%B3xima%20a%20vencer.%20%C2%BFLa%20renovamos%3F"
+       target="_blank" class="btn btn-secondary">
+      Renovar
+    </a>
+    {% endif %}
+
+    {% if cliente.cuotas_vencidas > 0 %}
+    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }},%20%C2%BFme%20pod%C3%A9s%20enviar%20el%20comprobante%20de%20pago%20de%20la%20cuponera%3F"
+       target="_blank" class="btn btn-secondary">
+      Pedir comprobante
+    </a>
+    {% endif %}
+    {% endif %}
+
+    <a href="/polizas/nueva/?cliente={{ cliente.id }}" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Nueva póliza
+    </a>
+  </div>
+</div>
+
+<!-- BLOQUE CRM -->
+<div class="crm-panel">
+  <div class="crm-header">
+    <div class="crm-title-wrap">
+      <div class="crm-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="crm-eyebrow">CRM / Seguimiento</div>
+        <div class="crm-title">Estado comercial del cliente</div>
+      </div>
+    </div>
+
+    <div class="crm-badges">
+      {% if cliente.seguimiento_estado == "SIN_GESTION" %}
+        <span class="badge badge-gray">Sin gestión</span>
+      {% elif cliente.seguimiento_estado == "PENDIENTE" %}
+        <span class="badge badge-yellow">Pendiente</span>
+      {% elif cliente.seguimiento_estado == "CONTACTADO" %}
+        <span class="badge badge-blue">Contactado</span>
+      {% elif cliente.seguimiento_estado == "EN_SEGUIMIENTO" %}
+        <span class="badge badge-blue">En seguimiento</span>
+      {% elif cliente.seguimiento_estado == "INTERESADO" %}
+        <span class="badge badge-green">Interesado</span>
+      {% elif cliente.seguimiento_estado == "NO_INTERESADO" %}
+        <span class="badge badge-red">No interesado</span>
+      {% elif cliente.seguimiento_estado == "CLIENTE" %}
+        <span class="badge badge-green">Cliente</span>
+      {% else %}
+        <span class="badge badge-gray">{{ cliente.seguimiento_estado }}</span>
+      {% endif %}
+
+      {% if cliente.seguimiento_vencido %}
+        <span class="badge badge-red">Seguimiento vencido</span>
+      {% elif cliente.seguimiento_hoy %}
+        <span class="badge badge-yellow">Seguimiento hoy</span>
+      {% elif cliente.seguimiento_proxima_semana %}
+        <span class="badge badge-blue">Próx. 7 días</span>
+      {% elif cliente.proximo_seguimiento %}
+        <span class="badge badge-gray">Programado</span>
+      {% else %}
+        <span class="badge badge-gray">Sin fecha</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if cliente.seguimiento_vencido %}
+  <div class="crm-alert crm-alert-red">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
     </svg>
-    Nueva póliza
-  </a>
+    <div>
+      <strong>Seguimiento vencido.</strong>
+      Este cliente tenía seguimiento para el {{ cliente.proximo_seguimiento|date:"d/m/Y" }}.
+    </div>
+  </div>
+  {% elif cliente.seguimiento_hoy %}
+  <div class="crm-alert crm-alert-yellow">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <div>
+      <strong>Seguimiento para hoy.</strong>
+      Conviene contactar al cliente durante el día.
+    </div>
+  </div>
+  {% elif cliente.seguimiento_proxima_semana %}
+  <div class="crm-alert crm-alert-blue">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v4l2.5 2.5"/>
+    </svg>
+    <div>
+      <strong>Seguimiento próximo.</strong>
+      Programado para el {{ cliente.proximo_seguimiento|date:"d/m/Y" }}.
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="crm-grid">
+    <div class="crm-card">
+      <span class="crm-label">Estado CRM</span>
+      <span class="crm-value">
+        {% if cliente.get_seguimiento_estado_display %}
+          {{ cliente.get_seguimiento_estado_display }}
+        {% else %}
+          {{ cliente.seguimiento_estado|default:"—" }}
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="crm-card">
+      <span class="crm-label">Último contacto</span>
+      <span class="crm-value">
+        {% if cliente.ultimo_contacto %}
+          {{ cliente.ultimo_contacto|date:"d/m/Y H:i" }}
+        {% else %}
+          —
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="crm-card">
+      <span class="crm-label">Próximo seguimiento</span>
+      <span class="crm-value">
+        {% if cliente.proximo_seguimiento %}
+          {{ cliente.proximo_seguimiento|date:"d/m/Y" }}
+        {% else %}
+          —
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="crm-card">
+      <span class="crm-label">Canal preferido</span>
+      <span class="crm-value">
+        {% if cliente.permite_whatsapp and cliente.telefono_normalizado %}
+          WhatsApp habilitado
+        {% else %}
+          Sin WhatsApp habilitado
+        {% endif %}
+      </span>
+    </div>
+  </div>
+
+  {% if cliente.seguimiento_notas %}
+  <div class="crm-notas">
+    <div class="crm-notas-title">Notas de seguimiento</div>
+    <div class="crm-notas-body">{{ cliente.seguimiento_notas|linebreaksbr }}</div>
+  </div>
+  {% endif %}
 </div>
 
 <!-- KPIs RESUMEN -->
@@ -123,7 +301,11 @@
           </thead>
           <tbody>
             <tr>
-              <td>{{ p.policy_number }}</td>
+              <td>
+                <a href="/polizas/{{ p.id }}/" class="link-poliza">
+                  {{ p.policy_number }}
+                </a>
+              </td>
               <td>{{ p.company }}</td>
               <td>{{ p.start_date }}</td>
               <td>{{ p.end_date }}</td>
@@ -139,13 +321,37 @@
               </td>
               <td>
                 <div class="acciones">
+                  <a href="/polizas/{{ p.id }}/" class="btn btn-ghost btn-sm">
+                    Ver
+                  </a>
                   <a href="/polizas/renovar/{{ p.id }}/" class="btn btn-secondary btn-sm">Renovar</a>
                   <form method="POST" action="/polizas/enviar/{{ p.id }}/" style="display:inline;">
                     {% csrf_token %}
                     <button class="btn btn-ghost btn-sm">Enviar</button>
                   </form>
-                  {% if cliente.phone %}
-                  <a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola%20{{ cliente.first_name }},%20te%20enviamos%20tu%20póliza%20N°%20{{ p.policy_number }}%20de%20{{ p.company }}."
+
+                  {% if p.pdf_poliza %}
+                  <a href="{{ p.pdf_poliza }}" target="_blank" class="btn btn-primary btn-sm">
+                    PDF
+                  </a>
+                  {% elif p.pdf_url %}
+                  <a href="{{ p.pdf_url }}" target="_blank" class="btn btn-primary btn-sm">
+                    PDF
+                  </a>
+                  {% endif %}
+
+                  {% if p.cuponera_pdf %}
+                  <a href="{{ p.cuponera_pdf }}" target="_blank" class="btn btn-secondary btn-sm">
+                    Cuponera
+                  </a>
+                  {% elif p.cuponera_url %}
+                  <a href="{{ p.cuponera_url }}" target="_blank" class="btn btn-secondary btn-sm">
+                    Cuponera
+                  </a>
+                  {% endif %}
+
+                  {% if cliente.permite_whatsapp and cliente.telefono_normalizado %}
+                  <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }}%2C%20te%20enviamos%20tu%20p%C3%B3liza%20N%C2%B0%20{{ p.policy_number }}%20de%20{{ p.company }}.%0A{% if p.pdf_poliza %}%0AP%C3%B3liza:%20{{ p.pdf_poliza|urlencode }}{% elif p.pdf_url %}%0AP%C3%B3liza:%20{{ p.pdf_url|urlencode }}{% endif %}{% if p.cuponera_pdf %}%0ACuponera:%20{{ p.cuponera_pdf|urlencode }}{% elif p.cuponera_url %}%0ACuponera:%20{{ p.cuponera_url|urlencode }}{% endif %}"
                      target="_blank" class="btn-whatsapp btn-whatsapp-sm">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -220,6 +426,17 @@
 </div>
 
 <style>
+.link-poliza {
+  color: #4ade80;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.link-poliza:hover {
+  color: #22c55e;
+  text-decoration: underline;
+}
 
 .mensaje-ok {
   display: flex; align-items: center; gap: 10px;
@@ -235,6 +452,13 @@
 .mensaje-ok svg { width: 16px; height: 16px; flex-shrink: 0; }
 
 .cliente-header-info { display: flex; align-items: center; gap: 16px; }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .cliente-avatar-xl {
   width: 52px; height: 52px;
@@ -253,6 +477,158 @@
   font-size: 12.5px; color: var(--text-muted); font-family: var(--font-mono);
 }
 .meta-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* CRM */
+.crm-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.crm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.crm-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.crm-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59,130,246,0.10);
+  color: #93c5fd;
+  flex-shrink: 0;
+}
+
+.crm-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.crm-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.crm-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ecfdf5;
+  margin-top: 2px;
+}
+
+.crm-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.crm-alert {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.crm-alert svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.crm-alert-red {
+  background: rgba(239,68,68,0.10);
+  border-color: rgba(239,68,68,0.25);
+  color: #fecaca;
+}
+
+.crm-alert-yellow {
+  background: rgba(245,158,11,0.10);
+  border-color: rgba(245,158,11,0.25);
+  color: #fde68a;
+}
+
+.crm-alert-blue {
+  background: rgba(59,130,246,0.10);
+  border-color: rgba(59,130,246,0.25);
+  color: #bfdbfe;
+}
+
+.crm-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.crm-card {
+  background: rgba(15,32,24,0.65);
+  border: 1px solid rgba(52,211,100,0.08);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.crm-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.crm-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ecfdf5;
+  line-height: 1.3;
+}
+
+.crm-notas {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: rgba(15,32,24,0.65);
+  border: 1px solid rgba(52,211,100,0.08);
+}
+
+.crm-notas-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.crm-notas-body {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #d1fae5;
+}
 
 .resumen-grid { display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
 
@@ -367,9 +743,29 @@
 .btn-whatsapp:hover { background: rgba(37,211,102,0.22) !important; border-color: rgba(37,211,102,0.4); }
 .btn-whatsapp-sm { padding: 5px 10px; font-size: 11.5px; }
 
+.badge-gray {
+  background: rgba(148,163,184,0.14);
+  color: #cbd5e1;
+  border: 1px solid rgba(148,163,184,0.20);
+}
+
+.badge-blue {
+  background: rgba(59,130,246,0.14);
+  color: #bfdbfe;
+  border: 1px solid rgba(59,130,246,0.22);
+}
+
+@media (max-width: 980px) {
+  .crm-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 700px) {
   .resumen-grid { flex-direction: column; }
   .cliente-header-info { flex-direction: column; align-items: flex-start; }
+  .header-actions { width: 100%; }
+  .crm-grid { grid-template-columns: 1fr; }
 }
 
 </style>

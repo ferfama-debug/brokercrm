@@ -13,7 +13,6 @@ class Alert(models.Model):
         ("MEDIA", "Media"),
     )
 
-    # 🔥 NUEVO: tipos de alerta (automatización)
     TIPOS = (
         ("DEUDA", "Deuda"),
         ("VENCIMIENTO", "Vencimiento"),
@@ -42,7 +41,6 @@ class Alert(models.Model):
         db_index=True,
     )
 
-    # 🔥 NUEVO
     tipo = models.CharField(
         max_length=20,
         choices=TIPOS,
@@ -60,6 +58,13 @@ class Alert(models.Model):
         db_index=True,
     )
 
+    def save(self, *args, **kwargs):
+        # 🔥 NORMALIZACIÓN MENSAJE
+        if self.message:
+            self.message = self.message.strip()
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.level} - {self.message}"
 
@@ -68,5 +73,11 @@ class Alert(models.Model):
         verbose_name_plural = "Alertas"
         ordering = ["-created_at"]
 
-        # 🔥 CLAVE: evita duplicados automáticos
-        unique_together = ("policy", "tipo", "resolved")
+        # 🔥 EVITA DUPLICADOS ACTIVOS
+        constraints = [
+            models.UniqueConstraint(
+                fields=["policy", "tipo"],
+                condition=models.Q(resolved=False),
+                name="unique_active_alert_per_policy_tipo",
+            )
+        ]

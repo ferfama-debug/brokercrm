@@ -63,7 +63,11 @@
             {% for poliza in cliente.policy_set.all %}
             {% if not compania_seleccionada or poliza.company == compania_seleccionada %}
             <tr>
-              <td><span class="mono-val">{{ poliza.policy_number }}</span></td>
+              <td>
+                <a href="/polizas/{{ poliza.id }}/" class="link-poliza-numero">
+                  {{ poliza.policy_number }}
+                </a>
+              </td>
               <td>{{ poliza.company }}</td>
               <td><span class="tipo-pill">{{ poliza.tipo_poliza }}</span></td>
               <td><span class="mono-val">{{ poliza.start_date }}</span></td>
@@ -78,15 +82,15 @@
                 {% endif %}
               </td>
               <td>
-                {% if poliza.pdf_poliza %}
-                  <span class="badge badge-green">Cargada</span>
+                {% if poliza.pdf_url %}
+                  <a href="{{ poliza.pdf_url }}" target="_blank" class="btn btn-ghost btn-sm">Ver PDF</a>
                 {% else %}
                   <span class="badge badge-gray">Sin archivo</span>
                 {% endif %}
               </td>
               <td>
-                {% if poliza.cuponera_pdf %}
-                  <span class="badge badge-green">Cargada</span>
+                {% if poliza.cuponera_url %}
+                  <a href="{{ poliza.cuponera_url }}" target="_blank" class="btn btn-ghost btn-sm">Ver cuponera</a>
                 {% else %}
                   <span class="badge badge-gray">Sin archivo</span>
                 {% endif %}
@@ -264,6 +268,20 @@
   font-family: var(--font-mono);
   font-size: 12px;
   color: #ecfdf5 !important;
+}
+
+.link-poliza-numero {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #ecfdf5 !important;
+  text-decoration: none;
+  transition: 0.18s;
+}
+
+.link-poliza-numero:hover {
+  color: #86efac !important;
+  text-decoration: underline;
 }
 
 .tipo-pill {

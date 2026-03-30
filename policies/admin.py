@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Policy
+from .models import Policy, Company
 
 
 @admin.register(Policy)
@@ -39,11 +39,11 @@ class PolicyAdmin(admin.ModelAdmin):
         estado = obj.estado
 
         if estado == "VENCIDA":
-            color = "#dc3545"  # rojo
+            color = "#dc3545"
         elif estado == "POR VENCER":
-            color = "#fd7e14"  # naranja
+            color = "#fd7e14"
         else:
-            color = "#28a745"  # verde
+            color = "#28a745"
 
         return format_html(
             '<strong style="color: {};">{}</strong>',
@@ -59,3 +59,10 @@ class PolicyAdmin(admin.ModelAdmin):
 
     email_enviado.boolean = True
     email_enviado.short_description = "Email enviado"
+
+
+# 🔥 NUEVO: ADMIN DE COMPAÑÍAS
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ("nombre",)
+    search_fields = ("nombre",)

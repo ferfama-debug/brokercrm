@@ -6,13 +6,8 @@
     <h1 class="page-title">Renovar póliza</h1>
     <p class="page-subtitle">Actualizá los datos para la nueva vigencia</p>
   </div>
-<<<<<<< HEAD
   <a href="/polizas/" class="btn btn-ghost">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="19" y1="12" x2="5" y2="12"/>
-      <polyline points="12 19 5 12 12 5"/>
-    </svg>
-    Volver
+    ← Volver
   </a>
 </div>
 
@@ -27,16 +22,7 @@
       </svg>
       Póliza actual
     </div>
-=======
-  <a href="/polizas/" class="btn btn-ghost">← Volver</a>
-</div>
 
-<div style="max-width:680px;">
-
-  <!-- INFO PÓLIZA ACTUAL -->
-  <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
-    <div class="info-header">Póliza actual</div>
->>>>>>> 50d7afbe (cambios)
     <div class="info-grid">
       <div class="info-item">
         <span class="info-label">Cliente</span>
@@ -52,16 +38,11 @@
       </div>
       <div class="info-item">
         <span class="info-label">N° Póliza actual</span>
-<<<<<<< HEAD
         <span class="info-val mono-val">{{ poliza.policy_number }}</span>
-=======
-        <span class="info-val" style="font-family:var(--font-mono);">{{ poliza.policy_number }}</span>
->>>>>>> 50d7afbe (cambios)
       </div>
     </div>
   </div>
 
-<<<<<<< HEAD
   <!-- FORMULARIO RENOVACIÓN -->
   <div class="card form-card">
     <form method="post" enctype="multipart/form-data">
@@ -85,22 +66,6 @@
         </div>
 
         <div class="form-row">
-=======
-  <!-- FORMULARIO -->
-  <div class="card" style="padding:0;overflow:hidden;">
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-
-      <div class="form-seccion">
-        <div class="form-seccion-titulo">Nueva vigencia</div>
-
-        <div class="form-grupo">
-          <label class="form-label">N° nueva póliza</label>
-          <input type="text" name="policy_number" value="{{ poliza.policy_number }}" class="form-control" placeholder="Ej: 12345678">
-        </div>
-
-        <div class="form-fila">
->>>>>>> 50d7afbe (cambios)
           <div class="form-grupo">
             <label class="form-label">Fecha inicio</label>
             <input type="date" name="start_date" class="form-control">
@@ -114,30 +79,96 @@
 
       <div class="form-divider"></div>
 
-<<<<<<< HEAD
-      <!-- Archivo -->
+      <!-- FORMA DE PAGO -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 7h20"/>
+            <path d="M4 7l1.5 10.5A2 2 0 0 0 7.48 19h9.04a2 2 0 0 0 1.98-1.5L20 7"/>
+            <path d="M9 11h6"/>
+          </svg>
+          Forma de pago
+        </div>
+
+        <div class="form-row">
+          <div class="form-grupo">
+            <label class="form-label">Forma de pago</label>
+            <select name="forma_pago" id="forma_pago" class="form-control">
+              <option value="TARJETA">Tarjeta</option>
+              <option value="CBU">CBU</option>
+              <option value="CUPONERA">Cuponera</option>
+            </select>
+          </div>
+
+          <div class="form-grupo" id="grupo_frecuencia" style="display:none;">
+            <label class="form-label">Frecuencia cuponera</label>
+            <select name="frecuencia_cuponera" id="frecuencia_cuponera" class="form-control">
+              <option value="">Frecuencia</option>
+              <option value="1">Mensual</option>
+              <option value="3">Trimestral</option>
+              <option value="6">Semestral</option>
+              <option value="12">Anual</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- DOCUMENTOS -->
       <div class="form-section">
         <div class="form-section-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
           </svg>
-          Documento
+          Documentos
         </div>
 
-        <div class="form-grupo">
-          <label class="form-label">Nuevo PDF de póliza</label>
-          <label class="file-drop">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="16 16 12 12 8 16"/>
-              <line x1="12" y1="12" x2="12" y2="21"/>
-              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-            </svg>
-            <span class="file-drop-text">Subir nuevo PDF</span>
-            <span class="file-drop-hint">Hacé clic para seleccionar</span>
-            <input type="file" name="pdf_poliza" accept="application/pdf" class="file-input" onchange="updateFileName(this, 'label-poliza')">
-          </label>
-          <span class="file-name" id="label-poliza"></span>
+        <div class="form-row">
+          <div class="form-grupo">
+            <label class="form-label">Nuevo PDF de póliza</label>
+
+            {% if poliza.pdf_poliza %}
+              <a href="{{ poliza.pdf_poliza }}" target="_blank" class="btn btn-ghost" style="margin-bottom:8px;">
+                📄 Ver actual
+              </a>
+            {% endif %}
+
+            <label class="file-drop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+              <span class="file-drop-text">Subir nuevo PDF</span>
+              <span class="file-drop-hint">Hacé clic para seleccionar</span>
+              <input type="file" name="pdf_poliza" accept="application/pdf" class="file-input" onchange="updateFileName(this, 'label-poliza')">
+            </label>
+            <span class="file-name" id="label-poliza"></span>
+          </div>
+
+          <div class="form-grupo">
+            <label class="form-label">Nueva cuponera</label>
+
+            {% if poliza.cuponera_pdf %}
+              <a href="{{ poliza.cuponera_pdf }}" target="_blank" class="btn btn-ghost" style="margin-bottom:8px;">
+                💳 Ver actual
+              </a>
+            {% endif %}
+
+            <label class="file-drop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+              <span class="file-drop-text">Subir nueva cuponera</span>
+              <span class="file-drop-hint">Hacé clic para seleccionar</span>
+              <input type="file" name="cuponera_pdf" accept="application/pdf" class="file-input" onchange="updateFileName(this, 'label-cuponera')">
+            </label>
+            <span class="file-name" id="label-cuponera"></span>
+          </div>
         </div>
       </div>
 
@@ -151,19 +182,6 @@
           </svg>
           Guardar renovación
         </button>
-=======
-      <div class="form-seccion">
-        <div class="form-seccion-titulo">Documento</div>
-        <div class="form-grupo">
-          <label class="form-label">Nuevo PDF de póliza</label>
-          <input type="file" name="pdf_poliza" accept="application/pdf" class="form-control-file">
-        </div>
-      </div>
-
-      <div class="form-acciones">
-        <a href="/polizas/" class="btn btn-ghost">Cancelar</a>
-        <button type="submit" class="btn btn-primary">Guardar renovación</button>
->>>>>>> 50d7afbe (cambios)
       </div>
 
     </form>
@@ -172,8 +190,6 @@
 </div>
 
 <style>
-
-<<<<<<< HEAD
 .form-layout {
   max-width: 820px;
   display: flex;
@@ -277,82 +293,15 @@
 }
 
 .form-row {
-=======
-.info-header {
-  padding: 12px 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #4d7c60;
-  background: #0a1610;
-  border-bottom: 1px solid rgba(52,211,100,0.08);
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 14px 20px;
-  border-right: 1px solid rgba(52,211,100,0.08);
-  border-bottom: 1px solid rgba(52,211,100,0.08);
-}
-.info-item:nth-child(2n) { border-right: none; }
-.info-item:nth-last-child(-n+2) { border-bottom: none; }
-
-.info-label {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #4d7c60;
-}
-
-.info-val {
-  font-size: 14px;
-  font-weight: 500;
-  color: #ecfdf5;
-}
-
-.form-seccion { padding: 24px 28px; }
-
-.form-seccion-titulo {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #4d7c60;
-  margin-bottom: 18px;
-}
-
-.form-fila {
->>>>>>> 50d7afbe (cambios)
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-<<<<<<< HEAD
-@media (max-width: 600px) {
-  .form-row { grid-template-columns: 1fr; }
-  .form-section { padding: 18px; }
-  .info-grid { grid-template-columns: 1fr; }
-  .info-item { border-right: none; border-bottom: 1px solid var(--border); }
-  .info-item:last-child { border-bottom: none; }
-}
-
-=======
->>>>>>> 50d7afbe (cambios)
 .form-grupo {
   display: flex;
   flex-direction: column;
   gap: 6px;
-<<<<<<< HEAD
 }
 
 /* FILE DROP */
@@ -393,7 +342,9 @@
   color: var(--text-muted);
 }
 
-.file-input { display: none; }
+.file-input {
+  display: none;
+}
 
 .file-name {
   font-size: 11px;
@@ -404,61 +355,45 @@
 
 /* ACCIONES */
 .form-actions {
-=======
-  margin-bottom: 16px;
-}
-.form-grupo:last-child { margin-bottom: 0; }
-
-.form-divider { height: 1px; background: rgba(52,211,100,0.08); }
-
-.form-control-file {
-  width: 100%;
-  background: #0a1610;
-  border: 1px dashed rgba(52,211,100,0.18);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 13px;
-  color: #86efac;
-  cursor: pointer;
-  transition: border-color 0.18s;
-}
-.form-control-file:hover { border-color: rgba(52,211,100,0.4); }
-
-.form-acciones {
->>>>>>> 50d7afbe (cambios)
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
   padding: 20px 28px;
-<<<<<<< HEAD
   border-top: 1px solid var(--border);
   background: var(--bg-surface);
-=======
-  border-top: 1px solid rgba(52,211,100,0.08);
-  background: #0a1610;
 }
 
 @media (max-width: 600px) {
-  .form-fila { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .form-section { padding: 18px; }
   .info-grid { grid-template-columns: 1fr; }
-  .info-item { border-right: none; border-bottom: 1px solid rgba(52,211,100,0.08); }
+  .info-item { border-right: none; border-bottom: 1px solid var(--border); }
   .info-item:last-child { border-bottom: none; }
-  .form-seccion { padding: 18px; }
-  .form-acciones { padding: 16px 18px; }
->>>>>>> 50d7afbe (cambios)
 }
-
 </style>
 
-<<<<<<< HEAD
 <script>
 function updateFileName(input, labelId) {
   const label = document.getElementById(labelId);
   label.textContent = input.files.length > 0 ? input.files[0].name : "";
 }
+
+const formaPago = document.getElementById("forma_pago");
+const grupoFrecuencia = document.getElementById("grupo_frecuencia");
+const frecuencia = document.getElementById("frecuencia_cuponera");
+
+function toggleFrecuencia() {
+  if (formaPago.value === "CUPONERA") {
+    grupoFrecuencia.style.display = "block";
+  } else {
+    grupoFrecuencia.style.display = "none";
+    frecuencia.value = "";
+  }
+}
+
+formaPago.addEventListener("change", toggleFrecuencia);
+document.addEventListener("DOMContentLoaded", toggleFrecuencia);
 </script>
 
-=======
->>>>>>> 50d7afbe (cambios)
 {% endblock %}

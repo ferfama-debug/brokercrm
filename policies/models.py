@@ -49,8 +49,7 @@ class Policy(models.Model):
     )
 
     company = models.CharField(
-        max_length=100,
-        verbose_name="Compañía",
+        max_length=100, verbose_name="Compañía", blank=True, null=True
     )
 
     company_obj = models.ForeignKey(
@@ -58,7 +57,7 @@ class Policy(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Compañía (estructura nueva)",
+        verbose_name="Compañía",
     )
 
     policy_number = models.CharField(
@@ -118,7 +117,23 @@ class Policy(models.Model):
         verbose_name="Frecuencia de cuponera (meses)",
     )
 
+    def _normalizar_url(self, valor):
+        if not valor:
+            return None
+
+        valor = str(valor).strip()
+        return valor or None
+
     def save(self, *args, **kwargs):
+        if self.company_obj:
+            self.company = self.company_obj.nombre
+
+        self.pdf_poliza = self._normalizar_url(self.pdf_poliza)
+        self.cuponera_pdf = self._normalizar_url(self.cuponera_pdf)
+
+        if self.forma_pago != "CUPONERA":
+            self.frecuencia_cuponera = None
+
         super().save(*args, **kwargs)
 
         if self.forma_pago == "CUPONERA" and self.frecuencia_cuponera:
@@ -142,20 +157,18 @@ class Policy(models.Model):
 
             while fecha <= fecha_fin:
                 Payment.objects.create(
-                    policy=self,
-                    numero_cuota=numero,
-                    fecha_vencimiento=fecha
+                    policy=self, numero_cuota=numero, fecha_vencimiento=fecha
                 )
                 fecha = fecha + relativedelta(months=frecuencia)
                 numero += 1
 
     @property
     def pdf_url(self):
-        return self.pdf_poliza
+        return self._normalizar_url(self.pdf_poliza)
 
     @property
     def cuponera_url(self):
-        return self.cuponera_pdf
+        return self._normalizar_url(self.cuponera_pdf)
 
     @property
     def estado(self):
@@ -223,11 +236,7 @@ class Payment(models.Model):
 
     fecha_vencimiento = models.DateField(verbose_name="Fecha de vencimiento")
 
-    fecha_pago = models.DateField(
-        blank=True,
-        null=True,
-        verbose_name="Fecha de pago"
-    )
+    fecha_pago = models.DateField(blank=True, null=True, verbose_name="Fecha de pago")
 
     estado = models.CharField(
         max_length=10,
@@ -250,7 +259,6 @@ class Payment(models.Model):
         verbose_name="URL comprobante",
     )
 
-    # 🔥 NUEVO
     recordatorio_enviado = models.BooleanField(
         default=False,
         verbose_name="Recordatorio enviado",
@@ -278,7 +286,6 @@ class Payment(models.Model):
         else:
             return "PENDIENTE"
 
-    # 🔥 MENSAJE AUTOMÁTICO
     def mensaje_whatsapp(self):
         cliente = self.policy.client.nombre_completo()
         numero_poliza = self.policy.policy_number
@@ -291,7 +298,6 @@ class Payment(models.Model):
             "Cualquier duda estamos para ayudarte."
         )
 
-    # 🔥 LINK WHATSAPP
     def whatsapp_link(self):
         telefono = getattr(self.policy.client, "telefono", "")
         mensaje = self.mensaje_whatsapp().replace(" ", "%20")

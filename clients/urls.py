@@ -9,4 +9,10 @@ urlpatterns = [
     path("ver/<int:cliente_id>/", views.ver_cliente, name="ver_cliente"),
     path("editar/<int:cliente_id>/", views.editar_cliente, name="editar_cliente"),
     path("eliminar/<int:id>/", views.eliminar_cliente, name="eliminar_cliente"),
+    # 🔥 NUEVO (NO ROMPE NADA)
+    path(
+        "marcar-contactado/<int:cliente_id>/",
+        views.marcar_contactado,
+        name="marcar_contactado",
+    ),
 ]

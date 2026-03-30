@@ -12,8 +12,42 @@
   color: #e2e8f0;
 }
 
-.title {
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 25px;
+}
+
+.dashboard-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dashboard-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.dashboard-subtitle {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.section-title {
+  margin-bottom: 14px;
   font-weight: 600;
   color: #f8fafc;
 }
@@ -30,7 +64,12 @@ p, td, th, span { color: #ecfdf5; }
   border: none;
   font-weight: bold;
   cursor: pointer;
-  margin-bottom: 20px;
+  transition: 0.2s ease;
+}
+
+.btn-cobranza:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(185,28,28,0.25);
 }
 
 .btn-panel {
@@ -40,7 +79,12 @@ p, td, th, span { color: #ecfdf5; }
   border-radius: 10px;
   text-decoration: none;
   font-weight: bold;
-  margin-left: 10px;
+  transition: 0.2s ease;
+}
+
+.btn-panel:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(21,128,61,0.25);
 }
 
 /* KPI */
@@ -57,6 +101,24 @@ p, td, th, span { color: #ecfdf5; }
   border-radius: 16px;
   border: 1px solid rgba(52,211,100,0.08);
   text-align: center;
+  transition: 0.2s ease;
+}
+
+.radar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.radar h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.radar span {
+  font-size: 28px;
+  font-weight: 700;
+  display: inline-block;
 }
 
 .vencido  { border-top: 3px solid #ef4444 !important; }
@@ -70,16 +132,29 @@ table {
   background: #0f2018;
   border-radius: 12px;
   overflow: hidden;
+  border-collapse: collapse;
 }
 
 th {
   background: #0a1610;
   padding: 12px;
   font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 td {
   padding: 12px;
+  border-bottom: 1px solid rgba(52,211,100,0.08);
+  vertical-align: middle;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: rgba(34,197,94,0.04);
 }
 
 .grafico-box {
@@ -87,82 +162,253 @@ td {
   padding: 16px;
   border-radius: 16px;
   margin-bottom: 30px;
-  height: 200px;
+  height: 280px;
+  border: 1px solid rgba(52,211,100,0.08);
+}
+
+.grafico-box canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.crm-link {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(34,197,94,0.12);
+  color: #86efac;
+  border: 1px solid rgba(34,197,94,0.18);
+  transition: 0.18s ease;
+}
+
+.crm-link:hover {
+  background: rgba(34,197,94,0.18);
+}
+
+.crm-muted {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.crm-contacto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crm-cliente {
+  font-weight: 600;
+  color: #f0fdf4;
+}
+
+.crm-subinfo {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.crm-dias {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(249,115,22,0.14);
+  color: #fdba74;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.crm-acciones {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.crm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.crm-btn-wa {
+  background: rgba(37,211,102,0.14);
+  color: #86efac;
+  border-color: rgba(37,211,102,0.22);
+}
+
+.crm-btn-wa:hover {
+  background: rgba(37,211,102,0.22);
+}
+
+.crm-btn-copy {
+  background: rgba(148,163,184,0.12);
+  color: #cbd5e1;
+  border-color: rgba(148,163,184,0.2);
+}
+
+.crm-btn-copy:hover {
+  background: rgba(148,163,184,0.18);
+}
+
+.crm-copy-ok {
+  font-size: 11px;
+  color: #86efac;
+  min-width: 72px;
+}
+
+@media (max-width: 900px) {
+  .radar-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-header-right {
+    width: 100%;
+  }
+
+  .radar-container {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
 
 </style>
 
 <div class="dashboard">
 
-<h1 class="title">Panel de control</h1>
+  <div class="dashboard-header">
+    <div class="dashboard-header-left">
+      <h1 class="title">Panel de control</h1>
+      <p class="dashboard-subtitle">Resumen comercial, cobranzas y crecimiento</p>
+    </div>
 
-<button class="btn-cobranza" onclick="ejecutarCobranza()">
-Ejecutar cobranza del día
-</button>
+    <div class="dashboard-header-right">
+      <button class="btn-cobranza" onclick="ejecutarCobranza()">
+        Ejecutar cobranza del día
+      </button>
 
-<a href="/polizas/cobranzas/" class="btn-panel">
-Ver panel completo
-</a>
+      <a href="/polizas/cobranzas/" class="btn-panel">
+        Ver panel completo
+      </a>
+    </div>
+  </div>
 
-<div class="radar-container">
+  <div class="radar-container">
 
-<div class="radar vencido">
-<h3>Vencidos</h3>
-<span>{{ cobranzas_vencidas|default:0 }}</span>
+    <div class="radar vencido">
+      <h3>Vencidos</h3>
+      <span>{{ cobranzas_vencidas|default:0 }}</span>
+    </div>
+
+    <div class="radar hoy">
+      <h3>Hoy</h3>
+      <span>{{ cobranzas_hoy|default:0 }}</span>
+    </div>
+
+    <div class="radar proximo">
+      <h3>Próximos</h3>
+      <span>{{ cobranzas_proximos|default:0 }}</span>
+    </div>
+
+    <div class="radar">
+      <h3>Total deuda</h3>
+      <span>$ {{ deuda_total|default:0 }}</span>
+    </div>
+
+  </div>
+
+  <h2 class="section-title">CRM de Ventas</h2>
+
+  <table>
+    <tr>
+      <th>Cliente</th>
+      <th>Pólizas</th>
+      <th>Próximo contacto</th>
+      <th>Acciones</th>
+      <th>Ver</th>
+    </tr>
+
+    {% for c in clientes_llamar %}
+    <tr>
+      <td>
+        <div class="crm-contacto">
+          <span class="crm-cliente">{{ c.cliente }}</span>
+          <span class="crm-subinfo">{{ c.telefono }}</span>
+        </div>
+      </td>
+      <td>{{ c.cantidad }}</td>
+      <td><span class="crm-dias">{{ c.dias }}</span></td>
+      <td>
+        <div class="crm-acciones">
+          <a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje|urlencode }}" target="_blank" class="crm-btn crm-btn-wa">
+            WhatsApp
+          </a>
+          <button type="button" class="crm-btn crm-btn-copy" onclick="copiarMensaje(this)" data-mensaje="{{ c.mensaje|escape }}">
+            Copiar
+          </button>
+          <span class="crm-copy-ok"></span>
+        </div>
+      </td>
+      <td>
+        {% if c.cliente_id %}
+        <a href="/clientes/ver/{{ c.cliente_id }}/" class="crm-link">
+          Ver cliente
+        </a>
+        {% else %}
+        <span class="crm-muted">Sin link</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2 class="section-title">Producción</h2>
+  <div class="grafico-box">
+    <canvas id="graficoCompanias"></canvas>
+  </div>
+
+  <h2 class="section-title">Crecimiento</h2>
+  <div class="grafico-box">
+    <canvas id="graficoCrecimiento"></canvas>
+  </div>
+
 </div>
 
-<div class="radar hoy">
-<h3>Hoy</h3>
-<span>{{ cobranzas_hoy|default:0 }}</span>
-</div>
+{{ companias|json_script:"companias-data" }}
+{{ cantidades|json_script:"cantidades-data" }}
+{{ meses|json_script:"meses-data" }}
+{{ crecimiento_totales|json_script:"crecimiento-data" }}
 
-<div class="radar proximo">
-<h3>Próximos</h3>
-<span>{{ cobranzas_proximos|default:0 }}</span>
-</div>
-
-<div class="radar">
-<h3>Total deuda</h3>
-<span>$ {{ deuda_total|default:0 }}</span>
-</div>
-
-</div>
-
-<h2>CRM de Ventas</h2>
-
-<table>
-<tr>
-<th>Cliente</th>
-<th>Póliza</th>
-<th>Días</th>
-<th>Acción</th>
-</tr>
-
-{% for c in clientes_llamar %}
-<tr>
-<td>{{ c.cliente }}</td>
-<td>{{ c.numero }}</td>
-<td>{{ c.dias }}</td>
-<td>
-<a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje|urlencode }}" target="_blank">
-WhatsApp
-</a>
-</td>
-</tr>
-{% endfor %}
-</table>
-
-<h2>Producción</h2>
-<div class="grafico-box">
-<canvas id="graficoCompanias"></canvas>
-</div>
-
-<h2>Crecimiento</h2>
-<div class="grafico-box">
-<canvas id="graficoCrecimiento"></canvas>
-</div>
-
-</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
@@ -170,9 +416,223 @@ function ejecutarCobranza(){
     alert("Cobranza ejecutada");
 }
 
-/* 🔥 FIX SEGURO */
-const companias = JSON.parse('{{ companias|default:"[]"|escapejs }}');
-const cantidades = JSON.parse('{{ cantidades|default:"[]"|escapejs }}');
+function copiarMensaje(btn){
+    const mensaje = btn.getAttribute("data-mensaje");
+    const estado = btn.parentElement.querySelector(".crm-copy-ok");
+
+    navigator.clipboard.writeText(mensaje).then(function() {
+        estado.textContent = "✔ Copiado";
+        setTimeout(function(){
+            estado.textContent = "";
+        }, 1800);
+    }).catch(function() {
+        estado.textContent = "No se pudo copiar";
+        setTimeout(function(){
+            estado.textContent = "";
+        }, 1800);
+    });
+}
+
+function normalizarJsonScript(valor) {
+    let resultado = valor;
+
+    if (typeof resultado === 'string') {
+        try {
+            resultado = JSON.parse(resultado);
+        } catch (e) {
+            return [];
+        }
+    }
+
+    if (Array.isArray(resultado)) {
+        return resultado;
+    }
+
+    if (resultado && typeof resultado === 'object') {
+        return Object.values(resultado);
+    }
+
+    return [];
+}
+
+function dividirEtiqueta(texto, maximo = 12) {
+    const limpio = String(texto || '').trim();
+
+    if (!limpio) {
+        return ['Sin compañía'];
+    }
+
+    const palabras = limpio.split(/\s+/);
+    const lineas = [];
+    let actual = '';
+
+    for (let i = 0; i < palabras.length; i++) {
+        const palabra = palabras[i];
+        const candidata = actual ? actual + ' ' + palabra : palabra;
+
+        if (candidata.length <= maximo) {
+            actual = candidata;
+        } else {
+            if (actual) {
+                lineas.push(actual);
+            }
+
+            if (palabra.length > maximo) {
+                const partes = palabra.match(new RegExp(`.{1,${maximo}}`, 'g')) || [palabra];
+                for (let j = 0; j < partes.length - 1; j++) {
+                    lineas.push(partes[j]);
+                }
+                actual = partes[partes.length - 1];
+            } else {
+                actual = palabra;
+            }
+        }
+    }
+
+    if (actual) {
+        lineas.push(actual);
+    }
+
+    return lineas.slice(0, 3);
+}
+
+const rawCompanias = JSON.parse(document.getElementById("companias-data").textContent);
+const rawCantidades = JSON.parse(document.getElementById("cantidades-data").textContent);
+const rawMeses = JSON.parse(document.getElementById("meses-data").textContent);
+const rawCrecimientoTotales = JSON.parse(document.getElementById("crecimiento-data").textContent);
+
+const companias = normalizarJsonScript(rawCompanias);
+const cantidades = normalizarJsonScript(rawCantidades);
+const meses = normalizarJsonScript(rawMeses);
+const crecimientoTotales = normalizarJsonScript(rawCrecimientoTotales);
+
+const colorTexto = '#ecfdf5';
+const colorGrid = 'rgba(52, 211, 100, 0.08)';
+
+const companiasConDatos = companias.map((nombre, index) => ({
+    nombre: String(nombre || '').trim(),
+    total: Number(cantidades[index] || 0)
+}));
+
+const topCompanias = companiasConDatos
+    .filter(item => item.nombre && item.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
+
+const companiasChart = topCompanias.map(item => dividirEtiqueta(item.nombre, 12));
+const cantidadesChart = topCompanias.map(item => item.total);
+
+const ctxCompanias = document.getElementById('graficoCompanias');
+if (ctxCompanias && companiasChart.length && cantidadesChart.length) {
+    new Chart(ctxCompanias, {
+        type: 'bar',
+        data: {
+            labels: companiasChart,
+            datasets: [{
+                label: 'Pólizas',
+                data: cantidadesChart,
+                backgroundColor: 'rgba(34, 197, 94, 0.45)',
+                borderColor: 'rgba(34, 197, 94, 1)',
+                borderWidth: 1.5,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: colorTexto
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#111827',
+                    titleColor: '#f8fafc',
+                    bodyColor: '#e5e7eb',
+                    borderColor: 'rgba(34, 197, 94, 0.35)',
+                    borderWidth: 1,
+                    callbacks: {
+                        title: function(context) {
+                            return topCompanias[context[0].dataIndex].nombre;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: colorTexto,
+                        maxRotation: 0,
+                        minRotation: 0,
+                        autoSkip: false
+                    },
+                    grid: { color: colorGrid }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: colorTexto, precision: 0 },
+                    grid: { color: colorGrid }
+                }
+            }
+        }
+    });
+}
+
+const ctxCrecimiento = document.getElementById('graficoCrecimiento');
+if (ctxCrecimiento && meses.length && crecimientoTotales.length) {
+    new Chart(ctxCrecimiento, {
+        type: meses.length === 1 ? 'bar' : 'line',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Crecimiento',
+                data: crecimientoTotales,
+                borderColor: 'rgba(96, 165, 250, 1)',
+                backgroundColor: meses.length === 1 ? 'rgba(96, 165, 250, 0.45)' : 'rgba(96, 165, 250, 0.12)',
+                fill: meses.length === 1 ? false : true,
+                tension: 0.25,
+                borderWidth: 3,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: 'rgba(96, 165, 250, 1)',
+                pointBorderColor: 'rgba(191, 219, 254, 1)',
+                pointBorderWidth: 2,
+                borderRadius: 8,
+                maxBarThickness: 56
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: colorTexto
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#111827',
+                    titleColor: '#f8fafc',
+                    bodyColor: '#e5e7eb',
+                    borderColor: 'rgba(96, 165, 250, 0.35)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: colorTexto },
+                    grid: { color: colorGrid }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: colorTexto, precision: 0, stepSize: 1 },
+                    grid: { color: colorGrid }
+                }
+            }
+        }
+    });
+}
 
 </script>
 

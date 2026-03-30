@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from django.core.mail import send_mail
 from django.conf import settings
 from urllib.parse import quote
@@ -11,12 +11,20 @@ def generate_expiration_alerts():
 
     today = date.today()
 
+    # 🔥 SOLO PÓLIZAS DENTRO DE 30 DÍAS
     policies = Policy.objects.filter(
-        end_date__gte=today
+        end_date__gte=today,
+        end_date__lte=today.replace(day=today.day),
     ).select_related(
         "client",
         "client__producer"
     )
+
+    # 🔥 FIX rango real de 30 días
+    policies = [
+        policy for policy in policies
+        if 0 <= (policy.end_date - today).days <= 30
+    ]
 
     for policy in policies:
 
@@ -31,22 +39,46 @@ def generate_expiration_alerts():
         else:
             continue
 
-        alert, created = Alert.objects.get_or_create(
+        mensaje = (
+            f"La póliza {policy.policy_number} del cliente {policy.client} "
+            f"vence en {days} días"
+        )
+
+        alerta = Alert.objects.filter(
             user=policy.client.producer,
             policy=policy,
             tipo="VENCIMIENTO",
             resolved=False,
-            defaults={
-                "message": f"La póliza {policy.policy_number} del cliente {policy.client} vence en {days} días",
-                "level": level,
-            },
-        )
+        ).first()
 
-        if days == 7 and created and policy.client.producer.email:
+        if alerta:
+            cambios = False
 
-            subject = "⚠ Póliza por vencer en 7 días"
+            if alerta.message != mensaje:
+                alerta.message = mensaje
+                cambios = True
 
-            message = f"""
+            if alerta.level != level:
+                alerta.level = level
+                cambios = True
+
+            if cambios:
+                alerta.save()
+        else:
+            alerta = Alert.objects.create(
+                user=policy.client.producer,
+                policy=policy,
+                tipo="VENCIMIENTO",
+                resolved=False,
+                message=mensaje,
+                level=level,
+            )
+
+            if days == 7 and policy.client.producer.email:
+
+                subject = "⚠ Póliza por vencer en 7 días"
+
+                message = f"""
 Cliente: {policy.client}
 
 Compañía: {policy.company}
@@ -57,16 +89,30 @@ La póliza vence el {policy.end_date}.
 Se recomienda contactar al cliente para gestionar la renovación.
 """
 
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [policy.client.producer.email],
-                fail_silently=True,
-            )
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [policy.client.producer.email],
+                    fail_silently=True,
+                )
+
+    # 🔥 AUTO-RESOLVER ALERTAS DE VENCIMIENTO QUE YA NO APLICAN
+    alertas_vencimiento = Alert.objects.filter(
+        tipo="VENCIMIENTO",
+        resolved=False,
+    ).select_related("policy")
+
+    for alerta in alertas_vencimiento:
+        if not alerta.policy:
+            continue
+
+        dias = (alerta.policy.end_date - today).days
+        if dias < 0 or dias > 30:
+            alerta.resolved = True
+            alerta.save()
 
 
-# 🔥 ALERTAS DE DEUDA
 def generate_debt_alerts():
 
     pagos_vencidos = Payment.objects.filter(estado="VENCIDO").select_related(
@@ -75,37 +121,63 @@ def generate_debt_alerts():
         "policy__client__producer"
     )
 
+    policies_con_deuda = set()
+
     for pago in pagos_vencidos:
 
         policy = pago.policy
         cliente = policy.client
+        policies_con_deuda.add(policy.id)
 
-        Alert.objects.get_or_create(
+        mensaje = f"Cliente con deuda en cuota #{pago.numero_cuota}"
+
+        alerta = Alert.objects.filter(
             user=cliente.producer,
             policy=policy,
             tipo="DEUDA",
             resolved=False,
-            defaults={
-                "message": f"Cliente con deuda en cuota #{pago.numero_cuota}",
-                "level": "CRITICA",
-            },
-        )
+        ).first()
+
+        if alerta:
+            if alerta.message != mensaje or alerta.level != "CRITICA":
+                alerta.message = mensaje
+                alerta.level = "CRITICA"
+                alerta.save()
+        else:
+            Alert.objects.create(
+                user=cliente.producer,
+                policy=policy,
+                tipo="DEUDA",
+                resolved=False,
+                message=mensaje,
+                level="CRITICA",
+            )
+
+    # 🔥 AUTO-RESOLVER ALERTAS DE DEUDA SI YA NO HAY PAGOS VENCIDOS
+    alertas_deuda = Alert.objects.filter(
+        tipo="DEUDA",
+        resolved=False,
+    ).select_related("policy")
+
+    for alerta in alertas_deuda:
+        if alerta.policy_id not in policies_con_deuda:
+            alerta.resolved = True
+            alerta.save()
 
 
-# 🔥 FUNCIÓN CENTRAL
 def generar_todas_las_alertas():
 
     generate_expiration_alerts()
     generate_debt_alerts()
 
 
-# =========================
-# 🔥 WHATSAPP (NUEVO)
-# =========================
-
 def generar_link_whatsapp(cliente, mensaje):
 
-    telefono = cliente.phone.replace(" ", "").replace("-", "")
+    telefono = (
+        getattr(cliente, "phone", "") or getattr(cliente, "telefono", "")
+    )
+
+    telefono = telefono.replace(" ", "").replace("-", "")
 
     texto = quote(mensaje)
 

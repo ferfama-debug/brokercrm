@@ -15,7 +15,7 @@
 </div>
 
 <!-- BUSCADOR -->
-<div class="card" style="margin-bottom: 20px;">
+<div class="card" style="margin-bottom: 16px;">
   <form method="get" class="buscador-clientes">
     <div class="search-input-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -29,8 +29,57 @@
         class="form-control search-input"
       >
     </div>
+
+    <select name="estado" class="form-control filtro-estado">
+      <option value="">Todos</option>
+      <option value="ACTIVOS" {% if estado == "ACTIVOS" %}selected{% endif %}>Activos</option>
+      <option value="VENCIDOS" {% if estado == "VENCIDOS" %}selected{% endif %}>Vencidos</option>
+      <option value="POR_VENCER" {% if estado == "POR_VENCER" %}selected{% endif %}>Por vencer</option>
+      <option value="SEGUIMIENTO_VENCIDO" {% if estado == "SEGUIMIENTO_VENCIDO" %}selected{% endif %}>Seguimiento vencido</option>
+      <option value="SEGUIMIENTO_HOY" {% if estado == "SEGUIMIENTO_HOY" %}selected{% endif %}>Seguimiento hoy</option>
+      <option value="SEGUIMIENTO_SEMANA" {% if estado == "SEGUIMIENTO_SEMANA" %}selected{% endif %}>Seguimiento semana</option>
+    </select>
+
     <button type="submit" class="btn btn-primary">Buscar</button>
+
+    {% if buscar or estado %}
+    <a href="{% url 'clients:clientes' %}" class="btn btn-ghost">Limpiar</a>
+    {% endif %}
   </form>
+</div>
+
+<!-- FILTROS RÁPIDOS CRM -->
+<div class="quick-filters-card">
+  <div class="quick-filters-header">
+    <span class="quick-filters-title">Filtros rápidos</span>
+    {% if estado %}
+    <span class="quick-filters-status">Filtro activo: {{ estado }}</span>
+    {% endif %}
+  </div>
+
+  <div class="quick-filters">
+    <a href="{% url 'clients:clientes' %}?buscar={{ buscar|urlencode }}" class="quick-filter {% if not estado %}active{% endif %}">
+      Todos
+    </a>
+    <a href="{% url 'clients:clientes' %}?buscar={{ buscar|urlencode }}&estado=ACTIVOS" class="quick-filter {% if estado == 'ACTIVOS' %}active{% endif %}">
+      Activos
+    </a>
+    <a href="{% url 'clients:clientes' %}?buscar={{ buscar|urlencode }}&estado=POR_VENCER" class="quick-filter {% if estado == 'POR_VENCER' %}active{% endif %}">
+      Por vencer
+    </a>
+    <a href="{% url 'clients:clientes' %}?buscar={{ buscar|urlencode }}&estado=VENCIDOS" class="quick-filter {% if estado == 'VENCIDOS' %}active{% endif %}">
+      Vencidos
+    </a>
+    <a href="{% url 'clients:clientes' %}?buscar={{ buscar|urlencode }}&estado=SEGUIMIENTO_VENCIDO" class="quick-filter quick-filter-red {% if estado == 'SEGUIMIENTO_VENCIDO' %}active{% endif %}">
+      Seguimiento vencido
+    </a>
+    <a href="{% url 'clients:clientes' %}?buscar={{ buscar|urlencode }}&estado=SEGUIMIENTO_HOY" class="quick-filter quick-filter-yellow {% if estado == 'SEGUIMIENTO_HOY' %}active{% endif %}">
+      Seguimiento hoy
+    </a>
+    <a href="{% url 'clients:clientes' %}?buscar={{ buscar|urlencode }}&estado=SEGUIMIENTO_SEMANA" class="quick-filter quick-filter-blue {% if estado == 'SEGUIMIENTO_SEMANA' %}active{% endif %}">
+      Próximos 7 días
+    </a>
+  </div>
 </div>
 
 <!-- TABLA CLIENTES -->
@@ -42,18 +91,37 @@
         <th>DNI</th>
         <th>Email</th>
         <th>Teléfono</th>
-        <th style="width:160px;">Acciones</th>
+        <th>Seguimiento</th>
+        <th style="width:260px;">Acciones</th>
       </tr>
     </thead>
     <tbody>
       {% for cliente in clientes %}
-      <tr>
+      <tr
+        {% if cliente.seguimiento_vencido %}
+          class="fila-seguimiento-vencido"
+        {% elif cliente.seguimiento_hoy %}
+          class="fila-seguimiento-hoy"
+        {% elif cliente.seguimiento_proxima_semana %}
+          class="fila-seguimiento-semana"
+        {% endif %}
+      >
         <td>
           <div class="cliente-nombre">
             <div class="cliente-avatar">
               {{ cliente.first_name|first|upper }}{{ cliente.last_name|first|upper }}
             </div>
-            <span>{{ cliente.first_name }} {{ cliente.last_name }}</span>
+            <div class="cliente-main">
+              <span class="cliente-main-name">{{ cliente.first_name }} {{ cliente.last_name }}</span>
+
+              <div class="cliente-submeta">
+                {% if cliente.ultimo_contacto %}
+                  Último contacto: {{ cliente.ultimo_contacto|date:"d/m/Y H:i" }}
+                {% else %}
+                  Sin contacto registrado
+                {% endif %}
+              </div>
+            </div>
           </div>
         </td>
         <td>
@@ -66,6 +134,64 @@
           <span class="mono-text">{{ cliente.phone|default:"—" }}</span>
         </td>
         <td>
+          <div class="seguimiento-wrap">
+
+            <div class="seguimiento-badges">
+              {% if cliente.seguimiento_estado == "SIN_GESTION" %}
+                <span class="badge-seguimiento badge-seguimiento-gray">Sin gestión</span>
+              {% elif cliente.seguimiento_estado == "PENDIENTE" %}
+                <span class="badge-seguimiento badge-seguimiento-yellow">Pendiente</span>
+              {% elif cliente.seguimiento_estado == "CONTACTADO" %}
+                <span class="badge-seguimiento badge-seguimiento-blue">Contactado</span>
+              {% elif cliente.seguimiento_estado == "EN_SEGUIMIENTO" %}
+                <span class="badge-seguimiento badge-seguimiento-blue">En seguimiento</span>
+              {% elif cliente.seguimiento_estado == "INTERESADO" %}
+                <span class="badge-seguimiento badge-seguimiento-green">Interesado</span>
+              {% elif cliente.seguimiento_estado == "NO_INTERESADO" %}
+                <span class="badge-seguimiento badge-seguimiento-red">No interesado</span>
+              {% elif cliente.seguimiento_estado == "CLIENTE" %}
+                <span class="badge-seguimiento badge-seguimiento-green">Cliente</span>
+              {% else %}
+                <span class="badge-seguimiento badge-seguimiento-gray">
+                  {{ cliente.get_seguimiento_estado_display|default:"Sin gestión" }}
+                </span>
+              {% endif %}
+
+              {% if cliente.seguimiento_vencido %}
+                <span class="mini-badge mini-badge-red">Vencido</span>
+              {% elif cliente.seguimiento_hoy %}
+                <span class="mini-badge mini-badge-yellow">Hoy</span>
+              {% elif cliente.seguimiento_proxima_semana %}
+                <span class="mini-badge mini-badge-blue">7 días</span>
+              {% endif %}
+            </div>
+
+            {% if cliente.proximo_seguimiento %}
+              {% if cliente.seguimiento_vencido %}
+                <div class="seguimiento-alerta seguimiento-vencido">
+                  Vencido: {{ cliente.proximo_seguimiento|date:"d/m/Y" }}
+                </div>
+              {% elif cliente.seguimiento_hoy %}
+                <div class="seguimiento-alerta seguimiento-hoy">
+                  Seguimiento para hoy
+                </div>
+              {% elif cliente.seguimiento_proxima_semana %}
+                <div class="seguimiento-alerta seguimiento-semana">
+                  Próximo: {{ cliente.proximo_seguimiento|date:"d/m/Y" }}
+                </div>
+              {% else %}
+                <div class="seguimiento-fecha">
+                  Próximo seguimiento: {{ cliente.proximo_seguimiento|date:"d/m/Y" }}
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="seguimiento-fecha muted-text">
+                Sin fecha programada
+              </div>
+            {% endif %}
+          </div>
+        </td>
+        <td>
           <div class="acciones">
             <a href="{% url 'clients:ver_cliente' cliente.id %}" class="btn btn-secondary btn-sm">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -74,6 +200,7 @@
               </svg>
               Ver
             </a>
+
             <a href="{% url 'clients:editar_cliente' cliente.id %}" class="btn btn-ghost btn-sm">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -81,12 +208,30 @@
               </svg>
               Editar
             </a>
+
+            <form method="post" action="{% url 'clients:marcar_contactado' cliente.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary btn-sm">
+                Marcar contactado
+              </button>
+            </form>
+
+            {% if cliente.permite_whatsapp and cliente.whatsapp_url %}
+            <a href="{{ cliente.whatsapp_url }}" target="_blank" class="btn btn-whatsapp btn-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 1 1 21 11.5z"/>
+                <path d="M8 12c.2 1.7 2.3 3.8 4 4"/>
+                <path d="M14.5 14.5l1.5 1.2a1 1 0 0 0 1.2 0l1.1-.9a1 1 0 0 0 .2-1.3l-.7-1.1a1 1 0 0 0-1.2-.4l-1 .4a7.7 7.7 0 0 1-3.2-3.2l.4-1a1 1 0 0 0-.4-1.2l-1.1-.7a1 1 0 0 0-1.3.2l-.9 1.1a1 1 0 0 0 0 1.2l1.2 1.5"/>
+              </svg>
+              WhatsApp
+            </a>
+            {% endif %}
           </div>
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="5">
+        <td colspan="6">
           <div class="empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -133,6 +278,108 @@
   padding-left: 34px;
 }
 
+.filtro-estado {
+  min-width: 220px;
+}
+
+/* QUICK FILTERS */
+.quick-filters-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.quick-filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.quick-filters-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.quick-filters-status {
+  font-size: 12px;
+  color: #bbf7d0;
+}
+
+.quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-filter {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  background: rgba(34, 197, 94, 0.08);
+  color: #d1fae5;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  transition: 0.18s;
+}
+
+.quick-filter:hover {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(134, 239, 172, 0.24);
+}
+
+.quick-filter.active {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(134, 239, 172, 0.34);
+  color: #ecfdf5;
+}
+
+.quick-filter-red {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.14);
+  color: #fecaca;
+}
+
+.quick-filter-red:hover,
+.quick-filter-red.active {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.26);
+}
+
+.quick-filter-yellow {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.14);
+  color: #fde68a;
+}
+
+.quick-filter-yellow:hover,
+.quick-filter-yellow.active {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.26);
+}
+
+.quick-filter-blue {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.14);
+  color: #bfdbfe;
+}
+
+.quick-filter-blue:hover,
+.quick-filter-blue.active {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: rgba(59, 130, 246, 0.26);
+}
+
 /* TABLA */
 .tabla-clientes {
   width: 100%;
@@ -143,15 +390,40 @@
 .tabla-clientes tbody td {
   color: #ecfdf5 !important;
   background: #0f2018 !important;
+  vertical-align: middle;
+  transition: background 0.18s ease;
 }
 
 .tabla-clientes tbody tr:hover td {
   background: #132619 !important;
 }
 
-.cliente-nombre span {
+.fila-seguimiento-vencido td {
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+
+.fila-seguimiento-hoy td {
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+.fila-seguimiento-semana td {
+  box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+.cliente-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cliente-main-name {
   color: #ecfdf5 !important;
   font-weight: 500;
+}
+
+.cliente-submeta {
+  font-size: 11.5px;
+  color: #86efac;
 }
 
 .tabla-clientes .mono-text {
@@ -188,12 +460,112 @@
   letter-spacing: 0.02em;
 }
 
+/* SEGUIMIENTO */
+.seguimiento-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
+.seguimiento-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge-seguimiento {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-seguimiento-green {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(134, 239, 172, 0.18);
+  color: #bbf7d0;
+}
+
+.badge-seguimiento-yellow {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+}
+
+.badge-seguimiento-red {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+}
+
+.badge-seguimiento-blue {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  color: #bfdbfe;
+}
+
+.badge-seguimiento-gray {
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #cbd5e1;
+}
+
+.mini-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.mini-badge-red {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+}
+
+.mini-badge-yellow {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fde68a;
+}
+
+.mini-badge-blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #bfdbfe;
+}
+
+.seguimiento-alerta {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.seguimiento-vencido {
+  color: #fca5a5;
+}
+
+.seguimiento-hoy {
+  color: #fde68a;
+}
+
+.seguimiento-semana {
+  color: #93c5fd;
+}
+
+.seguimiento-fecha {
+  font-size: 12px;
+  color: #d1fae5;
+}
 
 /* ACCIONES */
 .acciones {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .btn-sm {
@@ -205,6 +577,17 @@
 .btn-sm svg {
   width: 13px;
   height: 13px;
+}
+
+.btn-whatsapp {
+  background: #14532d;
+  color: #dcfce7;
+  border: 1px solid #166534;
+}
+
+.btn-whatsapp:hover {
+  background: #166534;
+  color: #ffffff;
 }
 
 /* EMPTY STATE */
@@ -225,6 +608,12 @@
 
 .empty-state p {
   font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .quick-filters-header {
+    align-items: flex-start;
+  }
 }
 
 </style>

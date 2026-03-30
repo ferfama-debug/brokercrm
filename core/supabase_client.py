@@ -1,40 +1,161 @@
-import os
-import uuid
+from supabase import create_client, Client
 from django.conf import settings
+from uuid import uuid4
+import mimetypes
+import os
+import re
 
 
-def subir_archivo_supabase(file, carpeta):
+def get_supabase():
     try:
-        # 🔥 SI ESTAMOS EN GITHUB → NO HACER NADA
-        if os.environ.get("GITHUB_ACTIONS") == "true":
-            print("⚠️ Supabase desactivado en GitHub")
+        url = getattr(settings, "SUPABASE_URL", None)
+        key = getattr(settings, "SUPABASE_KEY", None)
+
+        if not url or not key:
+            print("⚠️ Supabase no configurado")
             return None
 
-        # 🔥 IMPORT DINÁMICO (CLAVE)
-        from supabase import create_client
+        print("✅ Supabase configurado correctamente")
 
-        if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
-            raise Exception("Supabase no configurado correctamente")
+        # 🔥 FIX PROXY ERROR
+        try:
+            return create_client(url, key)
+        except TypeError as e:
+            print("⚠️ create_client falló, usando fallback:", e)
+            return Client(url, key)
 
-        supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    except Exception as e:
+        print("❌ Error creando cliente Supabase:", e)
+        return None
 
-        nombre_unico = f"{uuid.uuid4()}_{file.name}"
-        path = f"{carpeta}/{nombre_unico}"
 
-        print("SUBIENDO A SUPABASE:", path)
+def _bucket_name():
+    bucket = getattr(settings, "SUPABASE_BUCKET", "documents")
+    print("🪣 Bucket Supabase:", bucket)
+    return bucket
 
-        supabase.storage.from_("polizas").upload(
-            path,
-            file.read(),
-            {"content-type": file.content_type},
+
+def _safe_filename(filename):
+    if not filename:
+        return f"{uuid4().hex}.pdf"
+
+    base_name = os.path.basename(filename)
+    name, ext = os.path.splitext(base_name)
+
+    safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("._")
+    if not safe_name:
+        safe_name = uuid4().hex
+
+    if not ext:
+        ext = ".pdf"
+
+    return f"{safe_name}{ext.lower()}"
+
+
+def _content_type(file, filename):
+    content_type = getattr(file, "content_type", None)
+    if content_type:
+        return content_type
+
+    guessed, _ = mimetypes.guess_type(filename)
+    return guessed or "application/octet-stream"
+
+
+def _extract_public_url(public_url_result):
+    if not public_url_result:
+        return None
+
+    if isinstance(public_url_result, str):
+        return public_url_result
+
+    if isinstance(public_url_result, dict):
+        return (
+            public_url_result.get("publicUrl")
+            or public_url_result.get("public_url")
+            or (public_url_result.get("data", {}) or {}).get("publicUrl")
+            or (public_url_result.get("data", {}) or {}).get("public_url")
         )
 
-        public_url = supabase.storage.from_("polizas").get_public_url(path)
+    data = getattr(public_url_result, "data", None)
+    if isinstance(data, dict):
+        return data.get("publicUrl") or data.get("public_url")
 
-        print("URL GENERADA:", public_url)
+    return (
+        getattr(public_url_result, "publicUrl", None)
+        or getattr(public_url_result, "public_url", None)
+    )
 
+
+def _build_public_url(bucket, file_path):
+    base_url = getattr(settings, "SUPABASE_URL", "").rstrip("/")
+    if not base_url:
+        return None
+
+    return f"{base_url}/storage/v1/object/public/{bucket}/{file_path}"
+
+
+def subir_archivo_supabase(file, folder):
+    try:
+        print("🚀 Iniciando subida a Supabase")
+        print("📁 Folder recibido:", folder)
+        print("📄 Archivo recibido:", getattr(file, "name", None))
+
+        supabase = get_supabase()
+
+        if not supabase:
+            print("⚠️ Cliente Supabase no disponible")
+            return None
+
+        if not file:
+            print("⚠️ No se recibió archivo para subir")
+            return None
+
+        bucket = _bucket_name()
+        safe_filename = _safe_filename(getattr(file, "name", "archivo.pdf"))
+        file_path = f"{folder}/{uuid4().hex}_{safe_filename}"
+        content_type = _content_type(file, safe_filename)
+
+        print("📝 safe_filename:", safe_filename)
+        print("🛣️ file_path:", file_path)
+        print("🏷️ content_type:", content_type)
+
+        try:
+            file.seek(0)
+        except Exception as e:
+            print("⚠️ No se pudo hacer seek(0):", e)
+
+        file_bytes = file.read()
+
+        if not file_bytes:
+            print("⚠️ Archivo vacío, no se sube a Supabase")
+            return None
+
+        print("📦 Tamaño archivo bytes:", len(file_bytes))
+
+        supabase.storage.from_(bucket).upload(
+            path=file_path,
+            file=file_bytes,
+            file_options={
+                "content-type": content_type,
+            },
+        )
+
+        public_url_result = supabase.storage.from_(bucket).get_public_url(file_path)
+        print("🌐 get_public_url result:", public_url_result)
+
+        public_url = _extract_public_url(public_url_result)
+
+        if not public_url:
+            public_url = _build_public_url(bucket, file_path)
+            print("🛠️ URL pública armada manualmente:", public_url)
+
+        if not public_url:
+            print("⚠️ No se pudo obtener URL pública del archivo")
+            return None
+
+        print("✅ URL final archivo:", public_url)
         return public_url
 
     except Exception as e:
-        print("ERROR SUBIENDO:", str(e))
+        print("❌ ERROR SUBIENDO:", e)
         return None

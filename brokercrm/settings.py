@@ -2,14 +2,15 @@ from pathlib import Path
 import os
 from django.core.management.utils import get_random_secret_key
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 # 🔥 DOTENV SEGURO
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+
+    load_dotenv(BASE_DIR / ".env")
 except Exception:
     pass
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # =========================
@@ -18,7 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+# 🔥 FORZAMOS DEBUG PARA VER LOGS
+DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS", "localhost,127.0.0.1,brokercrm.onrender.com"
@@ -26,24 +28,37 @@ ALLOWED_HOSTS = os.environ.get(
 
 
 # =========================
-# JAZZMIN (🔥 BRANDING + LOGO)
+# LOGGING (🔥 NUEVO)
+# =========================
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}
+
+
+# =========================
+# JAZZMIN
 # =========================
 
 JAZZMIN_SETTINGS = {
     "site_title": "Fuerza Natural Broker",
     "site_header": "Fuerza Natural Broker",
     "site_brand": "Fuerza Natural Broker",
-
-    # 🔥 LOGO
     "site_logo": "images/img/logo.png",
     "login_logo": "images/img/logo.png",
     "site_icon": "images/img/logo.png",
-
-    # 🔥 TEXTOS
     "welcome_sign": "Panel de gestión",
     "copyright": "Fuerza Natural Broker de Seguros",
-
-    # 🔥 UX
     "navigation_expanded": True,
 }
 
@@ -232,9 +247,19 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # =========================
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+SUPABASE_KEY = (
+    os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    or os.environ.get("SUPABASE_KEY")
+)
+
+SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "documents")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("⚠️ SUPABASE no configurado correctamente (variables faltantes)")
     SUPABASE_URL = None
     SUPABASE_KEY = None
+else:
+    print("✅ SUPABASE configurado")
+    print("✅ SUPABASE URL:", SUPABASE_URL)
+    print("✅ SUPABASE BUCKET:", SUPABASE_BUCKET)

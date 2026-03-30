@@ -19,6 +19,9 @@ def generar_pagos_cuponera():
 
         frecuencia = p.frecuencia_cuponera
 
+        if not frecuencia:
+            continue
+
         proximo_pago = p.start_date
 
         while proximo_pago <= p.end_date:
@@ -26,6 +29,13 @@ def generar_pagos_cuponera():
             dias = (proximo_pago - hoy).days
 
             if 0 <= dias <= 5:
+
+                telefono = (
+                    getattr(p.client, "phone", "")
+                    or getattr(p.client, "telefono", "")
+                    or ""
+                )
+                telefono = telefono.replace(" ", "").replace("-", "")
 
                 mensaje = (
                     f"Hola {p.client.first_name}. "
@@ -37,15 +47,15 @@ def generar_pagos_cuponera():
                 pagos.append(
                     {
                         "cliente": p.client,
-                        "telefono": getattr(p.client, "phone", ""),
+                        "telefono": telefono,
                         "numero": p.policy_number,
                         "company": p.company,
                         "fecha": proximo_pago,
                         "mensaje": mensaje,
-                        "pdf": p.cuponera_pdf.url if p.cuponera_pdf else None,
+                        "pdf": p.cuponera_pdf if p.cuponera_pdf else None,
                     }
                 )
 
-            proximo_pago += relativedelta(months=frecuencia)
+            proximo_pago += relativedelta(months=int(frecuencia))
 
     return pagos

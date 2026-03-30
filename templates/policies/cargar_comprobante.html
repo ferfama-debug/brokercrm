@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 30px;
+}
+
+.card {
+  background: #0f2018;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(52,211,100,0.08);
+}
+
+.title {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #f1f5f9;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  background: #020617;
+  border: 1px solid rgba(52,211,100,0.15);
+  border-radius: 8px;
+  color: #e2e8f0;
+}
+
+.btn {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  margin-left: 10px;
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  text-decoration: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+}
+
+</style>
+
+<div class="container">
+
+<div class="card">
+
+<div class="title">
+Cargar comprobante de pago
+</div>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label>Archivo (PDF / imagen)</label>
+    <input type="file" name="comprobante" required>
+  </div>
+
+  <button type="submit" class="btn">
+    Guardar comprobante
+  </button>
+
+  <a href="/polizas/" class="btn-secondary">
+    Cancelar
+  </a>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}
