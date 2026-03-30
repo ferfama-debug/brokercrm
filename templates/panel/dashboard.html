@@ -516,10 +516,9 @@ const companiasConDatos = companias.map((nombre, index) => ({
 
 const topCompanias = companiasConDatos
     .filter(item => item.nombre && item.total > 0)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 8);
+    .sort((a, b) => b.total - a.total);
 
-const companiasChart = topCompanias.map(item => dividirEtiqueta(item.nombre, 12));
+const companiasChart = topCompanias.map(item => item.nombre);
 const cantidadesChart = topCompanias.map(item => item.total);
 
 const ctxCompanias = document.getElementById('graficoCompanias');
@@ -531,10 +530,24 @@ if (ctxCompanias && companiasChart.length && cantidadesChart.length) {
             datasets: [{
                 label: 'Pólizas',
                 data: cantidadesChart,
-                backgroundColor: 'rgba(34, 197, 94, 0.45)',
+                backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+
+                    if (!chartArea) return;
+
+                    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                    gradient.addColorStop(0, 'rgba(34, 197, 94, 0.25)');
+                    gradient.addColorStop(1, 'rgba(34, 197, 94, 0.9)');
+
+                    return gradient;
+                },
                 borderColor: 'rgba(34, 197, 94, 1)',
                 borderWidth: 1.5,
-                borderRadius: 8
+                borderRadius: 8,
+                barThickness: 25,
+                hoverBackgroundColor: 'rgba(34, 197, 94, 0.7)',
+                hoverBorderColor: 'rgba(74, 222, 128, 1)'
             }]
         },
         options: {
@@ -563,8 +576,8 @@ if (ctxCompanias && companiasChart.length && cantidadesChart.length) {
                 x: {
                     ticks: {
                         color: colorTexto,
-                        maxRotation: 0,
-                        minRotation: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
                         autoSkip: false
                     },
                     grid: { color: colorGrid }
@@ -599,12 +612,16 @@ if (ctxCrecimiento && meses.length && crecimientoTotales.length) {
                 pointBorderColor: 'rgba(191, 219, 254, 1)',
                 pointBorderWidth: 2,
                 borderRadius: 8,
-                maxBarThickness: 56
+                barThickness: 35
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            },
             plugins: {
                 legend: {
                     labels: {
