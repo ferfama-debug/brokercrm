@@ -132,11 +132,15 @@ def crear_poliza(request):
 
     if request.method == "POST":
 
-        client = get_object_or_404(Client, id=request.POST.get("client"))
-
-        if not request.user.is_superuser and client.producer != request.user:
-            messages.error(request, "❌ No tenés permisos para este cliente")
-            return redirect("clients:clientes")
+        # 🔥 CORRECCIÓN SEGURA
+        if request.user.is_superuser:
+            client = get_object_or_404(Client, id=request.POST.get("client"))
+        else:
+            client = get_object_or_404(
+                Client,
+                id=request.POST.get("client"),
+                producer=request.user
+            )
 
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
@@ -152,22 +156,13 @@ def crear_poliza(request):
                 },
             )
 
-        print("📨 POST crear_poliza:", request.POST)
-        print("📎 FILES RECIBIDOS:", request.FILES)
-
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
-
-        print("📄 Archivo póliza recibido:", archivo_poliza)
-        print("💳 Archivo cuponera recibido:", archivo_cuponera)
 
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
         cuponera_url = procesar_archivo(
             archivo_cuponera, "cuponeras_clientes"
         )
-
-        print("🔗 pdf_url final:", pdf_url)
-        print("🔗 cuponera_url final:", cuponera_url)
 
         company_id = request.POST.get("company")
         company_obj = None
@@ -198,15 +193,7 @@ def crear_poliza(request):
             cuponera_pdf=cuponera_url or None,
         )
 
-        print("🧾 Antes de guardar póliza | pdf_poliza:", nueva_poliza.pdf_poliza)
-        print("🧾 Antes de guardar póliza | cuponera_pdf:", nueva_poliza.cuponera_pdf)
-
         nueva_poliza.save()
-        nueva_poliza.refresh_from_db()
-
-        print("✅ Póliza guardada | ID:", nueva_poliza.id)
-        print("✅ Póliza guardada | pdf_poliza:", nueva_poliza.pdf_poliza)
-        print("✅ Póliza guardada | cuponera_pdf:", nueva_poliza.cuponera_pdf)
 
         messages.success(request, "✅ Póliza creada correctamente")
 
@@ -228,11 +215,15 @@ def crear_poliza(request):
 @login_required
 def renovar_poliza(request, poliza_id):
 
-    poliza = get_object_or_404(Policy, id=poliza_id)
-
-    if not request.user.is_superuser and poliza.client.producer != request.user:
-        messages.error(request, "❌ No tenés permisos")
-        return redirect("clients:clientes")
+    # 🔥 CORRECCIÓN SEGURA
+    if request.user.is_superuser:
+        poliza = get_object_or_404(Policy, id=poliza_id)
+    else:
+        poliza = get_object_or_404(
+            Policy,
+            id=poliza_id,
+            client__producer=request.user
+        )
 
     if request.method == "POST":
 
@@ -249,22 +240,13 @@ def renovar_poliza(request, poliza_id):
                 },
             )
 
-        print("📨 POST renovar_poliza:", request.POST)
-        print("📎 FILES RECIBIDOS:", request.FILES)
-
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
-
-        print("📄 Archivo póliza recibido:", archivo_poliza)
-        print("💳 Archivo cuponera recibido:", archivo_cuponera)
 
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
         cuponera_url = procesar_archivo(
             archivo_cuponera, "cuponeras_clientes"
         )
-
-        print("🔗 pdf_url final:", pdf_url)
-        print("🔗 cuponera_url final:", cuponera_url)
 
         nueva_poliza = Policy(
             client=poliza.client,
@@ -284,15 +266,7 @@ def renovar_poliza(request, poliza_id):
             cuponera_pdf=cuponera_url or None,
         )
 
-        print("🧾 Antes de guardar renovación | pdf_poliza:", nueva_poliza.pdf_poliza)
-        print("🧾 Antes de guardar renovación | cuponera_pdf:", nueva_poliza.cuponera_pdf)
-
         nueva_poliza.save()
-        nueva_poliza.refresh_from_db()
-
-        print("✅ Renovación guardada | ID:", nueva_poliza.id)
-        print("✅ Renovación guardada | pdf_poliza:", nueva_poliza.pdf_poliza)
-        print("✅ Renovación guardada | cuponera_pdf:", nueva_poliza.cuponera_pdf)
 
         messages.success(request, "🔄 Póliza renovada correctamente")
 
@@ -310,11 +284,15 @@ def renovar_poliza(request, poliza_id):
 @login_required
 def marcar_pago(request, pago_id):
 
-    pago = get_object_or_404(Payment, id=pago_id)
-
-    if not request.user.is_superuser and pago.policy.client.producer != request.user:
-        messages.error(request, "❌ No tenés permisos")
-        return redirect("clients:clientes")
+    # 🔥 CORRECCIÓN SEGURA
+    if request.user.is_superuser:
+        pago = get_object_or_404(Payment, id=pago_id)
+    else:
+        pago = get_object_or_404(
+            Payment,
+            id=pago_id,
+            policy__client__producer=request.user
+        )
 
     if request.method == "POST":
 
@@ -346,12 +324,17 @@ def marcar_pago(request, pago_id):
 @login_required
 def enviar_poliza(request, poliza_id):
 
-    poliza = get_object_or_404(Policy, id=poliza_id)
-    cliente = poliza.client
+    # 🔥 CORRECCIÓN SEGURA
+    if request.user.is_superuser:
+        poliza = get_object_or_404(Policy, id=poliza_id)
+    else:
+        poliza = get_object_or_404(
+            Policy,
+            id=poliza_id,
+            client__producer=request.user
+        )
 
-    if not request.user.is_superuser and cliente.producer != request.user:
-        messages.error(request, "❌ No tenés permisos")
-        return redirect("clients:clientes")
+    cliente = poliza.client
 
     if not cliente.email:
         messages.error(request, "❌ El cliente no tiene email cargado")
@@ -398,11 +381,15 @@ Te enviamos tu póliza:
 @login_required
 def detalle_poliza(request, poliza_id):
 
-    poliza = get_object_or_404(Policy, id=poliza_id)
-
-    if not request.user.is_superuser and poliza.client.producer != request.user:
-        messages.error(request, "❌ No tenés permisos")
-        return redirect("clients:clientes")
+    # 🔥 CORRECCIÓN SEGURA
+    if request.user.is_superuser:
+        poliza = get_object_or_404(Policy, id=poliza_id)
+    else:
+        poliza = get_object_or_404(
+            Policy,
+            id=poliza_id,
+            client__producer=request.user
+        )
 
     return render(
         request,

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entorno virtual
+.venv/
+venv/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Variables sensibles
+.env
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

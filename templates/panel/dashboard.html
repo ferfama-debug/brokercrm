@@ -12,6 +12,10 @@
   color: #e2e8f0;
 }
 
+body.light-mode .dashboard {
+  color: #0f172a;
+}
+
 .dashboard-header {
   display: flex;
   align-items: center;
@@ -40,10 +44,18 @@
   color: #f8fafc;
 }
 
+body.light-mode .title {
+  color: #0f172a !important;
+}
+
 .dashboard-subtitle {
   margin: 0;
   color: #94a3b8;
   font-size: 14px;
+}
+
+body.light-mode .dashboard-subtitle {
+  color: #64748b !important;
 }
 
 .section-title {
@@ -52,8 +64,22 @@
   color: #f8fafc;
 }
 
+body.light-mode .section-title {
+  color: #0f172a !important;
+}
+
 h1, h2, h3 { color: #f1f5f9; }
 p, td, th, span { color: #ecfdf5; }
+
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode p,
+body.light-mode td,
+body.light-mode th,
+body.light-mode span {
+  color: inherit;
+}
 
 /* BOTONES */
 .btn-cobranza {
@@ -104,9 +130,19 @@ p, td, th, span { color: #ecfdf5; }
   transition: 0.2s ease;
 }
 
+body.light-mode .radar {
+  background: #ffffff;
+  border: 1px solid rgba(21,128,61,0.12);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 8px 24px rgba(15,23,42,0.04);
+}
+
 .radar:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+body.light-mode .radar:hover {
+  box-shadow: 0 10px 20px rgba(15,23,42,0.10);
 }
 
 .radar h3 {
@@ -115,10 +151,18 @@ p, td, th, span { color: #ecfdf5; }
   font-size: 15px;
 }
 
+body.light-mode .radar h3 {
+  color: #334155 !important;
+}
+
 .radar span {
   font-size: 28px;
   font-weight: 700;
   display: inline-block;
+}
+
+body.light-mode .radar span {
+  color: #0f172a !important;
 }
 
 .vencido  { border-top: 3px solid #ef4444 !important; }
@@ -135,6 +179,11 @@ table {
   border-collapse: collapse;
 }
 
+body.light-mode table {
+  background: #ffffff;
+  border: 1px solid rgba(21,128,61,0.10);
+}
+
 th {
   background: #0a1610;
   padding: 12px;
@@ -143,10 +192,20 @@ th {
   text-transform: uppercase;
 }
 
+body.light-mode th {
+  background: #f8fafc;
+  color: #334155 !important;
+}
+
 td {
   padding: 12px;
   border-bottom: 1px solid rgba(52,211,100,0.08);
   vertical-align: middle;
+}
+
+body.light-mode td {
+  color: #0f172a !important;
+  border-bottom: 1px solid rgba(21,128,61,0.10);
 }
 
 tr:last-child td {
@@ -157,6 +216,10 @@ tbody tr:hover {
   background: rgba(34,197,94,0.04);
 }
 
+body.light-mode tbody tr:hover {
+  background: #ecfdf3;
+}
+
 .grafico-box {
   background: #0f2018;
   padding: 16px;
@@ -164,6 +227,12 @@ tbody tr:hover {
   margin-bottom: 30px;
   height: 280px;
   border: 1px solid rgba(52,211,100,0.08);
+}
+
+body.light-mode .grafico-box {
+  background: #ffffff;
+  border: 1px solid rgba(21,128,61,0.10);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 8px 24px rgba(15,23,42,0.04);
 }
 
 .grafico-box canvas {
@@ -184,6 +253,12 @@ tbody tr:hover {
   transition: 0.18s ease;
 }
 
+body.light-mode .crm-link {
+  color: #15803d !important;
+  background: rgba(34,197,94,0.10);
+  border-color: rgba(34,197,94,0.18);
+}
+
 .crm-link:hover {
   background: rgba(34,197,94,0.18);
 }
@@ -191,6 +266,10 @@ tbody tr:hover {
 .crm-muted {
   color: #94a3b8;
   font-size: 12px;
+}
+
+body.light-mode .crm-muted {
+  color: #64748b !important;
 }
 
 .crm-contacto {
@@ -204,9 +283,17 @@ tbody tr:hover {
   color: #f0fdf4;
 }
 
+body.light-mode .crm-cliente {
+  color: #0f172a !important;
+}
+
 .crm-subinfo {
   font-size: 11px;
   color: #94a3b8;
+}
+
+body.light-mode .crm-subinfo {
+  color: #64748b !important;
 }
 
 .crm-dias {
@@ -220,6 +307,11 @@ tbody tr:hover {
   color: #fdba74;
   font-size: 12px;
   font-weight: 700;
+}
+
+body.light-mode .crm-dias {
+  color: #c2410c !important;
+  background: rgba(249,115,22,0.14);
 }
 
 .crm-acciones {
@@ -250,6 +342,10 @@ tbody tr:hover {
   border-color: rgba(37,211,102,0.22);
 }
 
+body.light-mode .crm-btn-wa {
+  color: #15803d !important;
+}
+
 .crm-btn-wa:hover {
   background: rgba(37,211,102,0.22);
 }
@@ -257,6 +353,12 @@ tbody tr:hover {
 .crm-btn-copy {
   background: rgba(148,163,184,0.12);
   color: #cbd5e1;
+  border-color: rgba(148,163,184,0.2);
+}
+
+body.light-mode .crm-btn-copy {
+  color: #475569 !important;
+  background: rgba(148,163,184,0.12);
   border-color: rgba(148,163,184,0.2);
 }
 
@@ -268,6 +370,10 @@ tbody tr:hover {
   font-size: 11px;
   color: #86efac;
   min-width: 72px;
+}
+
+body.light-mode .crm-copy-ok {
+  color: #15803d !important;
 }
 
 @media (max-width: 900px) {
@@ -506,8 +612,14 @@ const cantidades = normalizarJsonScript(rawCantidades);
 const meses = normalizarJsonScript(rawMeses);
 const crecimientoTotales = normalizarJsonScript(rawCrecimientoTotales);
 
-const colorTexto = '#ecfdf5';
-const colorGrid = 'rgba(52, 211, 100, 0.08)';
+const esModoClaro = document.body.classList.contains('light-mode');
+const colorTexto = esModoClaro ? '#0f172a' : '#ecfdf5';
+const colorGrid = esModoClaro ? 'rgba(148, 163, 184, 0.22)' : 'rgba(52, 211, 100, 0.08)';
+const tooltipBg = esModoClaro ? '#ffffff' : '#111827';
+const tooltipTitle = esModoClaro ? '#0f172a' : '#f8fafc';
+const tooltipBody = esModoClaro ? '#334155' : '#e5e7eb';
+const tooltipBorderGreen = esModoClaro ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.35)';
+const tooltipBorderBlue = esModoClaro ? 'rgba(96, 165, 250, 0.25)' : 'rgba(96, 165, 250, 0.35)';
 
 const companiasConDatos = companias.map((nombre, index) => ({
     nombre: String(nombre || '').trim(),
@@ -537,8 +649,14 @@ if (ctxCompanias && companiasChart.length && cantidadesChart.length) {
                     if (!chartArea) return;
 
                     const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                    gradient.addColorStop(0, 'rgba(34, 197, 94, 0.25)');
-                    gradient.addColorStop(1, 'rgba(34, 197, 94, 0.9)');
+
+                    if (esModoClaro) {
+                        gradient.addColorStop(0, 'rgba(34, 197, 94, 0.35)');
+                        gradient.addColorStop(1, 'rgba(34, 197, 94, 0.75)');
+                    } else {
+                        gradient.addColorStop(0, 'rgba(34, 197, 94, 0.25)');
+                        gradient.addColorStop(1, 'rgba(34, 197, 94, 0.9)');
+                    }
 
                     return gradient;
                 },
@@ -546,7 +664,7 @@ if (ctxCompanias && companiasChart.length && cantidadesChart.length) {
                 borderWidth: 1.5,
                 borderRadius: 8,
                 barThickness: 25,
-                hoverBackgroundColor: 'rgba(34, 197, 94, 0.7)',
+                hoverBackgroundColor: esModoClaro ? 'rgba(34, 197, 94, 0.55)' : 'rgba(34, 197, 94, 0.7)',
                 hoverBorderColor: 'rgba(74, 222, 128, 1)'
             }]
         },
@@ -560,10 +678,10 @@ if (ctxCompanias && companiasChart.length && cantidadesChart.length) {
                     }
                 },
                 tooltip: {
-                    backgroundColor: '#111827',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#e5e7eb',
-                    borderColor: 'rgba(34, 197, 94, 0.35)',
+                    backgroundColor: tooltipBg,
+                    titleColor: tooltipTitle,
+                    bodyColor: tooltipBody,
+                    borderColor: tooltipBorderGreen,
                     borderWidth: 1,
                     callbacks: {
                         title: function(context) {
@@ -602,14 +720,16 @@ if (ctxCrecimiento && meses.length && crecimientoTotales.length) {
                 label: 'Crecimiento',
                 data: crecimientoTotales,
                 borderColor: 'rgba(96, 165, 250, 1)',
-                backgroundColor: meses.length === 1 ? 'rgba(96, 165, 250, 0.45)' : 'rgba(96, 165, 250, 0.12)',
+                backgroundColor: meses.length === 1
+                    ? (esModoClaro ? 'rgba(96, 165, 250, 0.55)' : 'rgba(96, 165, 250, 0.45)')
+                    : (esModoClaro ? 'rgba(96, 165, 250, 0.18)' : 'rgba(96, 165, 250, 0.12)'),
                 fill: meses.length === 1 ? false : true,
                 tension: 0.25,
                 borderWidth: 3,
                 pointRadius: 4,
                 pointHoverRadius: 6,
                 pointBackgroundColor: 'rgba(96, 165, 250, 1)',
-                pointBorderColor: 'rgba(191, 219, 254, 1)',
+                pointBorderColor: esModoClaro ? 'rgba(219, 234, 254, 1)' : 'rgba(191, 219, 254, 1)',
                 pointBorderWidth: 2,
                 borderRadius: 8,
                 barThickness: 35
@@ -629,10 +749,10 @@ if (ctxCrecimiento && meses.length && crecimientoTotales.length) {
                     }
                 },
                 tooltip: {
-                    backgroundColor: '#111827',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#e5e7eb',
-                    borderColor: 'rgba(96, 165, 250, 0.35)',
+                    backgroundColor: tooltipBg,
+                    titleColor: tooltipTitle,
+                    bodyColor: tooltipBody,
+                    borderColor: tooltipBorderBlue,
                     borderWidth: 1
                 }
             },

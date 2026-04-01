@@ -7,7 +7,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 🔥 DOTENV SEGURO
 try:
     from dotenv import load_dotenv
-
     load_dotenv(BASE_DIR / ".env")
 except Exception:
     pass
@@ -19,8 +18,8 @@ except Exception:
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
-# 🔥 FORZAMOS DEBUG PARA VER LOGS
-DEBUG = True
+# 🔐 PRODUCCIÓN CONTROLADA
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS", "localhost,127.0.0.1,brokercrm.onrender.com"
@@ -28,7 +27,7 @@ ALLOWED_HOSTS = os.environ.get(
 
 
 # =========================
-# LOGGING (🔥 NUEVO)
+# LOGGING
 # =========================
 
 LOGGING = {
@@ -41,7 +40,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "DEBUG",
+        "level": "DEBUG" if DEBUG else "INFO",
     },
 }
 
@@ -60,6 +59,9 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Panel de gestión",
     "copyright": "Fuerza Natural Broker de Seguros",
     "navigation_expanded": True,
+    "topmenu_links": [
+        {"name": "Volver al CRM", "url": "/", "new_window": False},
+    ],
 }
 
 
@@ -98,6 +100,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.AdminAccessMiddleware",
 ]
 
 
@@ -141,7 +144,7 @@ if DATABASE_URL:
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=not DEBUG,
         )
     }
 else:
@@ -158,9 +161,7 @@ else:
 # =========================
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -199,7 +200,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # =========================
-# SEGURIDAD
+# SEGURIDAD (🔥 CLAVE)
 # =========================
 
 CSRF_TRUSTED_ORIGINS = [
@@ -209,22 +210,35 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
+# 🔐 COOKIES SEGURAS
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
-CSRF_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
-SESSION_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
 
-SECURE_SSL_REDIRECT = False
+# 🔒 HTTPS
+SECURE_SSL_REDIRECT = not DEBUG
+
+# 🛡️ HEADERS DE SEGURIDAD
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
+# 🔒 HSTS (solo en producción)
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 
 # =========================
 # LOGIN
 # =========================
 
-LOGIN_URL = "/admin/login/"
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/admin/login/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 
 # =========================

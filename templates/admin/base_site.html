@@ -10,6 +10,51 @@
 
 {% endblock %}
 
-
 {% block nav-global %}
+<a href="/" id="volver-crm-btn" style="
+    position: fixed;
+    top: 14px;
+    right: 70px;
+    z-index: 99999;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: #16a34a;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(22, 163, 74, 0.28);
+">
+    Volver al CRM
+</a>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    if (!document.getElementById("volver-crm-btn")) {
+        const btn = document.createElement("a");
+        btn.id = "volver-crm-btn";
+        btn.href = "/";
+        btn.textContent = "Volver al CRM";
+        btn.style.position = "fixed";
+        btn.style.top = "14px";
+        btn.style.right = "70px";
+        btn.style.zIndex = "99999";
+        btn.style.display = "inline-flex";
+        btn.style.alignItems = "center";
+        btn.style.justifyContent = "center";
+        btn.style.padding = "10px 16px";
+        btn.style.borderRadius = "10px";
+        btn.style.background = "#16a34a";
+        btn.style.color = "white";
+        btn.style.textDecoration = "none";
+        btn.style.fontSize = "13px";
+        btn.style.fontWeight = "600";
+        btn.style.boxShadow = "0 6px 18px rgba(22, 163, 74, 0.28)";
+        document.body.appendChild(btn);
+    }
+});
+</script>
 {% endblock %}

@@ -95,7 +95,15 @@ def ver_cliente(request, cliente_id):
     limite_seguimiento = hoy + timedelta(days=7)
 
     poliza_id = request.GET.get("poliza")
-    polizas_query = Policy.objects.filter(client=cliente)
+
+    # 🔥 CORRECCIÓN IMPORTANTE
+    if request.user.is_superuser:
+        polizas_query = Policy.objects.filter(client=cliente)
+    else:
+        polizas_query = Policy.objects.filter(
+            client=cliente,
+            client__producer=request.user
+        )
 
     if poliza_id:
         polizas_query = polizas_query.filter(id=poliza_id)

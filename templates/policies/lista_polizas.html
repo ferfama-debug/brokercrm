@@ -119,7 +119,39 @@
 
 <style>
 
-/* FILTRO */
+/* 🔥 FIX MODO CLARO (QUIRÚRGICO) */
+body.light-mode .tabla-polizas thead th {
+  background: #f8fafc !important;
+  color: #334155 !important;
+}
+
+body.light-mode .tabla-polizas tbody td,
+body.light-mode .tabla-polizas tbody td * {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .tabla-polizas tbody tr:nth-child(even) td {
+  background: #f8fafc !important;
+}
+
+body.light-mode .tabla-polizas tbody tr:hover td,
+body.light-mode .tabla-polizas tbody tr:hover td * {
+  background: #ecfdf3 !important;
+}
+
+body.light-mode .cliente-nombre-texto {
+  color: #0f172a !important;
+}
+
+body.light-mode .mono-val,
+body.light-mode .link-poliza-numero,
+body.light-mode .tipo-pill {
+  color: #0f172a !important;
+}
+
+/* ================= ORIGINAL ================= */
+
 .filtro-form {
   display: flex;
   align-items: center;
@@ -132,14 +164,12 @@
   margin-bottom: 0 !important;
 }
 
-/* LISTA */
 .clientes-lista {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* CAJA DE CLIENTE */
 .cliente-box {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -152,7 +182,6 @@
   border-color: var(--border-strong);
 }
 
-/* HEADER CLIENTE */
 .cliente-header {
   display: flex;
   align-items: center;
@@ -221,13 +250,11 @@
   transform: rotate(180deg);
 }
 
-/* PANEL DE PÓLIZAS */
 .polizas-wrap {
   display: none;
   border-top: 1px solid var(--border);
 }
 
-/* TABLA PÓLIZAS */
 .tabla-polizas {
   width: 100%;
   border-collapse: collapse;
@@ -246,8 +273,7 @@
   border-bottom: 1px solid rgba(52, 211, 100, 0.08);
 }
 
-.tabla-polizas tbody td,
-.tabla-polizas tbody td * {
+.tabla-polizas tbody td {
   padding: 11px 16px;
   border-bottom: 1px solid rgba(52, 211, 100, 0.08);
   color: #ecfdf5 !important;
@@ -255,25 +281,38 @@
   vertical-align: middle;
 }
 
+.tabla-polizas tbody td * {
+  color: #ecfdf5 !important;
+  background: transparent !important;
+  vertical-align: middle;
+}
+
 .tabla-polizas tbody tr:last-child td {
   border-bottom: none;
 }
 
-.tabla-polizas tbody tr:hover td,
-.tabla-polizas tbody tr:hover td * {
+.tabla-polizas tbody tr:hover td {
   background: #132619 !important;
 }
 
+.tabla-polizas tbody tr:hover td * {
+  background: transparent !important;
+}
+
 .mono-val {
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 12px;
+  line-height: 1.35;
   color: #ecfdf5 !important;
 }
 
 .link-poliza-numero {
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.35;
   color: #ecfdf5 !important;
   text-decoration: none;
   transition: 0.18s;
@@ -285,11 +324,12 @@
 }
 
 .tipo-pill {
+  display: inline-block;
   font-size: 12px;
+  line-height: 1.35;
   color: #86efac !important;
 }
 
-/* EMPTY */
 .empty-polizas {
   display: flex;
   align-items: center;
@@ -306,6 +346,190 @@
   flex-shrink: 0;
 }
 
+/* ================= OVERRIDES SOLO ESTILOS / MODO CLARO VERDE SUAVE ================= */
+
+body.light-mode .cliente-box {
+  background: #ffffff !important;
+  border-color: rgba(16, 185, 129, 0.14) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 24px rgba(16, 185, 129, 0.04);
+}
+
+body.light-mode .cliente-box:hover {
+  border-color: rgba(16, 185, 129, 0.24) !important;
+}
+
+body.light-mode .cliente-header {
+  background: #ffffff !important;
+}
+
+body.light-mode .cliente-header:hover {
+  background: #f0fdf4 !important;
+}
+
+body.light-mode .cliente-avatar-lg {
+  background: linear-gradient(135deg, #15803d, #166534) !important;
+  border-color: rgba(16, 185, 129, 0.20) !important;
+  color: #dcfce7 !important;
+}
+
+body.light-mode .polizas-count {
+  color: #475569 !important;
+}
+
+body.light-mode .chevron-icon {
+  color: #64748b !important;
+}
+
+body.light-mode .polizas-wrap {
+  border-top-color: rgba(16, 185, 129, 0.12) !important;
+}
+
+body.light-mode .table-wrap {
+  background: transparent !important;
+}
+
+body.light-mode .tabla-polizas {
+  background: #ffffff !important;
+}
+
+body.light-mode .tabla-polizas thead th {
+  background: #ecfdf5 !important;
+  color: #065f46 !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.12) !important;
+}
+
+body.light-mode .tabla-polizas tbody td {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+}
+
+body.light-mode .tabla-polizas tbody td,
+body.light-mode .tabla-polizas tbody td * {
+  color: #0f172a !important;
+}
+
+body.light-mode .tabla-polizas tbody td {
+  background: #ffffff !important;
+}
+
+body.light-mode .tabla-polizas tbody td * {
+  background: transparent !important;
+}
+
+body.light-mode .tabla-polizas tbody tr:nth-child(even) td {
+  background: #f8fafc !important;
+}
+
+body.light-mode .tabla-polizas tbody tr:nth-child(even) td * {
+  background: transparent !important;
+}
+
+body.light-mode .tabla-polizas tbody tr:hover td {
+  background: #f0fdf4 !important;
+}
+
+body.light-mode .tabla-polizas tbody tr:hover td * {
+  background: transparent !important;
+}
+
+body.light-mode .mono-val {
+  color: #0f172a !important;
+}
+
+body.light-mode .link-poliza-numero {
+  color: #0f172a !important;
+}
+
+body.light-mode .link-poliza-numero:hover {
+  color: #15803d !important;
+}
+
+body.light-mode .tipo-pill {
+  color: #166534 !important;
+  font-weight: 600;
+}
+
+body.light-mode .badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 7px 14px !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+}
+
+body.light-mode .badge-green {
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #065f46 !important;
+  border: 1px solid rgba(16, 185, 129, 0.22) !important;
+}
+
+body.light-mode .badge-yellow {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #92400e !important;
+  border: 1px solid rgba(245, 158, 11, 0.20) !important;
+}
+
+body.light-mode .badge-red {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #991b1b !important;
+  border: 1px solid rgba(239, 68, 68, 0.18) !important;
+}
+
+body.light-mode .badge-gray {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 7px 14px !important;
+  line-height: 1.2 !important;
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border: 1px solid rgba(148, 163, 184, 0.20) !important;
+}
+
+body.light-mode .btn.btn-ghost,
+body.light-mode .btn-ghost.btn-sm,
+body.light-mode a.btn.btn-ghost,
+body.light-mode a.btn-ghost.btn-sm {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 36px !important;
+  padding: 8px 14px !important;
+  line-height: 1.2 !important;
+  background: rgba(16, 185, 129, 0.10) !important;
+  color: #065f46 !important;
+  border: 1px solid rgba(16, 185, 129, 0.18) !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+}
+
+body.light-mode .btn.btn-ghost:hover,
+body.light-mode .btn-ghost.btn-sm:hover,
+body.light-mode a.btn.btn-ghost:hover,
+body.light-mode a.btn-ghost.btn-sm:hover {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #064e3b !important;
+}
+
+body.light-mode .empty-polizas {
+  color: #64748b !important;
+  background: #ffffff !important;
+}
+
+body.light-mode .empty-polizas svg {
+  color: #94a3b8 !important;
+}
+body.light-mode .tabla-polizas th,
+body.light-mode .tabla-polizas td,
+body.light-mode .link-poliza-numero,
+body.light-mode .badge,
+body.light-mode .tipo-pill,
+body.light-mode .mono-val {
+  font-weight: 400 !important;
+}
 </style>
 
 <script>

@@ -58,6 +58,24 @@
   --shadow-glow: 0 0 0 1px rgba(52, 211, 100, 0.12), 0 8px 32px rgba(22, 163, 74, 0.08);
 }
 
+body.light-mode {
+  --bg-base:       #f4fbf7;
+  --bg-surface:    #ffffff;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #ecfdf3;
+  --bg-sidebar:    #f0fdf4;
+
+  --border:        rgba(21, 128, 61, 0.10);
+  --border-strong: rgba(21, 128, 61, 0.18);
+
+  --text-primary:   #0f172a;
+  --text-secondary: #166534;
+  --text-muted:     #64748b;
+
+  --shadow-card: 0 1px 3px rgba(15,23,42,0.08), 0 8px 24px rgba(15,23,42,0.06);
+  --shadow-glow: 0 0 0 1px rgba(22, 163, 74, 0.10), 0 8px 24px rgba(22, 163, 74, 0.06);
+}
+
 /* =============================================
    RESET & BASE
 ============================================= */
@@ -77,6 +95,159 @@ body {
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+body.light-mode,
+body.light-mode .content,
+body.light-mode .content p,
+body.light-mode .content span,
+body.light-mode .content small,
+body.light-mode .content strong,
+body.light-mode .content b,
+body.light-mode .content li,
+body.light-mode .content label,
+body.light-mode .content div,
+body.light-mode .content td,
+body.light-mode .content th,
+body.light-mode .content h1,
+body.light-mode .content h2,
+body.light-mode .content h3,
+body.light-mode .content h4,
+body.light-mode .content h5,
+body.light-mode .content h6 {
+  color: var(--text-primary);
+}
+
+body.light-mode .content a {
+  color: var(--text-secondary);
+}
+
+body.light-mode .content .page-subtitle,
+body.light-mode .content .form-label,
+body.light-mode .content .text-muted,
+body.light-mode .content .muted,
+body.light-mode .content .subtitle,
+body.light-mode .content .help-text {
+  color: var(--text-muted) !important;
+}
+
+/* Ajustes globales para componentes oscuros heredados */
+body.light-mode .card,
+body.light-mode .table-wrap,
+body.light-mode .dashboard-card,
+body.light-mode .metric-card,
+body.light-mode .summary-card,
+body.light-mode .kpi-card,
+body.light-mode .stat-card,
+body.light-mode .chart-card,
+body.light-mode .crm-card,
+body.light-mode .resumen-card,
+body.light-mode .panel-card,
+body.light-mode .info-card,
+body.light-mode .data-card {
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+body.light-mode .card *,
+body.light-mode .table-wrap *,
+body.light-mode .dashboard-card *,
+body.light-mode .metric-card *,
+body.light-mode .summary-card *,
+body.light-mode .kpi-card *,
+body.light-mode .stat-card *,
+body.light-mode .chart-card *,
+body.light-mode .crm-card *,
+body.light-mode .resumen-card *,
+body.light-mode .panel-card *,
+body.light-mode .info-card *,
+body.light-mode .data-card * {
+  color: var(--text-primary) !important;
+}
+
+body.light-mode canvas + *,
+body.light-mode .chart-legend,
+body.light-mode .chart-title,
+body.light-mode .chart-subtitle,
+body.light-mode .metric-label,
+body.light-mode .metric-value,
+body.light-mode .stat-label,
+body.light-mode .stat-value,
+body.light-mode .summary-label,
+body.light-mode .summary-value,
+body.light-mode .kpi-label,
+body.light-mode .kpi-value {
+  color: var(--text-primary) !important;
+}
+
+/* Fuerza visibilidad en cards KPI/resumen oscuras heredadas */
+body.light-mode [class*="card"] .value,
+body.light-mode [class*="card"] .label,
+body.light-mode [class*="card"] .title,
+body.light-mode [class*="card"] .amount,
+body.light-mode [class*="card"] .number,
+body.light-mode [class*="card"] .metric,
+body.light-mode [class*="card"] .stat,
+body.light-mode [class*="card"] .count,
+body.light-mode [class*="card"] .total,
+body.light-mode [class*="card"] .subtitle,
+body.light-mode [class*="card"] .heading,
+body.light-mode [class*="card"] .caption,
+body.light-mode [class*="card"] .small,
+body.light-mode [class*="metric"] .value,
+body.light-mode [class*="metric"] .label,
+body.light-mode [class*="summary"] .value,
+body.light-mode [class*="summary"] .label,
+body.light-mode [class*="stat"] .value,
+body.light-mode [class*="stat"] .label,
+body.light-mode [class*="kpi"] .value,
+body.light-mode [class*="kpi"] .label {
+  color: #0f172a !important;
+}
+
+/* Si las tarjetas conservan fondo oscuro, igual aclara textos */
+body.light-mode .card h1,
+body.light-mode .card h2,
+body.light-mode .card h3,
+body.light-mode .card h4,
+body.light-mode .card h5,
+body.light-mode .card h6,
+body.light-mode .card p,
+body.light-mode .card span,
+body.light-mode .card small,
+body.light-mode .card strong,
+body.light-mode .card b,
+body.light-mode .card div,
+body.light-mode [class*="card"] h1,
+body.light-mode [class*="card"] h2,
+body.light-mode [class*="card"] h3,
+body.light-mode [class*="card"] h4,
+body.light-mode [class*="card"] h5,
+body.light-mode [class*="card"] h6,
+body.light-mode [class*="card"] p,
+body.light-mode [class*="card"] span,
+body.light-mode [class*="card"] small,
+body.light-mode [class*="card"] strong,
+body.light-mode [class*="card"] b,
+body.light-mode [class*="card"] div {
+  color: #0f172a !important;
+}
+
+/* Fallback para bloques oscuros del dashboard */
+body.light-mode [style*="background:#0"],
+body.light-mode [style*="background: #0"],
+body.light-mode [style*="background-color:#0"],
+body.light-mode [style*="background-color: #0"] {
+  color: #0f172a !important;
+}
+
+body.light-mode [style*="background:#0"] *,
+body.light-mode [style*="background: #0"] *,
+body.light-mode [style*="background-color:#0"] *,
+body.light-mode [style*="background-color: #0"] * {
+  color: #0f172a !important;
 }
 
 /* =============================================
@@ -100,44 +271,60 @@ body {
   z-index: 100;
 }
 
+body.light-mode .topbar {
+  background: rgba(244, 251, 247, 0.88);
+}
+
 /* Logo en el topbar — ocupa el ancho del sidebar */
 .topbar-brand {
   width: var(--sidebar-w);
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 24px;
+  padding: 0 20px;
   border-right: 1px solid var(--border);
   height: 100%;
   text-decoration: none;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .brand-isotipo {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 .brand-text {
   display: flex;
-  flex-direction: column;
-  line-height: 1.15;
+  align-items: center;
+  line-height: 1;
+  min-width: 0;
 }
 
 .brand-name {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--green-400);
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: #e5e7eb;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .brand-sub {
+  display: none;
   font-size: 10px;
   font-weight: 400;
   color: var(--text-muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+body.light-mode .brand-name {
+  color: #4f46e5;
 }
 
 /* Controles derecha del topbar */
@@ -146,6 +333,37 @@ body {
   align-items: center;
   gap: 8px;
 }
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(52, 211, 100, 0.07);
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-toggle-btn .icon-sun { display: none; }
+body.light-mode .theme-toggle-btn .icon-moon { display: none; }
+body.light-mode .theme-toggle-btn .icon-sun { display: block; }
 
 /* ---- Campana de alertas ---- */
 .alert-bell-wrap {
@@ -364,6 +582,83 @@ body {
   opacity: 1;
 }
 
+body.light-mode .nav-group-label {
+  color: #475569;
+}
+
+body.light-mode .nav-item {
+  color: #475569;
+}
+
+body.light-mode .nav-item span {
+  color: #475569 !important;
+}
+
+body.light-mode .nav-item svg {
+  color: #64748b;
+  opacity: 1;
+}
+
+body.light-mode .nav-item:hover {
+  color: #166534;
+  background: rgba(34, 197, 94, 0.14);
+  border-left-color: #22c55e;
+}
+
+body.light-mode .nav-item:hover span {
+  color: #166534 !important;
+}
+
+body.light-mode .nav-item:hover svg {
+  color: #166534;
+  opacity: 1;
+}
+
+body.light-mode .nav-item.active {
+  color: #14532d;
+  background: rgba(34, 197, 94, 0.24);
+  border-left-color: #16a34a;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.12);
+}
+
+body.light-mode .nav-item.active svg {
+  color: #15803d;
+  opacity: 1;
+}
+
+body.light-mode .nav-item.active span {
+  color: #14532d !important;
+}
+
+body.light-mode .sidebar-footer .nav-item.danger {
+  color: #64748b;
+}
+
+body.light-mode .sidebar-footer .nav-item.danger span {
+  color: #64748b !important;
+}
+
+body.light-mode .sidebar-footer .nav-item.danger svg {
+  color: #64748b;
+  opacity: 1;
+}
+
+body.light-mode .sidebar-footer .nav-item.danger:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.10);
+  border-left-color: #ef4444;
+}
+
+body.light-mode .sidebar-footer .nav-item.danger:hover span {
+  color: #dc2626 !important;
+}
+
+body.light-mode .sidebar-footer .nav-item.danger:hover svg {
+  color: #dc2626;
+  opacity: 1;
+}
+
 /* Badge de alertas en nav */
 .nav-badge {
   margin-left: auto;
@@ -468,6 +763,15 @@ h3 {
   box-shadow: var(--shadow-glow);
 }
 
+body.light-mode .card,
+body.light-mode [class*="card"],
+body.light-mode [class*="panel"],
+body.light-mode [class*="widget"],
+body.light-mode [class*="metric"],
+body.light-mode [class*="stat"] {
+  color: var(--text-primary);
+}
+
 /* =============================================
    TABLAS
 ============================================= */
@@ -523,6 +827,24 @@ table { background: transparent !important; }
 tbody td { background: #0f2018 !important; color: #ecfdf5 !important; }
 tbody tr:nth-child(even) td { background: #0c1a13 !important; }
 tbody tr:hover td { background: #132619 !important; }
+
+body.light-mode thead th {
+  background: #f8fafc !important;
+  color: #334155 !important;
+}
+
+body.light-mode tbody td {
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+}
+
+body.light-mode tbody tr:nth-child(even) td {
+  background: #f8fafc !important;
+}
+
+body.light-mode tbody tr:hover td {
+  background: #ecfdf3 !important;
+}
 
 /* Restaura botones dentro de celdas */
 tbody td .btn-primary   { background: var(--green-600) !important; color: #fff !important; }
@@ -627,6 +949,10 @@ tbody td .btn-danger     { background: rgba(239,68,68,0.15) !important; color: #
   border: 1px solid var(--border);
 }
 
+body.light-mode .badge-gray {
+  background: rgba(15, 23, 42, 0.04);
+}
+
 /* =============================================
    INPUTS Y FORMULARIOS
 ============================================= */
@@ -668,6 +994,10 @@ select.form-control {
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 32px;
+}
+
+body.light-mode select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 }
 
 /* =============================================
@@ -724,6 +1054,28 @@ select.form-control {
     padding: 0 12px;
   }
 
+  body.light-mode .nav-item {
+    border-bottom-color: transparent;
+  }
+
+  body.light-mode .nav-item:hover {
+    border-bottom-color: #22c55e;
+    border-left-color: transparent;
+    background: rgba(34, 197, 94, 0.16);
+  }
+
+  body.light-mode .nav-item.active {
+    border-bottom-color: #16a34a;
+    border-left-color: transparent;
+    background: rgba(34, 197, 94, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.16);
+  }
+
+  body.light-mode .nav-item.active svg {
+    color: #166534;
+    opacity: 1;
+  }
+
   .content { padding: 20px 16px; }
 }
 
@@ -743,28 +1095,29 @@ select.form-control {
 
   <a href="/" class="topbar-brand">
 
-    <!-- Isotipo SVG: hoja estilizada + inicial F -->
-    <svg class="brand-isotipo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="32" height="32" rx="8" fill="#0a1f12"/>
-      <!-- Hoja -->
-      <path d="M16 6 C16 6, 26 10, 26 20 C26 26, 20 28, 16 26 C12 28, 6 26, 6 20 C6 10, 16 6 Z"
-            fill="#15803d" opacity="0.9"/>
-      <!-- Nervio central de la hoja -->
-      <path d="M16 26 L16 10" stroke="#34d364" stroke-width="1.2" stroke-linecap="round"/>
-      <!-- Nervios laterales -->
-      <path d="M16 20 Q12 18, 9 19" stroke="#34d364" stroke-width="0.8" stroke-linecap="round" opacity="0.7"/>
-      <path d="M16 16 Q20 14, 23 15" stroke="#34d364" stroke-width="0.8" stroke-linecap="round" opacity="0.7"/>
-      <path d="M16 23 Q20 21, 23 22" stroke="#34d364" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
-    </svg>
+    <img class="brand-isotipo" src="{% static 'images/img/logo.png' %}" alt="Fuerza Natural Broker">
 
     <div class="brand-text">
-      <span class="brand-name">Fuerza Natural</span>
+      <span class="brand-name">Fuerza Natural Broker</span>
       <span class="brand-sub">Broker CRM</span>
     </div>
 
   </a>
 
   <div class="topbar-right">
+
+    <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 0 1 11.21 3c0 .28 0 .56.03.83A7.5 7.5 0 1 0 20.17 12c.27.03.55.03.83 0Z"/>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2"/><path d="M12 20v2"/>
+        <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+        <path d="M2 12h2"/><path d="M20 12h2"/>
+        <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+      </svg>
+    </button>
 
     <!-- Campana de alertas -->
     <div class="alert-bell-wrap">
@@ -859,7 +1212,6 @@ select.form-control {
 
     <div class="nav-group">
       <div class="nav-group-label">Sistema</div>
-
       <a href="/alertas/" class="nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -876,6 +1228,7 @@ select.form-control {
         {% endif %}
       </a>
 
+      {% if request.user.is_superuser %}
       <a href="/admin/" class="nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -883,6 +1236,7 @@ select.form-control {
         </svg>
         <span>Administración</span>
       </a>
+      {% endif %}
     </div>
 
     <div class="sidebar-divider"></div>
@@ -907,6 +1261,33 @@ select.form-control {
   </main>
 
 </div>
+
+<script>
+(function () {
+  const storageKey = 'brokercrm-theme';
+  const body = document.body;
+  const toggle = document.getElementById('themeToggle');
+
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      body.classList.add('light-mode');
+    } else {
+      body.classList.remove('light-mode');
+    }
+  }
+
+  const savedTheme = localStorage.getItem(storageKey);
+  applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+
+  if (toggle) {
+    toggle.addEventListener('click', function () {
+      const nextTheme = body.classList.contains('light-mode') ? 'dark' : 'light';
+      applyTheme(nextTheme);
+      localStorage.setItem(storageKey, nextTheme);
+    });
+  }
+})();
+</script>
 
 </body>
 </html>

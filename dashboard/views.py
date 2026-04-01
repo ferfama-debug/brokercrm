@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from clients.models import Client
 from policies.models import Policy, Payment
 from django.contrib.auth.models import User
@@ -7,6 +8,7 @@ from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 
 
+@login_required
 def home(request):
 
     hoy = date.today()
@@ -17,6 +19,7 @@ def home(request):
         clientes_qs = Client.objects.all()
         policies_qs = Policy.objects.select_related("client").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
+        usuarios = User.objects.count()
     else:
         clientes_qs = Client.objects.filter(producer=request.user)
         policies_qs = Policy.objects.filter(
@@ -25,10 +28,10 @@ def home(request):
         pagos_qs = Payment.objects.filter(
             policy__client__producer=request.user
         ).select_related("policy", "policy__client")
+        usuarios = 1  # 🔥 solo él mismo
 
     clientes = clientes_qs.count()
     polizas = policies_qs.count()
-    usuarios = User.objects.count()
 
     polizas_por_vencer = []
     clientes_llamar = []
@@ -159,7 +162,7 @@ def home(request):
         fecha_vencimiento__lte=hoy, fecha_pago__isnull=True
     )
 
-    # ⭐ SCORE (RESPETA PERMISOS)
+    # ⭐ SCORE
     clientes_score_db = clientes_qs.annotate(total_polizas=Count("policy")).order_by(
         "-total_polizas"
     )
