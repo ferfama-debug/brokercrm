@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-echo "Applying migrations..."
-python manage.py migrate --noinput
+echo "Forcing migrations..."
+python manage.py migrate --noinput --fake-initial
+python manage.py migrate policies
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
