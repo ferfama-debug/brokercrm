@@ -21,9 +21,14 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 # 🔐 PRODUCCIÓN CONTROLADA
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS", "localhost,127.0.0.1,brokercrm.onrender.com"
-).split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        "ALLOWED_HOSTS",
+        "localhost,127.0.0.1,brokercrm.onrender.com"
+    ).split(",")
+    if host.strip()
+]
 
 
 # =========================
@@ -200,11 +205,16 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # =========================
-# SEGURIDAD (🔥 CLAVE)
+# SEGURIDAD
 # =========================
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://brokercrm.onrender.com",
+    origin.strip()
+    for origin in os.environ.get(
+        "CSRF_TRUSTED_ORIGINS",
+        "https://brokercrm.onrender.com"
+    ).split(",")
+    if origin.strip()
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -250,8 +260,8 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER") or os.environ.get("EMAIL_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") or os.environ.get("EMAIL_PASSWORD")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
