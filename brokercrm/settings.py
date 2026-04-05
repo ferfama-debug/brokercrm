@@ -287,3 +287,7 @@ else:
     print("✅ SUPABASE configurado")
     print("✅ SUPABASE URL:", SUPABASE_URL)
     print("✅ SUPABASE BUCKET:", SUPABASE_BUCKET)
+    default_db = DATABASES["default"]
+    print("DB ENGINE:", default_db.get("ENGINE"))
+    print("DB NAME:", default_db.get("NAME"))
+    print("DB HOST:", default_db.get("HOST"))
