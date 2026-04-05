@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "Applying migrations..."
-python manage.py migrate --noinput --verbosity 2
+python manage.py migrate --fake-initial --noinput --verbosity 2
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --verbosity 2
