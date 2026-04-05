@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-echo "Forcing migrations..."
-python manage.py migrate --noinput --fake-initial
-python manage.py migrate policies
+echo "Applying migrations..."
+python manage.py migrate --noinput --verbosity 2
 
 echo "Collecting static files..."
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput --verbosity 2
 
 echo "Creating superuser if not exists..."
-
-python manage.py shell << END
+python manage.py shell <<'END'
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -25,4 +24,4 @@ else:
 END
 
 echo "Starting Gunicorn..."
-gunicorn brokercrm.wsgi:application --bind 0.0.0.0:$PORT
+exec gunicorn brokercrm.wsgi:application --bind 0.0.0.0:$PORT
