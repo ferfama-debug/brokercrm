@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Applying admin migrations explicitly..."
-python manage.py migrate admin --noinput || true
+echo "Re-applying admin migration..."
+python manage.py migrate admin zero --fake || true
+python manage.py migrate admin || true
 
 echo "Applying migrations..."
 python manage.py migrate --noinput
