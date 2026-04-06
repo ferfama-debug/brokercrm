@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Re-applying admin migration..."
-python manage.py migrate admin zero --fake || true
-python manage.py migrate admin || true
-
 echo "Applying migrations..."
 python manage.py migrate --noinput
 
