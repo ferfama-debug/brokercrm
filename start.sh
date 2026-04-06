@@ -26,5 +26,20 @@ else:
     print("Superuser already exists.")
 END
 
+echo "Forcing session table creation..."
+python manage.py shell <<'END'
+from django.db import connection
+
+with connection.cursor() as cursor:
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS django_session (
+        session_key varchar(40) NOT NULL PRIMARY KEY,
+        session_data text NOT NULL,
+        expire_date timestamp with time zone NOT NULL
+    );
+    """)
+    print("django_session ensured.")
+END
+
 echo "Starting Gunicorn..."
 exec gunicorn brokercrm.wsgi:application --bind 0.0.0.0:$PORT
