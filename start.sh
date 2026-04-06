@@ -2,10 +2,21 @@
 set -euo pipefail
 
 echo "Applying core migrations..."
-python manage.py migrate contenttypes
-python manage.py migrate auth
-python manage.py migrate sessions
+python manage.py migrate contenttypes --noinput
+python manage.py migrate auth --noinput
+python manage.py migrate sessions --noinput
+
+echo "Showing clients migrations before migrate..."
+python manage.py showmigrations clients || true
+
+echo "Applying clients migrations explicitly..."
+python manage.py migrate clients --noinput
+
+echo "Applying remaining migrations..."
 python manage.py migrate --noinput
+
+echo "Showing clients migrations after migrate..."
+python manage.py showmigrations clients || true
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --verbosity 2
