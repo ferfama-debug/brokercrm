@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Applying migrations (force initial)..."
-python manage.py migrate --fake-initial --noinput --verbosity 2
+echo "Applying core migrations..."
+python manage.py migrate contenttypes
+python manage.py migrate auth
+python manage.py migrate sessions
+python manage.py migrate --noinput
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --verbosity 2
