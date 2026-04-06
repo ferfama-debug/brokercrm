@@ -15,7 +15,9 @@ echo "=== SHOWMIGRATIONS clients BEFORE START ==="
 python manage.py showmigrations clients || true
 echo "=== SHOWMIGRATIONS clients BEFORE END ==="
 
-echo "Applying clients migrations explicitly..."
+echo "Re-applying clients migration 0005..."
+python manage.py migrate clients 0004 --fake || true
+python manage.py migrate clients 0005 || true
 python manage.py migrate clients --noinput
 
 echo "Applying remaining migrations..."
