@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Applying migrations..."
+echo "Resetting migrations history..."
+python manage.py migrate --fake zero
+
+echo "Applying real migrations..."
 python manage.py migrate --noinput --verbosity 2
 
 echo "Collecting static files..."
