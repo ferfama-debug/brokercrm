@@ -6,8 +6,14 @@ python manage.py migrate contenttypes --noinput
 python manage.py migrate auth --noinput
 python manage.py migrate sessions --noinput
 
-echo "Showing clients migrations before migrate..."
+echo "=== LISTING clients FILES START ==="
+pwd
+find clients -maxdepth 2 -type f | sort || true
+echo "=== LISTING clients FILES END ==="
+
+echo "=== SHOWMIGRATIONS clients BEFORE START ==="
 python manage.py showmigrations clients || true
+echo "=== SHOWMIGRATIONS clients BEFORE END ==="
 
 echo "Applying clients migrations explicitly..."
 python manage.py migrate clients --noinput
@@ -15,11 +21,9 @@ python manage.py migrate clients --noinput
 echo "Applying remaining migrations..."
 python manage.py migrate --noinput
 
-echo "Listing clients migrations folder..."
-ls -la clients/migrations || true
-
-echo "Showing clients migrations after migrate..."
+echo "=== SHOWMIGRATIONS clients AFTER START ==="
 python manage.py showmigrations clients || true
+echo "=== SHOWMIGRATIONS clients AFTER END ==="
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --verbosity 2
