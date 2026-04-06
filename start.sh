@@ -15,6 +15,9 @@ python manage.py migrate clients --noinput
 echo "Applying remaining migrations..."
 python manage.py migrate --noinput
 
+echo "Listing clients migrations folder..."
+ls -la clients/migrations || true
+
 echo "Showing clients migrations after migrate..."
 python manage.py showmigrations clients || true
 
