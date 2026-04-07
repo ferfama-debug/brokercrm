@@ -10,8 +10,7 @@ from django.conf import settings
 
 from django.contrib import messages
 
-print("🔥 SUPABASE URL:", settings.SUPABASE_URL)
-print("🔥 SUPABASE KEY:", settings.SUPABASE_KEY)
+print("🔥 Integración Supabase inicializada")
 
 
 def get_subir_archivo():
