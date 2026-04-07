@@ -5,7 +5,22 @@ import mimetypes
 import os
 import re
 
-print("🔥 VERSION NUEVA SUPABASE CLIENT V2 🔥")
+print("🔥 VERSION NUEVA SUPABASE CLIENT V3 🔥")
+
+try:
+    import supabase
+
+    print("📦 supabase module:", getattr(supabase, "__file__", "sin __file__"))
+    print("📦 supabase version:", getattr(supabase, "__version__", "sin __version__"))
+except Exception as e:
+    print("❌ No se pudo leer version de supabase:", e)
+
+try:
+    import httpx
+
+    print("📦 httpx version:", getattr(httpx, "__version__", "sin __version__"))
+except Exception as e:
+    print("❌ No se pudo leer version de httpx:", e)
 
 
 def get_supabase():
