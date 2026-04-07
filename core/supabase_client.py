@@ -5,6 +5,8 @@ import mimetypes
 import os
 import re
 
+print("🔥 VERSION NUEVA SUPABASE CLIENT 🔥")
+
 
 def get_supabase():
     try:
