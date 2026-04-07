@@ -51,7 +51,6 @@ def procesar_archivo(file, carpeta):
 
 @login_required
 def panel_cobranzas(request):
-
     hoy = date.today()
     en_3_dias = hoy + timedelta(days=3)
 
@@ -83,7 +82,6 @@ def panel_cobranzas(request):
 
 @login_required
 def lista_polizas(request):
-
     compania = request.GET.get("compania")
     buscar = request.GET.get("buscar")
 
@@ -120,7 +118,6 @@ def lista_polizas(request):
 
 @login_required
 def crear_poliza(request):
-
     if request.user.is_superuser:
         clientes = Client.objects.all()
     else:
@@ -129,17 +126,14 @@ def crear_poliza(request):
     clientes = clientes.order_by("last_name", "first_name")
 
     cliente_id = request.GET.get("cliente")
+    companias = Company.objects.all().order_by("nombre")
 
     if request.method == "POST":
-
-        # 🔥 CORRECCIÓN SEGURA
         if request.user.is_superuser:
             client = get_object_or_404(Client, id=request.POST.get("client"))
         else:
             client = get_object_or_404(
-                Client,
-                id=request.POST.get("client"),
-                producer=request.user
+                Client, id=request.POST.get("client"), producer=request.user
             )
 
         start_date = request.POST.get("start_date")
@@ -152,17 +146,56 @@ def crear_poliza(request):
                 {
                     "clientes": clientes,
                     "cliente_id": cliente_id,
+                    "companias": companias,
                     "error": "Debe completar las fechas",
                 },
             )
 
+        print("===== DEBUG SUBIDA POLIZA (CREAR) =====")
+        print("request.FILES keys:", list(request.FILES.keys()))
+
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
+        print("archivo_poliza:", archivo_poliza)
+        print("archivo_cuponera:", archivo_cuponera)
+
+        if archivo_poliza:
+            print("nombre pdf_poliza:", archivo_poliza.name)
+            print("size pdf_poliza:", getattr(archivo_poliza, "size", "N/A"))
+
+        if archivo_cuponera:
+            print("nombre cuponera_pdf:", archivo_cuponera.name)
+            print("size cuponera_pdf:", getattr(archivo_cuponera, "size", "N/A"))
+
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
-        cuponera_url = procesar_archivo(
-            archivo_cuponera, "cuponeras_clientes"
-        )
+        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
+
+        if archivo_poliza and not pdf_url:
+            messages.error(request, "❌ El PDF de la póliza no se pudo subir")
+            return render(
+                request,
+                "policies/crear_poliza.html",
+                {
+                    "clientes": clientes,
+                    "cliente_id": cliente_id,
+                    "companias": companias,
+                    "error": "El PDF de la póliza no se pudo subir",
+                },
+            )
+
+        if archivo_cuponera and not cuponera_url:
+            messages.error(request, "❌ La cuponera no se pudo subir")
+            return render(
+                request,
+                "policies/crear_poliza.html",
+                {
+                    "clientes": clientes,
+                    "cliente_id": cliente_id,
+                    "companias": companias,
+                    "error": "La cuponera no se pudo subir",
+                },
+            )
 
         company_id = request.POST.get("company")
         company_obj = None
@@ -196,10 +229,7 @@ def crear_poliza(request):
         nueva_poliza.save()
 
         messages.success(request, "✅ Póliza creada correctamente")
-
         return redirect(f"/clientes/ver/{client.id}/")
-
-    companias = Company.objects.all().order_by("nombre")
 
     return render(
         request,
@@ -214,19 +244,12 @@ def crear_poliza(request):
 
 @login_required
 def renovar_poliza(request, poliza_id):
-
-    # 🔥 CORRECCIÓN SEGURA
     if request.user.is_superuser:
         poliza = get_object_or_404(Policy, id=poliza_id)
     else:
-        poliza = get_object_or_404(
-            Policy,
-            id=poliza_id,
-            client__producer=request.user
-        )
+        poliza = get_object_or_404(Policy, id=poliza_id, client__producer=request.user)
 
     if request.method == "POST":
-
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
 
@@ -240,13 +263,47 @@ def renovar_poliza(request, poliza_id):
                 },
             )
 
+        print("===== DEBUG SUBIDA POLIZA (RENOVAR) =====")
+        print("request.FILES keys:", list(request.FILES.keys()))
+
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
+        print("archivo_poliza:", archivo_poliza)
+        print("archivo_cuponera:", archivo_cuponera)
+
+        if archivo_poliza:
+            print("nombre pdf_poliza:", archivo_poliza.name)
+            print("size pdf_poliza:", getattr(archivo_poliza, "size", "N/A"))
+
+        if archivo_cuponera:
+            print("nombre cuponera_pdf:", archivo_cuponera.name)
+            print("size cuponera_pdf:", getattr(archivo_cuponera, "size", "N/A"))
+
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
-        cuponera_url = procesar_archivo(
-            archivo_cuponera, "cuponeras_clientes"
-        )
+        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
+
+        if archivo_poliza and not pdf_url:
+            messages.error(request, "❌ El PDF de la póliza no se pudo subir")
+            return render(
+                request,
+                "policies/renovar_poliza.html",
+                {
+                    "poliza": poliza,
+                    "error": "El PDF de la póliza no se pudo subir",
+                },
+            )
+
+        if archivo_cuponera and not cuponera_url:
+            messages.error(request, "❌ La cuponera no se pudo subir")
+            return render(
+                request,
+                "policies/renovar_poliza.html",
+                {
+                    "poliza": poliza,
+                    "error": "La cuponera no se pudo subir",
+                },
+            )
 
         nueva_poliza = Policy(
             client=poliza.client,
@@ -269,7 +326,6 @@ def renovar_poliza(request, poliza_id):
         nueva_poliza.save()
 
         messages.success(request, "🔄 Póliza renovada correctamente")
-
         return redirect(f"/clientes/ver/{poliza.client.id}/")
 
     return render(
@@ -283,22 +339,35 @@ def renovar_poliza(request, poliza_id):
 
 @login_required
 def marcar_pago(request, pago_id):
-
-    # 🔥 CORRECCIÓN SEGURA
     if request.user.is_superuser:
         pago = get_object_or_404(Payment, id=pago_id)
     else:
         pago = get_object_or_404(
-            Payment,
-            id=pago_id,
-            policy__client__producer=request.user
+            Payment, id=pago_id, policy__client__producer=request.user
         )
 
     if request.method == "POST":
+        print("===== DEBUG SUBIDA COMPROBANTE =====")
+        print("request.FILES keys:", list(request.FILES.keys()))
 
-        comprobante_url = procesar_archivo(
-            request.FILES.get("comprobante"), "comprobantes_pagos"
-        )
+        archivo_comprobante = request.FILES.get("comprobante")
+        print("archivo_comprobante:", archivo_comprobante)
+
+        if archivo_comprobante:
+            print("nombre comprobante:", archivo_comprobante.name)
+            print("size comprobante:", getattr(archivo_comprobante, "size", "N/A"))
+
+        comprobante_url = procesar_archivo(archivo_comprobante, "comprobantes_pagos")
+
+        if archivo_comprobante and not comprobante_url:
+            messages.error(request, "❌ El comprobante no se pudo subir")
+            return render(
+                request,
+                "policies/cargar_comprobante.html",
+                {
+                    "pago": pago,
+                },
+            )
 
         if comprobante_url:
             pago.comprobante = comprobante_url
@@ -309,7 +378,6 @@ def marcar_pago(request, pago_id):
         pago.save()
 
         messages.success(request, "📎 Comprobante cargado y pago registrado")
-
         return redirect(f"/clientes/ver/{pago.policy.client.id}/")
 
     return render(
@@ -323,16 +391,10 @@ def marcar_pago(request, pago_id):
 
 @login_required
 def enviar_poliza(request, poliza_id):
-
-    # 🔥 CORRECCIÓN SEGURA
     if request.user.is_superuser:
         poliza = get_object_or_404(Policy, id=poliza_id)
     else:
-        poliza = get_object_or_404(
-            Policy,
-            id=poliza_id,
-            client__producer=request.user
-        )
+        poliza = get_object_or_404(Policy, id=poliza_id, client__producer=request.user)
 
     cliente = poliza.client
 
@@ -380,16 +442,10 @@ Te enviamos tu póliza:
 
 @login_required
 def detalle_poliza(request, poliza_id):
-
-    # 🔥 CORRECCIÓN SEGURA
     if request.user.is_superuser:
         poliza = get_object_or_404(Policy, id=poliza_id)
     else:
-        poliza = get_object_or_404(
-            Policy,
-            id=poliza_id,
-            client__producer=request.user
-        )
+        poliza = get_object_or_404(Policy, id=poliza_id, client__producer=request.user)
 
     return render(
         request,
