@@ -5,23 +5,6 @@ import mimetypes
 import os
 import re
 
-print("🔥 VERSION NUEVA SUPABASE CLIENT V3 🔥")
-
-try:
-    import supabase
-
-    print("📦 supabase module:", getattr(supabase, "__file__", "sin __file__"))
-    print("📦 supabase version:", getattr(supabase, "__version__", "sin __version__"))
-except Exception as e:
-    print("❌ No se pudo leer version de supabase:", e)
-
-try:
-    import httpx
-
-    print("📦 httpx version:", getattr(httpx, "__version__", "sin __version__"))
-except Exception as e:
-    print("❌ No se pudo leer version de httpx:", e)
-
 
 def get_supabase():
     try:
@@ -32,9 +15,6 @@ def get_supabase():
             print("⚠️ Supabase no configurado")
             return None
 
-        print("✅ Supabase configurado correctamente")
-        print("🔎 get_supabase() usando archivo NUEVO")
-
         return create_client(url, key)
 
     except Exception as e:
@@ -43,9 +23,7 @@ def get_supabase():
 
 
 def _bucket_name():
-    bucket = getattr(settings, "SUPABASE_BUCKET", "documents")
-    print("🪣 Bucket Supabase:", bucket)
-    return bucket
+    return getattr(settings, "SUPABASE_BUCKET", "documents")
 
 
 def _safe_filename(filename):
@@ -108,9 +86,9 @@ def _build_public_url(bucket, file_path):
 
 def subir_archivo_supabase(file, folder):
     try:
-        print("🚀 Iniciando subida a Supabase")
-        print("📁 Folder recibido:", folder)
-        print("📄 Archivo recibido:", getattr(file, "name", None))
+        if not file:
+            print("⚠️ No se recibió archivo para subir")
+            return None
 
         supabase = get_supabase()
 
@@ -118,31 +96,21 @@ def subir_archivo_supabase(file, folder):
             print("⚠️ Cliente Supabase no disponible")
             return None
 
-        if not file:
-            print("⚠️ No se recibió archivo para subir")
-            return None
-
         bucket = _bucket_name()
         safe_filename = _safe_filename(getattr(file, "name", "archivo.pdf"))
         file_path = f"{folder}/{uuid4().hex}_{safe_filename}"
         content_type = _content_type(file, safe_filename)
 
-        print("📝 safe_filename:", safe_filename)
-        print("🛣️ file_path:", file_path)
-        print("🏷️ content_type:", content_type)
-
         try:
             file.seek(0)
-        except Exception as e:
-            print("⚠️ No se pudo hacer seek(0):", e)
+        except Exception:
+            pass
 
         file_bytes = file.read()
 
         if not file_bytes:
             print("⚠️ Archivo vacío, no se sube a Supabase")
             return None
-
-        print("📦 Tamaño archivo bytes:", len(file_bytes))
 
         supabase.storage.from_(bucket).upload(
             path=file_path,
@@ -153,21 +121,17 @@ def subir_archivo_supabase(file, folder):
         )
 
         public_url_result = supabase.storage.from_(bucket).get_public_url(file_path)
-        print("🌐 get_public_url result:", public_url_result)
-
         public_url = _extract_public_url(public_url_result)
 
         if not public_url:
             public_url = _build_public_url(bucket, file_path)
-            print("🛠️ URL pública armada manualmente:", public_url)
 
         if not public_url:
             print("⚠️ No se pudo obtener URL pública del archivo")
             return None
 
-        print("✅ URL final archivo:", public_url)
         return public_url
 
     except Exception as e:
-        print("❌ ERROR SUBIENDO:", e)
+        print("❌ Error subiendo archivo a Supabase:", e)
         return None
