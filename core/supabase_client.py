@@ -1,4 +1,4 @@
-from supabase import create_client, Client
+from supabase import create_client
 from django.conf import settings
 from uuid import uuid4
 import mimetypes
@@ -17,12 +17,7 @@ def get_supabase():
 
         print("✅ Supabase configurado correctamente")
 
-        # 🔥 FIX PROXY ERROR
-        try:
-            return create_client(url, key)
-        except TypeError as e:
-            print("⚠️ create_client falló, usando fallback:", e)
-            return Client(url, key)
+        return create_client(url, key)
 
     except Exception as e:
         print("❌ Error creando cliente Supabase:", e)
@@ -80,9 +75,8 @@ def _extract_public_url(public_url_result):
     if isinstance(data, dict):
         return data.get("publicUrl") or data.get("public_url")
 
-    return (
-        getattr(public_url_result, "publicUrl", None)
-        or getattr(public_url_result, "public_url", None)
+    return getattr(public_url_result, "publicUrl", None) or getattr(
+        public_url_result, "public_url", None
     )
 
 
