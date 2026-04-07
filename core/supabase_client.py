@@ -5,7 +5,7 @@ import mimetypes
 import os
 import re
 
-print("🔥 VERSION NUEVA SUPABASE CLIENT 🔥")
+print("🔥 VERSION NUEVA SUPABASE CLIENT V2 🔥")
 
 
 def get_supabase():
@@ -18,6 +18,7 @@ def get_supabase():
             return None
 
         print("✅ Supabase configurado correctamente")
+        print("🔎 get_supabase() usando archivo NUEVO")
 
         return create_client(url, key)
 
