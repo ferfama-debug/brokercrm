@@ -404,26 +404,37 @@ def enviar_poliza(request, poliza_id):
 
     asunto = f"Póliza {poliza.policy_number} - Fuerza Natural Broker"
 
-    mensaje = f"""
-Hola {cliente.first_name} 👋
+    mensaje = f"""Hola {cliente.first_name} 👋
 
-Te compartimos tu póliza vigente:
+Te escribimos desde Fuerza Natural Broker de Seguros.
 
-📌 Compañía: {poliza.company}
+Te enviamos tu póliza N° {poliza.policy_number} de {poliza.company}.
+
 📅 Vigencia: {poliza.start_date} al {poliza.end_date}
 """
 
     if poliza.pdf_poliza:
-        nombre_poliza = os.path.basename(poliza.pdf_poliza)
-        mensaje += f"\n📄 Póliza\n{nombre_poliza}\n🔗 {poliza.pdf_poliza}\n"
+        mensaje += f"""
+
+📄 Póliza:
+{poliza.pdf_poliza}
+"""
 
     if poliza.cuponera_pdf:
-        nombre_cuponera = os.path.basename(poliza.cuponera_pdf)
-        mensaje += f"\n💳 Cuponera\n{nombre_cuponera}\n🔗 {poliza.cuponera_pdf}\n"
-        mensaje += "\nCuando realices cada pago, podés enviarnos el comprobante por este medio 📎\n"
+        mensaje += f"""
 
-    mensaje += "\nQuedamos a disposición para cualquier consulta.\n"
-    mensaje += "\nFuerza Natural Broker de Seguros"
+💳 Cuponera de pago:
+{poliza.cuponera_pdf}
+
+Cuando realices el pago, podés enviarnos el comprobante por este medio para registrarlo con la compañía y mantener tu cobertura al día.
+"""
+
+    mensaje += """
+
+Ante cualquier duda, estamos para ayudarte.
+
+Fuerza Natural Broker de Seguros
+"""
 
     try:
         send_mail(
