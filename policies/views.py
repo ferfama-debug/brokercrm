@@ -4,6 +4,7 @@ from django.db.models import Q
 from .models import Policy, Payment, Company
 from clients.models import Client
 from datetime import date, timedelta
+import os
 
 from django.core.mail import send_mail
 from django.conf import settings
@@ -413,10 +414,12 @@ Te enviamos tu póliza:
 """
 
     if poliza.pdf_poliza:
-        mensaje += f"\n📄 Ver póliza:\n{poliza.pdf_poliza}\n"
+        nombre_poliza = os.path.basename(poliza.pdf_poliza)
+        mensaje += f"\n📄 Póliza: {nombre_poliza}\n{poliza.pdf_poliza}\n"
 
     if poliza.cuponera_pdf:
-        mensaje += f"\n💳 Te adjuntamos la cuponera:\n{poliza.cuponera_pdf}\n"
+        nombre_cuponera = os.path.basename(poliza.cuponera_pdf)
+        mensaje += f"\n💳 Cuponera: {nombre_cuponera}\n{poliza.cuponera_pdf}\n"
         mensaje += "\nCuando realices cada pago, envianos el comprobante.\n"
 
     mensaje += "\nFuerza Natural Broker de Seguros"
