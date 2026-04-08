@@ -98,7 +98,7 @@ def subir_archivo_supabase(file, folder):
 
         bucket = _bucket_name()
         safe_filename = _safe_filename(getattr(file, "name", "archivo.pdf"))
-        file_path = f"{folder}/{uuid4().hex}_{safe_filename}"
+        file_path = f"{folder}/{safe_filename}"
         content_type = _content_type(file, safe_filename)
 
         try:
