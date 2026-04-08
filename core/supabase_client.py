@@ -43,6 +43,11 @@ def _safe_filename(filename):
     return f"{safe_name}{ext.lower()}"
 
 
+def _filename_with_suffix(filename, suffix):
+    name, ext = os.path.splitext(filename)
+    return f"{name}_{suffix}{ext}"
+
+
 def _content_type(file, filename):
     content_type = getattr(file, "content_type", None)
     if content_type:
@@ -112,13 +117,29 @@ def subir_archivo_supabase(file, folder):
             print("⚠️ Archivo vacío, no se sube a Supabase")
             return None
 
-        supabase.storage.from_(bucket).upload(
-            path=file_path,
-            file=file_bytes,
-            file_options={
-                "content-type": content_type,
-            },
-        )
+        try:
+            supabase.storage.from_(bucket).upload(
+                path=file_path,
+                file=file_bytes,
+                file_options={
+                    "content-type": content_type,
+                },
+            )
+        except Exception as e:
+            error_text = str(e)
+            if "Duplicate" in error_text or "already exists" in error_text:
+                nuevo_nombre = _filename_with_suffix(safe_filename, uuid4().hex[:8])
+                file_path = f"{folder}/{nuevo_nombre}"
+
+                supabase.storage.from_(bucket).upload(
+                    path=file_path,
+                    file=file_bytes,
+                    file_options={
+                        "content-type": content_type,
+                    },
+                )
+            else:
+                raise
 
         public_url_result = supabase.storage.from_(bucket).get_public_url(file_path)
         public_url = _extract_public_url(public_url_result)
