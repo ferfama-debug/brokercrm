@@ -454,7 +454,45 @@ Fuerza Natural Broker de Seguros
                 "from": "Fuerza Natural Broker <onboarding@resend.dev>",
                 "to": ["fuerzanaturalbroker@gmail.com"],
                 "subject": asunto,
-                "text": mensaje,
+                "html": f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+
+                    <h2 style="color:#2c3e50;">Fuerza Natural Broker de Seguros</h2>
+
+                    <p>Hola <strong>{cliente.first_name}</strong> 👋</p>
+
+                    <p>
+                        Te escribimos desde <strong>Fuerza Natural Broker de Seguros</strong>.
+                    </p>
+
+                    <p>
+                        Te enviamos tu póliza <strong>N° {poliza.policy_number}</strong> de <strong>{poliza.company}</strong>.
+                    </p>
+
+                    <p>
+                        📅 <strong>Vigencia:</strong> {poliza.start_date} al {poliza.end_date}
+                    </p>
+
+                    {"<p>📄 <a href='" + poliza.pdf_poliza + "' target='_blank'>Ver póliza</a></p>" if poliza.pdf_poliza else ""}
+
+                    {"<p>💳 <a href='" + poliza.cuponera_pdf + "' target='_blank'>Ver cuponera de pago</a></p>" if poliza.cuponera_pdf else ""}
+
+                    <hr>
+
+                    <p>
+                        Cuando realices el pago, podés enviarnos el comprobante por este medio para registrarlo con la compañía y mantener tu cobertura al día.
+                    </p>
+
+                    <p>
+                        Ante cualquier duda, estamos para ayudarte.
+                    </p>
+
+                    <p style="margin-top:20px;">
+                        <strong>Fuerza Natural Broker de Seguros</strong>
+                    </p>
+
+                </div>
+                """,
             },
             timeout=15,
         )
