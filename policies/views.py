@@ -452,7 +452,7 @@ Fuerza Natural Broker de Seguros
             },
             json={
                 "from": "Fuerza Natural Broker <onboarding@resend.dev>",
-                "to": ["fuerzanaturalbroker@gmail.com"],
+                "to": [cliente.email],
                 "subject": asunto,
                 "html": f"""
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
