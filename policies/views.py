@@ -5,8 +5,8 @@ from .models import Policy, Payment, Company
 from clients.models import Client
 from datetime import date, timedelta
 import os
+import requests
 
-from django.core.mail import send_mail
 from django.conf import settings
 
 from django.contrib import messages
@@ -437,15 +437,34 @@ Fuerza Natural Broker de Seguros
 """
 
     try:
-        send_mail(
-            asunto,
-            mensaje,
-            settings.DEFAULT_FROM_EMAIL,
-            [cliente.email],
-            fail_silently=False,
+        resend_api_key = getattr(settings, "RESEND_API_KEY", None)
+
+        if not resend_api_key:
+            print("ERROR EMAIL: falta RESEND_API_KEY en settings/environment")
+            messages.error(request, "❌ Falta configurar RESEND_API_KEY")
+            return redirect(f"/clientes/ver/{cliente.id}/")
+
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": "Fuerza Natural Broker <onboarding@resend.dev>",
+                "to": [cliente.email],
+                "subject": asunto,
+                "text": mensaje,
+            },
+            timeout=15,
         )
 
-        messages.success(request, f"✅ Email enviado a {cliente.email}")
+        if response.status_code in [200, 201]:
+            messages.success(request, f"✅ Email enviado a {cliente.email}")
+        else:
+            print("ERROR RESEND STATUS:", response.status_code)
+            print("ERROR RESEND BODY:", response.text)
+            messages.error(request, "❌ Error al enviar el email")
 
     except Exception as e:
         print("ERROR EMAIL:", e)
