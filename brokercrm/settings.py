@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 🔥 DOTENV SEGURO
 try:
     from dotenv import load_dotenv
+
     load_dotenv(BASE_DIR / ".env")
 except Exception:
     pass
@@ -24,8 +25,7 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
-        "ALLOWED_HOSTS",
-        "localhost,127.0.0.1,brokercrm.onrender.com"
+        "ALLOWED_HOSTS", "localhost,127.0.0.1,brokercrm.onrender.com"
     ).split(",")
     if host.strip()
 ]
@@ -166,7 +166,9 @@ else:
 # =========================
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -211,8 +213,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
-        "CSRF_TRUSTED_ORIGINS",
-        "https://brokercrm.onrender.com"
+        "CSRF_TRUSTED_ORIGINS", "https://brokercrm.onrender.com"
     ).split(",")
     if origin.strip()
 ]
@@ -255,15 +256,24 @@ LOGOUT_REDIRECT_URL = "/accounts/login/"
 # EMAIL
 # =========================
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False") == "True"
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", 15))
 
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER") or os.environ.get("EMAIL_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") or os.environ.get("EMAIL_PASSWORD")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") or os.environ.get(
+    "EMAIL_PASSWORD"
+)
 
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "")
+
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("No se puede usar EMAIL_USE_TLS y EMAIL_USE_SSL al mismo tiempo")
 
 
 # =========================
@@ -272,9 +282,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 
-SUPABASE_KEY = (
-    os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-    or os.environ.get("SUPABASE_KEY")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get(
+    "SUPABASE_KEY"
 )
 
 SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "documents")
