@@ -277,6 +277,13 @@ if EMAIL_USE_TLS and EMAIL_USE_SSL:
 
 
 # =========================
+# RESEND
+# =========================
+
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+
+
+# =========================
 # SUPABASE
 # =========================
 
