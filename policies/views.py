@@ -8,6 +8,7 @@ import os
 import requests
 
 from django.conf import settings
+from django.core.mail import send_mail
 
 from django.contrib import messages
 
@@ -437,72 +438,15 @@ Fuerza Natural Broker de Seguros
 """
 
     try:
-        resend_api_key = getattr(settings, "RESEND_API_KEY", None)
-
-        if not resend_api_key:
-            print("ERROR EMAIL: falta RESEND_API_KEY en settings/environment")
-            messages.error(request, "❌ Falta configurar RESEND_API_KEY")
-            return redirect(f"/clientes/ver/{cliente.id}/")
-
-        response = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {resend_api_key}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "from": "Fuerza Natural Broker <onboarding@resend.dev>",
-                "to": [cliente.email],
-                "subject": asunto,
-                "html": f"""
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-
-                    <h2 style="color:#2c3e50;">Fuerza Natural Broker de Seguros</h2>
-
-                    <p>Hola <strong>{cliente.first_name}</strong> 👋</p>
-
-                    <p>
-                        Te escribimos desde <strong>Fuerza Natural Broker de Seguros</strong>.
-                    </p>
-
-                    <p>
-                        Te enviamos tu póliza <strong>N° {poliza.policy_number}</strong> de <strong>{poliza.company}</strong>.
-                    </p>
-
-                    <p>
-                        📅 <strong>Vigencia:</strong> {poliza.start_date} al {poliza.end_date}
-                    </p>
-
-                    {"<p>📄 <a href='" + poliza.pdf_poliza + "' target='_blank'>Ver póliza</a></p>" if poliza.pdf_poliza else ""}
-
-                    {"<p>💳 <a href='" + poliza.cuponera_pdf + "' target='_blank'>Ver cuponera de pago</a></p>" if poliza.cuponera_pdf else ""}
-
-                    <hr>
-
-                    <p>
-                        Cuando realices el pago, podés enviarnos el comprobante por este medio para registrarlo con la compañía y mantener tu cobertura al día.
-                    </p>
-
-                    <p>
-                        Ante cualquier duda, estamos para ayudarte.
-                    </p>
-
-                    <p style="margin-top:20px;">
-                        <strong>Fuerza Natural Broker de Seguros</strong>
-                    </p>
-
-                </div>
-                """,
-            },
-            timeout=15,
+        send_mail(
+            asunto,
+            mensaje,
+            settings.DEFAULT_FROM_EMAIL,
+            [cliente.email],
+            fail_silently=False,
         )
 
-        if response.status_code in [200, 201]:
-            messages.success(request, f"✅ Email enviado a {cliente.email}")
-        else:
-            print("ERROR RESEND STATUS:", response.status_code)
-            print("ERROR RESEND BODY:", response.text)
-            messages.error(request, "❌ Error al enviar el email")
+        messages.success(request, f"✅ Email enviado a {cliente.email}")
 
     except Exception as e:
         print("ERROR EMAIL:", e)
