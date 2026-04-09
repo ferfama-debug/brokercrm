@@ -443,7 +443,7 @@ Fuerza Natural Broker de Seguros
             mensaje,
             settings.DEFAULT_FROM_EMAIL,
             [cliente.email],
-            fail_silently=False,
+            fail_silently=True,
         )
 
         messages.success(request, f"✅ Email enviado a {cliente.email}")
