@@ -27,6 +27,12 @@ class Client(models.Model):
         null=True,
     )
 
+    fecha_nacimiento = models.DateField(
+        blank=True,
+        null=True,
+        db_index=True,
+    )
+
     producer = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -78,6 +84,7 @@ class Client(models.Model):
         indexes = [
             models.Index(fields=["last_name"]),
             models.Index(fields=["dni"]),
+            models.Index(fields=["fecha_nacimiento"]),
         ]
 
     @property
@@ -136,8 +143,8 @@ class Client(models.Model):
     def marcar_contactado(self, dias_hasta_proximo=7, guardar=True):
         self.ultimo_contacto = timezone.now()
         self.seguimiento_estado = "CONTACTADO"
-        self.proximo_seguimiento = (
-            self.ultimo_contacto.date() + timedelta(days=dias_hasta_proximo)
+        self.proximo_seguimiento = self.ultimo_contacto.date() + timedelta(
+            days=dias_hasta_proximo
         )
 
         if guardar:
@@ -163,8 +170,8 @@ class Client(models.Model):
         if marcar_contacto:
             self.ultimo_contacto = timezone.now()
             self.seguimiento_estado = "CONTACTADO"
-            self.proximo_seguimiento = (
-                self.ultimo_contacto.date() + timedelta(days=dias_hasta_proximo)
+            self.proximo_seguimiento = self.ultimo_contacto.date() + timedelta(
+                days=dias_hasta_proximo
             )
             update_fields.extend(
                 ["ultimo_contacto", "seguimiento_estado", "proximo_seguimiento"]

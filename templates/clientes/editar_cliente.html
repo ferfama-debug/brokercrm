@@ -62,6 +62,14 @@
               {{ form.phone.errors }}
             </div>
 
+            {% if form.fecha_nacimiento %}
+            <div class="form-field">
+              <label for="{{ form.fecha_nacimiento.id_for_label }}">Fecha de nacimiento</label>
+              {{ form.fecha_nacimiento }}
+              {{ form.fecha_nacimiento.errors }}
+            </div>
+            {% endif %}
+
             <div class="form-field form-field-full">
               <label for="{{ form.email.id_for_label }}">Email</label>
               {{ form.email }}

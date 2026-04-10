@@ -14,6 +14,9 @@ class ClientForm(forms.ModelForm):
             "dni": forms.TextInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "fecha_nacimiento": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"},
+            ),
             "producer": forms.Select(attrs={"class": "form-control"}),
             "seguimiento_estado": forms.Select(attrs={"class": "form-control"}),
             "seguimiento_notas": forms.Textarea(
