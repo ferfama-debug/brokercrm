@@ -3,6 +3,14 @@ from .models import Client
 
 
 class ClientForm(forms.ModelForm):
+    fecha_nacimiento = forms.DateField(
+        required=False,
+        input_formats=["%Y-%m-%d"],
+        widget=forms.DateInput(
+            attrs={"class": "form-control", "type": "date"},
+            format="%Y-%m-%d",
+        ),
+    )
 
     class Meta:
         model = Client
@@ -27,9 +35,6 @@ class ClientForm(forms.ModelForm):
             "dni": forms.TextInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
-            "fecha_nacimiento": forms.DateInput(
-                attrs={"class": "form-control", "type": "date"},
-            ),
             "producer": forms.Select(attrs={"class": "form-control"}),
             "seguimiento_estado": forms.Select(attrs={"class": "form-control"}),
             "seguimiento_notas": forms.Textarea(
@@ -55,4 +60,11 @@ class ClientForm(forms.ModelForm):
             if self.instance and self.instance.pk and self.instance.ultimo_contacto:
                 self.initial["ultimo_contacto"] = (
                     self.instance.ultimo_contacto.strftime("%Y-%m-%dT%H:%M")
+                )
+
+        if "fecha_nacimiento" in self.fields:
+            self.fields["fecha_nacimiento"].input_formats = ["%Y-%m-%d"]
+            if self.instance and self.instance.pk and self.instance.fecha_nacimiento:
+                self.initial["fecha_nacimiento"] = (
+                    self.instance.fecha_nacimiento.strftime("%Y-%m-%d")
                 )
