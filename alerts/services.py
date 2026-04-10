@@ -4,6 +4,7 @@ from django.conf import settings
 from urllib.parse import quote
 
 from policies.models import Policy, Payment
+from clients.models import Client  # 👈 agregado
 from .models import Alert
 
 
@@ -11,19 +12,13 @@ def generate_expiration_alerts():
 
     today = date.today()
 
-    # 🔥 SOLO PÓLIZAS DENTRO DE 30 DÍAS
     policies = Policy.objects.filter(
         end_date__gte=today,
         end_date__lte=today.replace(day=today.day),
-    ).select_related(
-        "client",
-        "client__producer"
-    )
+    ).select_related("client", "client__producer")
 
-    # 🔥 FIX rango real de 30 días
     policies = [
-        policy for policy in policies
-        if 0 <= (policy.end_date - today).days <= 30
+        policy for policy in policies if 0 <= (policy.end_date - today).days <= 30
     ]
 
     for policy in policies:
@@ -97,7 +92,6 @@ Se recomienda contactar al cliente para gestionar la renovación.
                     fail_silently=True,
                 )
 
-    # 🔥 AUTO-RESOLVER ALERTAS DE VENCIMIENTO QUE YA NO APLICAN
     alertas_vencimiento = Alert.objects.filter(
         tipo="VENCIMIENTO",
         resolved=False,
@@ -116,9 +110,7 @@ Se recomienda contactar al cliente para gestionar la renovación.
 def generate_debt_alerts():
 
     pagos_vencidos = Payment.objects.filter(estado="VENCIDO").select_related(
-        "policy",
-        "policy__client",
-        "policy__client__producer"
+        "policy", "policy__client", "policy__client__producer"
     )
 
     policies_con_deuda = set()
@@ -153,7 +145,6 @@ def generate_debt_alerts():
                 level="CRITICA",
             )
 
-    # 🔥 AUTO-RESOLVER ALERTAS DE DEUDA SI YA NO HAY PAGOS VENCIDOS
     alertas_deuda = Alert.objects.filter(
         tipo="DEUDA",
         resolved=False,
@@ -165,17 +156,47 @@ def generate_debt_alerts():
             alerta.save()
 
 
+# 🔥 NUEVA FUNCIÓN (CUMPLEAÑOS)
+def generate_birthday_alerts():
+
+    today = date.today()
+
+    clientes = Client.objects.filter(
+        fecha_nacimiento__day=today.day,
+        fecha_nacimiento__month=today.month,
+    ).select_related("producer")
+
+    for cliente in clientes:
+
+        mensaje = f"Hoy es el cumpleaños de {cliente.first_name} {cliente.last_name}"
+
+        alerta = Alert.objects.filter(
+            user=cliente.producer,
+            tipo="CUMPLEANIOS",
+            message=mensaje,
+            resolved=False,
+        ).first()
+
+        if not alerta:
+            Alert.objects.create(
+                user=cliente.producer,
+                tipo="CUMPLEANIOS",
+                resolved=False,
+                message=mensaje,
+                level="MEDIA",
+            )
+
+
 def generar_todas_las_alertas():
 
     generate_expiration_alerts()
     generate_debt_alerts()
+    generate_birthday_alerts()  # 👈 agregado
 
 
 def generar_link_whatsapp(cliente, mensaje):
 
-    telefono = (
-        getattr(cliente, "phone", "") or getattr(cliente, "telefono", "")
-    )
+    telefono = getattr(cliente, "phone", "") or getattr(cliente, "telefono", "")
 
     telefono = telefono.replace(" ", "").replace("-", "")
 
