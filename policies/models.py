@@ -292,10 +292,17 @@ class Payment(models.Model):
         fecha = self.fecha_vencimiento.strftime("%d/%m/%Y")
 
         return (
-            f"Hola {cliente}, te recordamos que la cuota {self.numero_cuota} "
-            f"de tu póliza {numero_poliza} vence el {fecha}. "
-            "Por favor, realizá el pago para evitar suspensión de cobertura. "
-            "Cualquier duda estamos para ayudarte."
+            f"Hola {cliente} 👋\n\n"
+            "Esperamos que te encuentres muy bien.\n\n"
+            "Te escribimos desde *Fuerza Natural Broker de Seguros* para recordarte el próximo vencimiento de tu póliza.\n\n"
+            f"📌 Póliza N°: {numero_poliza}\n"
+            f"💳 Cuota N°: {self.numero_cuota}\n"
+            f"📅 Vencimiento: {fecha}\n\n"
+            "Te recomendamos realizar el pago antes de la fecha indicada para evitar cualquier interrupción en tu cobertura.\n\n"
+            "Una vez realizado, podés enviarnos el comprobante por este medio para registrarlo.\n\n"
+            "Ante cualquier consulta, estamos para ayudarte.\n\n"
+            "Saludos cordiales,\n"
+            "*Fuerza Natural Broker de Seguros*"
         )
 
     def whatsapp_link(self):
