@@ -6,7 +6,20 @@ class ClientForm(forms.ModelForm):
 
     class Meta:
         model = Client
-        fields = "__all__"
+        fields = [
+            "first_name",
+            "last_name",
+            "dni",
+            "phone",
+            "email",
+            "fecha_nacimiento",
+            "producer",
+            "seguimiento_estado",
+            "seguimiento_notas",
+            "ultimo_contacto",
+            "proximo_seguimiento",
+            "permite_whatsapp",
+        ]
 
         widgets = {
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
