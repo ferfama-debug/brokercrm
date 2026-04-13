@@ -438,19 +438,25 @@ Fuerza Natural Broker de Seguros
 """
 
     try:
-        send_mail(
+        enviados = send_mail(
             asunto,
             mensaje,
             settings.DEFAULT_FROM_EMAIL,
             [cliente.email],
-            fail_silently=True,
+            fail_silently=False,
         )
 
-        messages.success(request, f"✅ Email enviado a {cliente.email}")
+        if enviados == 1:
+            messages.success(request, f"✅ Email enviado a {cliente.email}")
+        else:
+            messages.error(
+                request,
+                "❌ El servidor no confirmó el envío del email",
+            )
 
     except Exception as e:
         print("ERROR EMAIL:", e)
-        messages.error(request, "❌ Error al enviar el email")
+        messages.error(request, f"❌ Error al enviar el email: {e}")
 
     return redirect(f"/clientes/ver/{cliente.id}/")
 
