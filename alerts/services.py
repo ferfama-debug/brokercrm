@@ -1,27 +1,27 @@
-from datetime import date
+from datetime import date, timedelta
 from django.core.mail import send_mail
 from django.conf import settings
 from urllib.parse import quote
 
 from policies.models import Policy, Payment
-from clients.models import Client  # 👈 agregado
+from clients.models import Client
 from .models import Alert
 
 
 def generate_expiration_alerts():
 
     today = date.today()
+    limite = today + timedelta(days=30)
 
     policies = Policy.objects.filter(
         end_date__gte=today,
-        end_date__lte=today.replace(day=today.day),
+        end_date__lte=limite,
     ).select_related("client", "client__producer")
 
-    policies = [
-        policy for policy in policies if 0 <= (policy.end_date - today).days <= 30
-    ]
-
     for policy in policies:
+
+        if not policy.client or not policy.client.producer:
+            continue
 
         days = (policy.end_date - today).days
 
@@ -29,10 +29,8 @@ def generate_expiration_alerts():
             level = "CRITICA"
         elif days <= 15:
             level = "ALTA"
-        elif days <= 30:
-            level = "MEDIA"
         else:
-            continue
+            level = "MEDIA"
 
         mensaje = (
             f"La póliza {policy.policy_number} del cliente {policy.client} "
@@ -47,20 +45,12 @@ def generate_expiration_alerts():
         ).first()
 
         if alerta:
-            cambios = False
-
-            if alerta.message != mensaje:
+            if alerta.message != mensaje or alerta.level != level:
                 alerta.message = mensaje
-                cambios = True
-
-            if alerta.level != level:
                 alerta.level = level
-                cambios = True
-
-            if cambios:
                 alerta.save()
         else:
-            alerta = Alert.objects.create(
+            Alert.objects.create(
                 user=policy.client.producer,
                 policy=policy,
                 tipo="VENCIMIENTO",
@@ -69,28 +59,14 @@ def generate_expiration_alerts():
                 level=level,
             )
 
-            if days == 7 and policy.client.producer.email:
-
-                subject = "⚠ Póliza por vencer en 7 días"
-
-                message = f"""
-Cliente: {policy.client}
-
-Compañía: {policy.company}
-Número de póliza: {policy.policy_number}
-
-La póliza vence el {policy.end_date}.
-
-Se recomienda contactar al cliente para gestionar la renovación.
-"""
-
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [policy.client.producer.email],
-                    fail_silently=True,
-                )
+        if days == 7 and policy.client.producer.email:
+            send_mail(
+                "⚠ Póliza por vencer en 7 días",
+                f"La póliza {policy.policy_number} vence el {policy.end_date}",
+                settings.DEFAULT_FROM_EMAIL,
+                [policy.client.producer.email],
+                fail_silently=True,
+            )
 
     alertas_vencimiento = Alert.objects.filter(
         tipo="VENCIMIENTO",
@@ -117,8 +93,12 @@ def generate_debt_alerts():
 
     for pago in pagos_vencidos:
 
+        if not pago.policy or not pago.policy.client:
+            continue
+
         policy = pago.policy
         cliente = policy.client
+
         policies_con_deuda.add(policy.id)
 
         mensaje = f"Cliente con deuda en cuota #{pago.numero_cuota}"
@@ -156,7 +136,6 @@ def generate_debt_alerts():
             alerta.save()
 
 
-# 🔥 NUEVA FUNCIÓN (CUMPLEAÑOS)
 def generate_birthday_alerts():
 
     today = date.today()
@@ -167,6 +146,9 @@ def generate_birthday_alerts():
     ).select_related("producer")
 
     for cliente in clientes:
+
+        if not cliente.producer:
+            continue
 
         mensaje = f"Hoy es el cumpleaños de {cliente.first_name} {cliente.last_name}"
 
@@ -188,24 +170,21 @@ def generate_birthday_alerts():
 
 
 def generar_todas_las_alertas():
-
     generate_expiration_alerts()
     generate_debt_alerts()
-    generate_birthday_alerts()  # 👈 agregado
+    generate_birthday_alerts()
 
 
 def generar_link_whatsapp(cliente, mensaje):
-
     telefono = getattr(cliente, "phone", "") or getattr(cliente, "telefono", "")
-
     telefono = telefono.replace(" ", "").replace("-", "")
-
     texto = quote(mensaje)
-
     return f"https://wa.me/{telefono}?text={texto}"
 
 
 def whatsapp_deuda(pago):
+    if not pago.policy or not pago.policy.client:
+        return "#"
 
     cliente = pago.policy.client
 
@@ -219,6 +198,8 @@ def whatsapp_deuda(pago):
 
 
 def whatsapp_vencimiento(policy):
+    if not policy.client:
+        return "#"
 
     cliente = policy.client
 
