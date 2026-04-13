@@ -140,8 +140,23 @@
       {% for alerta in alertas %}
       <tr>
         <td>{{ alerta.created_at|date:"d/m/Y H:i" }}</td>
-        <td>{{ alerta.policy.client }}</td>
-        <td>{{ alerta.policy.policy_number }}</td>
+
+        <td>
+          {% if alerta.policy and alerta.policy.client %}
+            {{ alerta.policy.client }}
+          {% else %}
+            —
+          {% endif %}
+        </td>
+
+        <td>
+          {% if alerta.policy %}
+            {{ alerta.policy.policy_number }}
+          {% else %}
+            —
+          {% endif %}
+        </td>
+
         <td class="mensaje-col">{{ alerta.message }}</td>
 
         <td>
@@ -156,14 +171,18 @@
 
         <td>
           <div class="tabla-acciones">
-            <a href="{% url 'clients:ver_cliente' alerta.policy.client.id %}?poliza={{ alerta.policy.id }}" class="btn btn-secondary btn-sm">
-              Ver cliente
-            </a>
+            {% if alerta.policy and alerta.policy.client %}
+              <a href="{% url 'clients:ver_cliente' alerta.policy.client.id %}?poliza={{ alerta.policy.id }}" class="btn btn-secondary btn-sm">
+                Ver cliente
+              </a>
 
-            <a href="https://wa.me/{{ alerta.policy.client.phone|cut:' '|cut:'-' }}?text={{ alerta.message|urlencode }}"
-               target="_blank" class="btn-whatsapp btn-whatsapp-sm">
-              WhatsApp
-            </a>
+              <a href="https://wa.me/{{ alerta.policy.client.phone|cut:' '|cut:'-' }}?text={{ alerta.message|urlencode }}"
+                 target="_blank" class="btn-whatsapp btn-whatsapp-sm">
+                WhatsApp
+              </a>
+            {% else %}
+              —
+            {% endif %}
           </div>
         </td>
       </tr>
