@@ -18,10 +18,7 @@ def alertas(request):
     if request.user.is_superuser:
         alertas = Alert.objects.filter(resolved=False)
     else:
-        alertas = Alert.objects.filter(
-            user=request.user,
-            resolved=False
-        )
+        alertas = Alert.objects.filter(user=request.user, resolved=False)
 
     if nivel:
         alertas = alertas.filter(level=nivel)
@@ -36,9 +33,9 @@ def alertas(request):
             end_date__gte=hoy,
             end_date__lte=limite_vencimiento,
         )
-        pagos_vencidos = Payment.objects.filter(
-            estado="VENCIDO"
-        ).select_related("policy__client")
+        pagos_vencidos = Payment.objects.filter(estado="VENCIDO").select_related(
+            "policy__client"
+        )
     else:
         polizas_por_vencer = Policy.objects.filter(
             client__producer=request.user,
@@ -51,7 +48,9 @@ def alertas(request):
         ).select_related("policy__client")
 
     clientes_con_deuda = {
-        pago.policy.client for pago in pagos_vencidos
+        pago.policy.client
+        for pago in pagos_vencidos
+        if pago.policy and pago.policy.client
     }
 
     return render(
