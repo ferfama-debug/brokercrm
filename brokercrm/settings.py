@@ -8,7 +8,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # =========================
 try:
     from dotenv import load_dotenv
-
     load_dotenv(BASE_DIR / ".env")
 except Exception:
     pass
@@ -25,7 +24,8 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 if DEBUG:
     SECRET_KEY = os.environ.get(
-        "DJANGO_SECRET_KEY", "django-insecure-local-dev-key-brokercrm"
+        "DJANGO_SECRET_KEY",
+        "django-insecure-local-dev-key-brokercrm"
     )
 else:
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
