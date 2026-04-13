@@ -1,9 +1,28 @@
-from django.db import migrations
+from django.db import migrations, connection
 
 
-class Migration(migrations.Migration):
+def add_company_obj_column_if_needed(apps, schema_editor):
+    if connection.vendor != "postgresql":
+        return
 
-    from django.db import migrations
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'policies_policy'
+                    AND column_name = 'company_obj_id'
+                ) THEN
+                    ALTER TABLE policies_policy
+                    ADD COLUMN company_obj_id bigint NULL;
+                END IF;
+            END$$;
+            """
+        )
+
 
 class Migration(migrations.Migration):
 
@@ -12,21 +31,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(
-            sql="""
-            DO $$
-            BEGIN
-                IF NOT EXISTS (
-                    SELECT 1
-                    FROM information_schema.columns
-                    WHERE table_name='policies_policy'
-                    AND column_name='company_obj_id'
-                ) THEN
-                    ALTER TABLE policies_policy
-                    ADD COLUMN company_obj_id bigint NULL;
-                END IF;
-            END$$;
-            """,
-            reverse_sql=migrations.RunSQL.noop,
+        migrations.RunPython(
+            add_company_obj_column_if_needed,
+            reverse_code=migrations.RunPython.noop,
         ),
     ]
