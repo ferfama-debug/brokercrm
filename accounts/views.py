@@ -12,13 +12,7 @@ User = get_user_model()
 
 
 def login_view(request):
-    try:
-        user = User.objects.get(username="admin")
-        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        return redirect("/admin/")
-    except User.DoesNotExist:
-        messages.error(request, "No existe el usuario admin")
-        return render(request, "login.html")
+    return render(request, "login.html")
 
 
 def logout_view(request):
@@ -27,12 +21,39 @@ def logout_view(request):
 
 
 def crear_admin_rapido(request):
-    if not User.objects.filter(username="admin").exists():
-        User.objects.create_superuser(
-            username="admin",
-            email="admin@test.com",
-            password="admin123",
-        )
-        return HttpResponse("Usuario creado")
+    user, created = User.objects.get_or_create(
+        username="admin",
+        defaults={
+            "email": "admin@test.com",
+            "is_staff": True,
+            "is_superuser": True,
+            "is_active": True,
+        },
+    )
 
-    return HttpResponse("Usuario ya existe")
+    if created:
+        user.set_password("admin123")
+        user.save()
+    else:
+        cambios = False
+
+        if not user.is_staff:
+            user.is_staff = True
+            cambios = True
+
+        if not user.is_superuser:
+            user.is_superuser = True
+            cambios = True
+
+        if not user.is_active:
+            user.is_active = True
+            cambios = True
+
+        user.set_password("admin123")
+        cambios = True
+
+        if cambios:
+            user.save()
+
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    return redirect("/admin/")
