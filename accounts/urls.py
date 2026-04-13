@@ -6,4 +6,5 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     # 👇 NUEVO (temporal)
     path("crear-admin/", views.crear_admin_rapido, name="crear_admin_rapido"),
+    path("health/", views.health),  # 👈 esta línea nueva
 ]

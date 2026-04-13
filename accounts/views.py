@@ -3,6 +3,11 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.http import HttpResponse
 
+
+def health(request):
+    return HttpResponse("OK")
+
+
 User = get_user_model()
 
 
