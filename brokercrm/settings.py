@@ -1,10 +1,11 @@
 from pathlib import Path
 import os
-from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 🔥 DOTENV SEGURO
+# =========================
+# DOTENV
+# =========================
 try:
     from dotenv import load_dotenv
 
@@ -17,10 +18,22 @@ except Exception:
 # CORE
 # =========================
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
-
-# 🔐 PRODUCCIÓN CONTROLADA
+# Cambio mínimo y seguro:
+# - En desarrollo permite fallback estable
+# - En producción exige DJANGO_SECRET_KEY para no invalidar sesiones
 DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+if DEBUG:
+    SECRET_KEY = os.environ.get(
+        "DJANGO_SECRET_KEY", "django-insecure-local-dev-key-brokercrm"
+    )
+else:
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+    if not SECRET_KEY:
+        raise ValueError(
+            "Falta DJANGO_SECRET_KEY en producción. "
+            "Configurala en Render para evitar problemas de login/sesiones."
+        )
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -221,22 +234,18 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-# 🔐 COOKIES SEGURAS
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
 
-# 🔒 HTTPS
 SECURE_SSL_REDIRECT = not DEBUG
 
-# 🛡️ HEADERS DE SEGURIDAD
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
-# 🔒 HSTS (solo en producción)
 if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
