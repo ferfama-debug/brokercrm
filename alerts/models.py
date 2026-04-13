@@ -16,6 +16,7 @@ class Alert(models.Model):
     TIPOS = (
         ("DEUDA", "Deuda"),
         ("VENCIMIENTO", "Vencimiento"),
+        ("CUMPLEANIOS", "Cumpleaños"),
         ("MANUAL", "Manual"),
     )
 
@@ -29,11 +30,11 @@ class Alert(models.Model):
         Policy,
         on_delete=models.CASCADE,
         db_index=True,
+        null=True,
+        blank=True,
     )
 
-    message = models.CharField(
-        max_length=255
-    )
+    message = models.CharField(max_length=255)
 
     level = models.CharField(
         max_length=10,
@@ -59,7 +60,6 @@ class Alert(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # 🔥 NORMALIZACIÓN MENSAJE
         if self.message:
             self.message = self.message.strip()
 
@@ -73,7 +73,6 @@ class Alert(models.Model):
         verbose_name_plural = "Alertas"
         ordering = ["-created_at"]
 
-        # 🔥 EVITA DUPLICADOS ACTIVOS
         constraints = [
             models.UniqueConstraint(
                 fields=["policy", "tipo"],
