@@ -50,6 +50,73 @@ def procesar_archivo(file, carpeta):
         return None
 
 
+def enviar_email_con_fallback(asunto, mensaje, destinatarios):
+    remitente = (
+        getattr(settings, "DEFAULT_FROM_EMAIL", None)
+        or getattr(settings, "EMAIL_HOST_USER", None)
+        or "onboarding@resend.dev"
+    )
+
+    # 1) Intento con Gmail / SMTP
+    try:
+        enviados = send_mail(
+            asunto,
+            mensaje,
+            remitente,
+            destinatarios,
+            fail_silently=False,
+        )
+
+        if enviados == 1:
+            print("✅ EMAIL enviado por SMTP/Gmail")
+            return True, "smtp"
+    except Exception as smtp_error:
+        print("ERROR EMAIL SMTP:", smtp_error)
+
+        # 2) Fallback a Resend
+        resend_api_key = getattr(settings, "RESEND_API_KEY", None)
+        if not resend_api_key:
+            return (
+                False,
+                f"SMTP falló y RESEND_API_KEY no está configurada: {smtp_error}",
+            )
+
+        try:
+            response = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {resend_api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": remitente,
+                    "to": destinatarios,
+                    "subject": asunto,
+                    "text": mensaje,
+                },
+                timeout=20,
+            )
+
+            if response.status_code in (200, 201):
+                print("✅ EMAIL enviado por Resend")
+                return True, "resend"
+
+            print("ERROR EMAIL RESEND:", response.status_code, response.text)
+            return (
+                False,
+                f"SMTP falló ({smtp_error}) y Resend devolvió {response.status_code}: {response.text}",
+            )
+
+        except Exception as resend_error:
+            print("ERROR EMAIL RESEND EXCEPTION:", resend_error)
+            return (
+                False,
+                f"SMTP falló ({smtp_error}) y Resend también falló ({resend_error})",
+            )
+
+    return False, "El servidor no confirmó el envío"
+
+
 @login_required
 def panel_cobranzas(request):
     hoy = date.today()
@@ -437,26 +504,23 @@ Ante cualquier duda, estamos para ayudarte.
 Fuerza Natural Broker de Seguros
 """
 
-    try:
-        enviados = send_mail(
-            asunto,
-            mensaje,
-            settings.DEFAULT_FROM_EMAIL,
-            [cliente.email],
-            fail_silently=False,
-        )
+    ok, proveedor = enviar_email_con_fallback(
+        asunto=asunto,
+        mensaje=mensaje,
+        destinatarios=[cliente.email],
+    )
 
-        if enviados == 1:
-            messages.success(request, f"✅ Email enviado a {cliente.email}")
-        else:
-            messages.error(
-                request,
-                "❌ El servidor no confirmó el envío del email",
+    if ok:
+        if proveedor == "smtp":
+            messages.success(
+                request, f"✅ Email enviado a {cliente.email} por Gmail/SMTP"
             )
-
-    except Exception as e:
-        print("ERROR EMAIL:", e)
-        messages.error(request, f"❌ Error al enviar el email: {e}")
+        elif proveedor == "resend":
+            messages.success(request, f"✅ Email enviado a {cliente.email} por Resend")
+        else:
+            messages.success(request, f"✅ Email enviado a {cliente.email}")
+    else:
+        messages.error(request, f"❌ Error al enviar el email: {proveedor}")
 
     return redirect(f"/clientes/ver/{cliente.id}/")
 
