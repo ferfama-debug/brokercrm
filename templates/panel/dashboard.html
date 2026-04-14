@@ -116,7 +116,7 @@ body.light-mode span {
 /* KPI */
 .radar-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
   margin-bottom: 30px;
 }
@@ -168,6 +168,7 @@ body.light-mode .radar span {
 .vencido  { border-top: 3px solid #ef4444 !important; }
 .hoy      { border-top: 3px solid #f97316 !important; }
 .proximo  { border-top: 3px solid #22c55e !important; }
+.alerta   { border-top: 3px solid #eab308 !important; }
 
 /* TABLAS */
 table {
@@ -376,6 +377,12 @@ body.light-mode .crm-copy-ok {
   color: #15803d !important;
 }
 
+@media (max-width: 1200px) {
+  .radar-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .radar-container {
     grid-template-columns: repeat(2, 1fr);
@@ -443,6 +450,11 @@ body.light-mode .crm-copy-ok {
     <div class="radar proximo">
       <h3>Próximos</h3>
       <span>{{ cobranzas_proximos|default:0 }}</span>
+    </div>
+
+    <div class="radar alerta">
+      <h3>Alertas activas</h3>
+      <span>{{ alertas|default:0 }}</span>
     </div>
 
     <div class="radar">
