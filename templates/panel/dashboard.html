@@ -165,6 +165,17 @@ body.light-mode .radar span {
   color: #0f172a !important;
 }
 
+.radar-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.radar-link:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
 .vencido  { border-top: 3px solid #ef4444 !important; }
 .hoy      { border-top: 3px solid #f97316 !important; }
 .proximo  { border-top: 3px solid #22c55e !important; }
@@ -452,10 +463,10 @@ body.light-mode .crm-copy-ok {
       <span>{{ cobranzas_proximos|default:0 }}</span>
     </div>
 
-    <div class="radar alerta">
+    <a href="/alertas/" class="radar alerta radar-link">
       <h3>Alertas activas</h3>
       <span>{{ alertas|default:0 }}</span>
-    </div>
+    </a>
 
     <div class="radar">
       <h3>Total deuda</h3>
