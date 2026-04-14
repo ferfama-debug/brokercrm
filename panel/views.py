@@ -8,7 +8,8 @@ import json
 from clients.models import Client
 from policies.models import Policy, Payment
 from django.contrib.auth import get_user_model
-from alerts.services import generate_expiration_alerts
+from alerts.models import Alert
+from alerts.services import generar_todas_las_alertas
 
 
 User = get_user_model()
@@ -17,12 +18,17 @@ User = get_user_model()
 @login_required
 def home(request):
 
-    generate_expiration_alerts()
+    generar_todas_las_alertas()
 
     hoy = date.today()
     buscar = request.GET.get("buscar", "")
 
-    policies = Policy.objects.select_related("client")
+    if request.user.is_superuser:
+        policies = Policy.objects.select_related("client")
+    else:
+        policies = Policy.objects.filter(client__producer=request.user).select_related(
+            "client"
+        )
 
     if buscar:
         policies = policies.filter(
@@ -39,7 +45,6 @@ def home(request):
     cobranzas_proximas = []
 
     vencen_semana = 0
-    alertas = 0
     vencen_7 = 0
     vencen_15 = 0
     vencen_30 = 0
@@ -69,7 +74,6 @@ def home(request):
             )
 
             if dias <= 30:
-                alertas += 1
                 vencen_30 += 1
 
             if dias <= 15:
@@ -197,42 +201,96 @@ def home(request):
     )
 
     # =========================
+    # ALERTAS REALES
+    # =========================
+
+    if request.user.is_superuser:
+        alertas_count = Alert.objects.filter(resolved=False).count()
+    else:
+        alertas_count = Alert.objects.filter(user=request.user, resolved=False).count()
+
+    # =========================
     # RESTO (NO SE TOCA)
     # =========================
 
     mes_actual = datetime.now().month
     anio_actual = datetime.now().year
 
-    produccion_mes = Policy.objects.filter(
-        start_date__month=mes_actual,
-        start_date__year=anio_actual,
-    ).count()
+    if request.user.is_superuser:
+        produccion_mes = Policy.objects.filter(
+            start_date__month=mes_actual,
+            start_date__year=anio_actual,
+        ).count()
 
-    renovaciones_mes = Policy.objects.filter(
-        end_date__month=mes_actual,
-        end_date__year=anio_actual,
-    ).count()
+        renovaciones_mes = Policy.objects.filter(
+            end_date__month=mes_actual,
+            end_date__year=anio_actual,
+        ).count()
 
-    produccion_companias = (
-        Policy.objects.values("company").annotate(total=Count("id")).order_by("-total")
-    )
+        produccion_companias = (
+            Policy.objects.values("company")
+            .annotate(total=Count("id"))
+            .order_by("-total")
+        )
+
+        clientes_query = Client.objects.annotate(
+            total_polizas=Count("policy")
+        ).order_by("-total_polizas")[:5]
+
+        total_clientes = Client.objects.count()
+        total_polizas = Policy.objects.count()
+        total_usuarios = User.objects.count()
+    else:
+        produccion_mes = Policy.objects.filter(
+            client__producer=request.user,
+            start_date__month=mes_actual,
+            start_date__year=anio_actual,
+        ).count()
+
+        renovaciones_mes = Policy.objects.filter(
+            client__producer=request.user,
+            end_date__month=mes_actual,
+            end_date__year=anio_actual,
+        ).count()
+
+        produccion_companias = (
+            Policy.objects.filter(client__producer=request.user)
+            .values("company")
+            .annotate(total=Count("id"))
+            .order_by("-total")
+        )
+
+        clientes_query = (
+            Client.objects.filter(producer=request.user)
+            .annotate(total_polizas=Count("policy"))
+            .order_by("-total_polizas")[:5]
+        )
+
+        total_clientes = Client.objects.filter(producer=request.user).count()
+        total_polizas = Policy.objects.filter(client__producer=request.user).count()
+        total_usuarios = 1
 
     companias = [c["company"] for c in produccion_companias]
     cantidades = [c["total"] for c in produccion_companias]
 
-    crecimiento = (
-        Policy.objects.annotate(mes=ExtractMonth("start_date"))
-        .values("mes")
-        .annotate(total=Count("id"))
-        .order_by("mes")
-    )
+    if request.user.is_superuser:
+        crecimiento = (
+            Policy.objects.annotate(mes=ExtractMonth("start_date"))
+            .values("mes")
+            .annotate(total=Count("id"))
+            .order_by("mes")
+        )
+    else:
+        crecimiento = (
+            Policy.objects.filter(client__producer=request.user)
+            .annotate(mes=ExtractMonth("start_date"))
+            .values("mes")
+            .annotate(total=Count("id"))
+            .order_by("mes")
+        )
 
     meses = [c["mes"] for c in crecimiento]
     totales = [c["total"] for c in crecimiento]
-
-    clientes_query = Client.objects.annotate(total_polizas=Count("policy")).order_by(
-        "-total_polizas"
-    )[:5]
 
     clientes_score = []
 
@@ -254,10 +312,10 @@ def home(request):
         )
 
     context = {
-        "clientes": Client.objects.count(),
-        "polizas": Policy.objects.count(),
-        "alertas": alertas,
-        "usuarios": User.objects.count(),
+        "clientes": total_clientes,
+        "polizas": total_polizas,
+        "alertas": alertas_count,
+        "usuarios": total_usuarios,
         "polizas_por_vencer": polizas_por_vencer,
         "clientes_llamar": clientes_llamar,
         "pagos_cuponera": pagos_cuponera,
