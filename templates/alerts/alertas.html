@@ -108,6 +108,9 @@
         <a href="https://wa.me/{{ poliza.client.phone|cut:' '|cut:'-' }}?text=Hola {{ poliza.client.first_name }},%20tu%20póliza%20vence%20pronto.%20¿Querés%20renovarla?"
            target="_blank" class="btn-whatsapp btn-whatsapp-sm">
           WhatsApp
+          <span class="badge-poliza badge-yellow-soft">
+            #{{ poliza.policy_number|default:"-" }}
+          </span>
         </a>
       </div>
 
@@ -179,6 +182,17 @@
               <a href="https://wa.me/{{ alerta.policy.client.phone|cut:' '|cut:'-' }}?text={{ alerta.message|urlencode }}"
                  target="_blank" class="btn-whatsapp btn-whatsapp-sm">
                 WhatsApp
+                <span class="badge-poliza
+                  {% if alerta.level == 'CRITICA' %}
+                    badge-red-soft
+                  {% elif alerta.level == 'ALTA' %}
+                    badge-yellow-soft
+                  {% else %}
+                    badge-green-soft
+                  {% endif %}
+                ">
+                  #{{ alerta.policy.policy_number|default:"-" }}
+                </span>
               </a>
             {% else %}
               —
@@ -480,6 +494,7 @@
   font-size: 12px;
   font-weight: 600;
   transition: 0.18s;
+  gap: 8px;
 }
 
 .btn-whatsapp:hover {
@@ -490,6 +505,36 @@
 .btn-whatsapp-sm {
   padding: 7px 11px;
   font-size: 12px;
+}
+
+.badge-poliza {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.badge-red-soft {
+  background: rgba(239,68,68,0.14);
+  color: #fca5a5;
+  border-color: rgba(239,68,68,0.22);
+}
+
+.badge-yellow-soft {
+  background: rgba(245,158,11,0.14);
+  color: #fde68a;
+  border-color: rgba(245,158,11,0.22);
+}
+
+.badge-green-soft {
+  background: rgba(34,197,94,0.14);
+  color: #86efac;
+  border-color: rgba(34,197,94,0.22);
 }
 
 @media (max-width: 980px) {
