@@ -662,7 +662,7 @@ def enviar_poliza(request, poliza_id):
     else:
         messages.error(request, f"❌ Error al enviar el email: {proveedor}")
 
-    return redirect(f"/clientes/ver/{cliente.id}/")
+    return redirect("/")
 
 
 @login_required
