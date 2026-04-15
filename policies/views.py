@@ -8,7 +8,7 @@ import os
 import requests
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 
 from django.contrib import messages
 
@@ -50,30 +50,34 @@ def procesar_archivo(file, carpeta):
         return None
 
 
-def enviar_email_con_fallback(asunto, mensaje, destinatarios):
+def enviar_email_con_fallback(asunto, mensaje_texto, destinatarios, mensaje_html=None):
     remitente = (
         getattr(settings, "DEFAULT_FROM_EMAIL", None)
         or getattr(settings, "EMAIL_HOST_USER", None)
         or "onboarding@resend.dev"
     )
 
-    # 1) Intento con Gmail / SMTP
+    # 1) Intento con SMTP configurado en Django
     try:
-        enviados = send_mail(
-            asunto,
-            mensaje,
-            remitente,
-            destinatarios,
-            fail_silently=False,
+        email = EmailMultiAlternatives(
+            subject=asunto,
+            body=mensaje_texto,
+            from_email=remitente,
+            to=destinatarios,
         )
 
+        if mensaje_html:
+            email.attach_alternative(mensaje_html, "text/html")
+
+        enviados = email.send(fail_silently=False)
+
         if enviados == 1:
-            print("✅ EMAIL enviado por SMTP/Gmail")
+            print("✅ EMAIL enviado por SMTP")
             return True, "smtp"
     except Exception as smtp_error:
         print("ERROR EMAIL SMTP:", smtp_error)
 
-        # 2) Fallback a Resend
+        # 2) Fallback a Resend API
         resend_api_key = getattr(settings, "RESEND_API_KEY", None)
         if not resend_api_key:
             return (
@@ -82,18 +86,23 @@ def enviar_email_con_fallback(asunto, mensaje, destinatarios):
             )
 
         try:
+            payload = {
+                "from": remitente,
+                "to": destinatarios,
+                "subject": asunto,
+                "text": mensaje_texto,
+            }
+
+            if mensaje_html:
+                payload["html"] = mensaje_html
+
             response = requests.post(
                 "https://api.resend.com/emails",
                 headers={
                     "Authorization": f"Bearer {resend_api_key}",
                     "Content-Type": "application/json",
                 },
-                json={
-                    "from": remitente,
-                    "to": destinatarios,
-                    "subject": asunto,
-                    "text": mensaje,
-                },
+                json=payload,
                 timeout=20,
             )
 
@@ -115,6 +124,170 @@ def enviar_email_con_fallback(asunto, mensaje, destinatarios):
             )
 
     return False, "El servidor no confirmó el envío"
+
+
+def formatear_fecha(valor):
+    if not valor:
+        return ""
+    try:
+        return valor.strftime("%d/%m/%Y")
+    except Exception:
+        return str(valor)
+
+
+def construir_email_poliza(cliente, poliza):
+    fecha_inicio = formatear_fecha(poliza.start_date)
+    fecha_fin = formatear_fecha(poliza.end_date)
+    aseguradora = poliza.company or "tu compañía"
+    nombre_cliente = cliente.first_name or "cliente"
+
+    asunto = f"Póliza disponible - {aseguradora}"
+
+    mensaje_texto = f"""Hola {nombre_cliente} 👋
+
+Te escribimos desde Fuerza Natural Broker de Seguros.
+
+Te enviamos tu póliza de {aseguradora}.
+
+📅 Vigencia: {fecha_inicio} al {fecha_fin}
+
+📄 Documentación:
+"""
+
+    if poliza.pdf_poliza:
+        mensaje_texto += f"\n• Póliza: {poliza.pdf_poliza}\n"
+
+    if poliza.cuponera_pdf:
+        mensaje_texto += f"• Cuponera de pago: {poliza.cuponera_pdf}\n"
+
+    mensaje_texto += """
+
+Cuando realices el pago, podés enviarnos el comprobante por este medio para registrarlo con la compañía y mantener tu cobertura al día.
+
+Ante cualquier duda, estamos para ayudarte.
+
+Fuerza Natural Broker
+"""
+
+    boton_poliza_html = ""
+    if poliza.pdf_poliza:
+        boton_poliza_html = f"""
+                <tr>
+                  <td style="padding-bottom:12px;">
+                    <a href="{poliza.pdf_poliza}" style="display:inline-block; background:#0f172a; color:#ffffff; text-decoration:none; font-size:15px; font-weight:700; padding:14px 22px; border-radius:10px;">
+                      📄 Descargar póliza
+                    </a>
+                  </td>
+                </tr>
+        """
+
+    boton_cuponera_html = ""
+    texto_cuponera_html = ""
+    if poliza.cuponera_pdf:
+        boton_cuponera_html = f"""
+                <tr>
+                  <td>
+                    <a href="{poliza.cuponera_pdf}" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; font-size:15px; font-weight:700; padding:14px 22px; border-radius:10px;">
+                      💳 Descargar cuponera de pago
+                    </a>
+                  </td>
+                </tr>
+        """
+        texto_cuponera_html = """
+              <p style="margin:0 0 18px; font-size:15px; line-height:1.7; color:#374151;">
+                Cuando realices el pago, podés enviarnos el comprobante por este medio para registrarlo con la compañía y mantener tu cobertura al día.
+              </p>
+        """
+
+    mensaje_html = f"""
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Póliza disponible</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f4f6f8; margin:0; padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px; background:#ffffff; border-radius:14px; overflow:hidden; border:1px solid #e5e7eb;">
+          
+          <tr>
+            <td style="background:#0f172a; padding:28px 32px; text-align:center;">
+              <div style="color:#ffffff; font-size:24px; font-weight:700; letter-spacing:0.3px;">
+                Fuerza Natural Broker
+              </div>
+              <div style="color:#cbd5e1; font-size:14px; margin-top:6px;">
+                Broker de Seguros
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px;">
+              <p style="margin:0 0 18px; font-size:16px; line-height:1.6;">
+                Hola <strong>{nombre_cliente}</strong> 👋
+              </p>
+
+              <p style="margin:0 0 18px; font-size:16px; line-height:1.6;">
+                Te escribimos desde <strong>Fuerza Natural Broker de Seguros</strong>.
+              </p>
+
+              <p style="margin:0 0 24px; font-size:16px; line-height:1.6;">
+                Te enviamos tu póliza de <strong>{aseguradora}</strong>.
+              </p>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px;">
+                <tr>
+                  <td style="padding:18px 20px;">
+                    <div style="font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px;">
+                      Vigencia
+                    </div>
+                    <div style="font-size:18px; font-weight:700; color:#111827;">
+                      {fecha_inicio} al {fecha_fin}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="font-size:16px; font-weight:700; color:#111827; margin:0 0 14px;">
+                Documentación
+              </div>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:28px;">
+                {boton_poliza_html}
+                {boton_cuponera_html}
+              </table>
+
+              {texto_cuponera_html}
+
+              <p style="margin:0; font-size:15px; line-height:1.7; color:#374151;">
+                Ante cualquier duda, estamos para ayudarte.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:24px 32px; background:#f8fafc; border-top:1px solid #e5e7eb;">
+              <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:6px;">
+                Fuerza Natural Broker
+              </div>
+              <div style="font-size:13px; color:#6b7280; line-height:1.6;">
+                Este correo fue enviado desde tu gestión comercial.
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+    return asunto, mensaje_texto, mensaje_html
 
 
 @login_required
@@ -470,51 +643,18 @@ def enviar_poliza(request, poliza_id):
         messages.error(request, "❌ El cliente no tiene email cargado")
         return redirect(f"/clientes/ver/{cliente.id}/")
 
-    asunto = f"Póliza {poliza.policy_number} - Fuerza Natural Broker"
-
-    mensaje = f"""Hola {cliente.first_name} 👋
-
-Te escribimos desde Fuerza Natural Broker de Seguros.
-
-Te enviamos tu póliza N° {poliza.policy_number} de {poliza.company}.
-
-📅 Vigencia: {poliza.start_date} al {poliza.end_date}
-"""
-
-    if poliza.pdf_poliza:
-        mensaje += f"""
-
-📄 Póliza:
-{poliza.pdf_poliza}
-"""
-
-    if poliza.cuponera_pdf:
-        mensaje += f"""
-
-💳 Cuponera de pago:
-{poliza.cuponera_pdf}
-
-Cuando realices el pago, podés enviarnos el comprobante por este medio para registrarlo con la compañía y mantener tu cobertura al día.
-"""
-
-    mensaje += """
-
-Ante cualquier duda, estamos para ayudarte.
-
-Fuerza Natural Broker de Seguros
-"""
+    asunto, mensaje_texto, mensaje_html = construir_email_poliza(cliente, poliza)
 
     ok, proveedor = enviar_email_con_fallback(
         asunto=asunto,
-        mensaje=mensaje,
+        mensaje_texto=mensaje_texto,
+        mensaje_html=mensaje_html,
         destinatarios=[cliente.email],
     )
 
     if ok:
         if proveedor == "smtp":
-            messages.success(
-                request, f"✅ Email enviado a {cliente.email} por Gmail/SMTP"
-            )
+            messages.success(request, f"✅ Email enviado a {cliente.email}")
         elif proveedor == "resend":
             messages.success(request, f"✅ Email enviado a {cliente.email} por Resend")
         else:
