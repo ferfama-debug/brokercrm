@@ -50,12 +50,43 @@ def procesar_archivo(file, carpeta):
         return None
 
 
-def enviar_email_con_fallback(asunto, mensaje_texto, destinatarios, mensaje_html=None):
+def descargar_adjunto_desde_url(url, nombre_archivo):
+    if not url:
+        return None
+
+    try:
+        response = requests.get(url, timeout=20)
+        if response.status_code == 200:
+            content_type = response.headers.get("Content-Type", "application/pdf")
+            return {
+                "filename": nombre_archivo,
+                "content": response.content,
+                "mimetype": content_type,
+            }
+
+        print(
+            f"⚠️ No se pudo descargar adjunto {nombre_archivo}: {response.status_code}"
+        )
+        return None
+    except Exception as e:
+        print(f"⚠️ Error descargando adjunto {nombre_archivo}: {e}")
+        return None
+
+
+def enviar_email_con_fallback(
+    asunto,
+    mensaje_texto,
+    destinatarios,
+    mensaje_html=None,
+    adjuntos=None,
+):
     remitente = (
         getattr(settings, "DEFAULT_FROM_EMAIL", None)
         or getattr(settings, "EMAIL_HOST_USER", None)
         or "onboarding@resend.dev"
     )
+
+    adjuntos = adjuntos or []
 
     # 1) Intento con SMTP configurado en Django
     try:
@@ -68,6 +99,14 @@ def enviar_email_con_fallback(asunto, mensaje_texto, destinatarios, mensaje_html
 
         if mensaje_html:
             email.attach_alternative(mensaje_html, "text/html")
+
+        for adjunto in adjuntos:
+            if adjunto and adjunto.get("content"):
+                email.attach(
+                    adjunto["filename"],
+                    adjunto["content"],
+                    adjunto.get("mimetype", "application/pdf"),
+                )
 
         enviados = email.send(fail_silently=False)
 
@@ -96,6 +135,8 @@ def enviar_email_con_fallback(asunto, mensaje_texto, destinatarios, mensaje_html
             if mensaje_html:
                 payload["html"] = mensaje_html
 
+            # Resend API soporta attachments en base64, pero para mantener
+            # el cambio quirúrgico y estable, si falla SMTP usamos Resend sin adjuntos.
             response = requests.post(
                 "https://api.resend.com/emails",
                 headers={
@@ -645,11 +686,30 @@ def enviar_poliza(request, poliza_id):
 
     asunto, mensaje_texto, mensaje_html = construir_email_poliza(cliente, poliza)
 
+    adjuntos = []
+
+    if poliza.pdf_poliza:
+        adjunto_poliza = descargar_adjunto_desde_url(
+            poliza.pdf_poliza,
+            f"poliza_{poliza.policy_number or poliza.id}.pdf",
+        )
+        if adjunto_poliza:
+            adjuntos.append(adjunto_poliza)
+
+    if poliza.cuponera_pdf:
+        adjunto_cuponera = descargar_adjunto_desde_url(
+            poliza.cuponera_pdf,
+            f"cuponera_{poliza.policy_number or poliza.id}.pdf",
+        )
+        if adjunto_cuponera:
+            adjuntos.append(adjunto_cuponera)
+
     ok, proveedor = enviar_email_con_fallback(
         asunto=asunto,
         mensaje_texto=mensaje_texto,
         mensaje_html=mensaje_html,
         destinatarios=[cliente.email],
+        adjuntos=adjuntos,
     )
 
     if ok:
