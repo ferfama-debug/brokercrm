@@ -1,9 +1,6 @@
 from datetime import date, timedelta
 from urllib.parse import quote
 
-from django.conf import settings
-from django.core.mail import send_mail
-
 from policies.models import Policy, Payment
 from clients.models import Client
 from .models import Alert
@@ -58,32 +55,6 @@ def generate_expiration_alerts():
                 level=level,
             )
 
-        # Email automático al cliente 2 o 1 días antes del vencimiento
-        if days <= 5 and not policy.email_vencimiento_enviado:
-            client_email = (policy.client.email or "").strip()
-
-            if client_email:
-                asunto = "Recordatorio de vencimiento de póliza"
-                cuerpo = (
-                    f"Hola {policy.client.first_name},\n\n"
-                    f"Te recordamos que tu póliza N° {policy.policy_number} "
-                    f"vence el {policy.end_date.strftime('%d/%m/%Y')}.\n\n"
-                    "Si querés, podemos ayudarte con la renovación.\n\n"
-                    "Saludos,\n"
-                    "Fuerza Natural Broker de Seguros"
-                )
-
-                send_mail(
-                    asunto,
-                    cuerpo,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [client_email],
-                    fail_silently=False,
-                )
-
-                policy.email_vencimiento_enviado = True
-                policy.save(update_fields=["email_vencimiento_enviado"])
-
     alertas_vencimiento = Alert.objects.filter(
         tipo="VENCIMIENTO",
         resolved=False,
@@ -120,37 +91,29 @@ def generate_payment_reminders():
         if not client_email:
             continue
 
-        dias = (pago.fecha_vencimiento - today).days
+        mensaje = f"Cliente con pago próximo a vencer: cuota #{pago.numero_cuota}"
 
-        asunto = "Recordatorio de pago de cuponera"
-        cuerpo = (
-            f"Hola {cliente.first_name},\n\n"
-            f"Te recordamos que la cuota N° {pago.numero_cuota} "
-            f"de tu póliza N° {pago.policy.policy_number} "
-            f"vence el {pago.fecha_vencimiento.strftime('%d/%m/%Y')}.\n\n"
-        )
+        alerta = Alert.objects.filter(
+            user=cliente.producer,
+            policy=pago.policy,
+            tipo="PAGO_PROXIMO",
+            resolved=False,
+        ).first()
 
-        if pago.monto:
-            cuerpo += f"Monto: ${pago.monto}\n\n"
-
-        cuerpo += (
-            "Te recomendamos realizar el pago antes de la fecha indicada "
-            "para evitar inconvenientes con tu cobertura.\n\n"
-            "Si ya abonaste, podés ignorar este mensaje.\n\n"
-            "Saludos,\n"
-            "Fuerza Natural Broker de Seguros"
-        )
-
-        send_mail(
-            asunto,
-            cuerpo,
-            settings.DEFAULT_FROM_EMAIL,
-            [client_email],
-            fail_silently=False,
-        )
-
-        pago.recordatorio_enviado = True
-        pago.save(update_fields=["recordatorio_enviado"])
+        if alerta:
+            if alerta.message != mensaje or alerta.level != "ALTA":
+                alerta.message = mensaje
+                alerta.level = "ALTA"
+                alerta.save()
+        else:
+            Alert.objects.create(
+                user=cliente.producer,
+                policy=pago.policy,
+                tipo="PAGO_PROXIMO",
+                resolved=False,
+                message=mensaje,
+                level="ALTA",
+            )
 
 
 def generate_debt_alerts():
