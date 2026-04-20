@@ -59,7 +59,7 @@ def generate_expiration_alerts():
             )
 
         # Email automático al cliente 2 o 1 días antes del vencimiento
-        if days in [2, 1] and not policy.email_vencimiento_enviado:
+        if days <= 5 and not policy.email_vencimiento_enviado:
             client_email = (policy.client.email or "").strip()
 
             if client_email:
