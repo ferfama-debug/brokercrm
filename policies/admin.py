@@ -1,32 +1,32 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Policy, Company
+from .models import Policy, Company, Payment
 
 
 @admin.register(Policy)
 class PolicyAdmin(admin.ModelAdmin):
     list_display = (
-        'policy_number',
-        'client',
-        'company',
-        'end_date',
-        'estado_colored',
-        'email_enviado',
+        "policy_number",
+        "client",
+        "company",
+        "end_date",
+        "estado_colored",
+        "email_enviado",
     )
 
     list_filter = (
-        'company',
-        'email_vencimiento_enviado',
-        'end_date',
+        "company",
+        "email_vencimiento_enviado",
+        "end_date",
     )
 
     search_fields = (
-        'policy_number',
-        'client__first_name',
-        'client__last_name',
+        "policy_number",
+        "client__first_name",
+        "client__last_name",
     )
 
-    ordering = ('end_date',)
+    ordering = ("end_date",)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -34,7 +34,6 @@ class PolicyAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(client__producer=request.user)
 
-    # 🔥 ESTADO CON COLORES REALES
     def estado_colored(self, obj):
         estado = obj.estado
 
@@ -48,12 +47,11 @@ class PolicyAdmin(admin.ModelAdmin):
         return format_html(
             '<strong style="color: {};">{}</strong>',
             color,
-            estado
+            estado,
         )
 
     estado_colored.short_description = "Estado"
 
-    # 🔥 EMAIL ENVIADO (ICONO)
     def email_enviado(self, obj):
         return obj.email_vencimiento_enviado
 
@@ -61,8 +59,39 @@ class PolicyAdmin(admin.ModelAdmin):
     email_enviado.short_description = "Email enviado"
 
 
-# 🔥 NUEVO: ADMIN DE COMPAÑÍAS
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
     list_display = ("nombre",)
     search_fields = ("nombre",)
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = (
+        "policy",
+        "numero_cuota",
+        "fecha_vencimiento",
+        "fecha_pago",
+        "estado",
+        "recordatorio_enviado",
+    )
+
+    list_filter = (
+        "estado",
+        "recordatorio_enviado",
+        "fecha_vencimiento",
+    )
+
+    search_fields = (
+        "policy__policy_number",
+        "policy__client__first_name",
+        "policy__client__last_name",
+    )
+
+    ordering = ("fecha_vencimiento",)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request).select_related("policy", "policy__client")
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(policy__client__producer=request.user)
