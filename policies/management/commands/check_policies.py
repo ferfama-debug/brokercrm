@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -25,7 +25,7 @@ class Command(BaseCommand):
         errores = 0
 
         # =========================
-        # POLIZAS
+        # POLIZAS / RENOVACION
         # =========================
         policies = (
             Policy.objects.filter(
@@ -73,7 +73,7 @@ class Command(BaseCommand):
 
                 mensaje = (
                     f"Hola {cliente.first_name},\n\n"
-                    f"Te recordamos que tu póliza está próxima a vencer.\n\n"
+                    "Te recordamos que tu póliza está próxima a vencer.\n\n"
                     f"Compañía: {policy.company or 'No informada'}\n"
                     f"Número: {policy.policy_number}\n"
                     f"Vencimiento: {fecha_vencimiento}\n"
@@ -89,13 +89,24 @@ class Command(BaseCommand):
                 )
 
                 try:
-                    send_mail(
-                        subject=asunto,
-                        message=mensaje,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[cliente.email],
-                        fail_silently=False,
+                    html_content = render_to_string(
+                        "emails/recordatorio_poliza.html",
+                        {
+                            "cliente": cliente,
+                            "policy": policy,
+                            "fecha_vencimiento": fecha_vencimiento,
+                            "dias_restantes": dias_restantes,
+                        },
                     )
+
+                    email = EmailMultiAlternatives(
+                        subject=asunto,
+                        body=mensaje,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[cliente.email],
+                    )
+                    email.attach_alternative(html_content, "text/html")
+                    email.send()
 
                     policy.email_vencimiento_enviado = True
                     policy.save(update_fields=["email_vencimiento_enviado"])
