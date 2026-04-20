@@ -1,7 +1,8 @@
 from datetime import date, timedelta
-from django.core.mail import send_mail
-from django.conf import settings
 from urllib.parse import quote
+
+from django.conf import settings
+from django.core.mail import send_mail
 
 from policies.models import Policy, Payment
 from clients.models import Client
@@ -9,7 +10,6 @@ from .models import Alert
 
 
 def generate_expiration_alerts():
-
     today = date.today()
     limite = today + timedelta(days=30)
 
@@ -19,7 +19,6 @@ def generate_expiration_alerts():
     ).select_related("client", "client__producer")
 
     for policy in policies:
-
         if not policy.client or not policy.client.producer:
             continue
 
@@ -59,14 +58,31 @@ def generate_expiration_alerts():
                 level=level,
             )
 
-        if days == 7 and policy.client.producer.email:
-            send_mail(
-                "⚠ Póliza por vencer en 7 días",
-                f"La póliza {policy.policy_number} vence el {policy.end_date}",
-                settings.DEFAULT_FROM_EMAIL,
-                [policy.client.producer.email],
-                fail_silently=True,
-            )
+        # Email automático al cliente 2 o 1 días antes del vencimiento
+        if days in [2, 1] and not policy.email_vencimiento_enviado:
+            client_email = (policy.client.email or "").strip()
+
+            if client_email:
+                asunto = "Recordatorio de vencimiento de póliza"
+                cuerpo = (
+                    f"Hola {policy.client.first_name},\n\n"
+                    f"Te recordamos que tu póliza N° {policy.policy_number} "
+                    f"vence el {policy.end_date.strftime('%d/%m/%Y')}.\n\n"
+                    "Si querés, podemos ayudarte con la renovación.\n\n"
+                    "Saludos,\n"
+                    "Fuerza Natural Broker de Seguros"
+                )
+
+                send_mail(
+                    asunto,
+                    cuerpo,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [client_email],
+                    fail_silently=False,
+                )
+
+                policy.email_vencimiento_enviado = True
+                policy.save(update_fields=["email_vencimiento_enviado"])
 
     alertas_vencimiento = Alert.objects.filter(
         tipo="VENCIMIENTO",
@@ -83,8 +99,61 @@ def generate_expiration_alerts():
             alerta.save()
 
 
-def generate_debt_alerts():
+def generate_payment_reminders():
+    today = date.today()
 
+    pagos = Payment.objects.filter(
+        fecha_pago__isnull=True,
+        fecha_vencimiento__gte=today,
+        fecha_vencimiento__lte=today + timedelta(days=2),
+        recordatorio_enviado=False,
+        policy__forma_pago="CUPONERA",
+    ).select_related("policy", "policy__client", "policy__client__producer")
+
+    for pago in pagos:
+        if not pago.policy or not pago.policy.client:
+            continue
+
+        cliente = pago.policy.client
+        client_email = (cliente.email or "").strip()
+
+        if not client_email:
+            continue
+
+        dias = (pago.fecha_vencimiento - today).days
+
+        asunto = "Recordatorio de pago de cuponera"
+        cuerpo = (
+            f"Hola {cliente.first_name},\n\n"
+            f"Te recordamos que la cuota N° {pago.numero_cuota} "
+            f"de tu póliza N° {pago.policy.policy_number} "
+            f"vence el {pago.fecha_vencimiento.strftime('%d/%m/%Y')}.\n\n"
+        )
+
+        if pago.monto:
+            cuerpo += f"Monto: ${pago.monto}\n\n"
+
+        cuerpo += (
+            "Te recomendamos realizar el pago antes de la fecha indicada "
+            "para evitar inconvenientes con tu cobertura.\n\n"
+            "Si ya abonaste, podés ignorar este mensaje.\n\n"
+            "Saludos,\n"
+            "Fuerza Natural Broker de Seguros"
+        )
+
+        send_mail(
+            asunto,
+            cuerpo,
+            settings.DEFAULT_FROM_EMAIL,
+            [client_email],
+            fail_silently=False,
+        )
+
+        pago.recordatorio_enviado = True
+        pago.save(update_fields=["recordatorio_enviado"])
+
+
+def generate_debt_alerts():
     pagos_vencidos = Payment.objects.filter(estado="VENCIDO").select_related(
         "policy", "policy__client", "policy__client__producer"
     )
@@ -92,7 +161,6 @@ def generate_debt_alerts():
     policies_con_deuda = set()
 
     for pago in pagos_vencidos:
-
         if not pago.policy or not pago.policy.client:
             continue
 
@@ -137,7 +205,6 @@ def generate_debt_alerts():
 
 
 def generate_birthday_alerts():
-
     today = date.today()
 
     clientes = Client.objects.filter(
@@ -146,7 +213,6 @@ def generate_birthday_alerts():
     ).select_related("producer")
 
     for cliente in clientes:
-
         if not cliente.producer:
             continue
 
@@ -171,6 +237,7 @@ def generate_birthday_alerts():
 
 def generar_todas_las_alertas():
     generate_expiration_alerts()
+    generate_payment_reminders()
     generate_debt_alerts()
     generate_birthday_alerts()
 
