@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recordatorio de pago</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0f1115;font-family:Arial,Helvetica,sans-serif;color:#f3f4f6;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0f1115;margin:0;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background-color:#171a21;border-radius:18px;overflow:hidden;">
+          
+          <tr>
+            <td style="background-color:#eef0ff;padding:28px 32px;text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:#111827;letter-spacing:0.3px;">
+                Fuerza Natural Broker
+              </div>
+              <div style="font-size:14px;color:#4b5563;margin-top:8px;">
+                Broker de Seguros
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:34px 32px 24px 32px;">
+              <p style="margin:0 0 24px 0;font-size:16px;line-height:1.7;color:#f3f4f6;">
+                Hola <strong>{{ cliente.first_name }}</strong> 👋
+              </p>
+
+              <p style="margin:0 0 18px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
+                Te escribimos desde <strong>Fuerza Natural Broker de Seguros</strong>.
+              </p>
+
+              <p style="margin:0 0 26px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
+                Te recordamos que tenés un próximo vencimiento de cuponera.
+              </p>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#1b1f27;border:1px solid #2a3140;border-radius:16px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:22px 24px;">
+                    <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:14px;">
+                      Resumen
+                    </div>
+
+                    <div style="font-size:16px;line-height:1.9;color:#f9fafb;">
+                      <strong>Póliza:</strong> {{ policy.policy_number }}<br>
+                      <strong>Compañía:</strong> {{ policy.company|default:"No informada" }}<br>
+                      <strong>Cuota:</strong> {{ pago.numero_cuota }}<br>
+                      <strong>Vencimiento:</strong> {{ fecha_vencimiento }}<br>
+                      <strong>Días restantes:</strong> {{ dias_restantes }}
+                      {% if pago.monto %}<br><strong>Monto:</strong> ${{ pago.monto }}{% endif %}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              {% if policy.cuponera_pdf %}
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 28px 0;">
+                <tr>
+                  <td style="border-radius:14px;background-color:#eef0ff;">
+                    <a href="{{ policy.cuponera_pdf }}"
+                       style="display:inline-block;padding:16px 24px;font-size:16px;font-weight:700;color:#111827;text-decoration:none;border-radius:14px;">
+                      📄 Ver cuponera
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              {% endif %}
+
+              <p style="margin:0 0 14px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
+                Te recomendamos realizar el pago antes de la fecha indicada.
+              </p>
+
+              <p style="margin:0 0 26px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
+                Si ya abonaste, podés ignorar este mensaje.
+              </p>
+
+              <p style="margin:0;font-size:16px;line-height:1.8;color:#d1d5db;">
+                Fuerza Natural Broker de Seguros
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:20px 32px;border-top:1px solid #2a3140;color:#9ca3af;font-size:13px;">
+              Fuerza Natural Broker
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

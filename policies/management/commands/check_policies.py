@@ -1,8 +1,9 @@
 from datetime import timedelta
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.core.management.base import BaseCommand
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from policies.models import Policy, Payment
@@ -193,13 +194,25 @@ class Command(BaseCommand):
                 )
 
                 try:
-                    send_mail(
-                        subject=asunto,
-                        message=mensaje,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[cliente.email],
-                        fail_silently=False,
+                    html_content = render_to_string(
+                        "emails/recordatorio_cuponera.html",
+                        {
+                            "cliente": cliente,
+                            "policy": policy,
+                            "pago": pago,
+                            "fecha_vencimiento": fecha_vencimiento,
+                            "dias_restantes": dias_restantes,
+                        },
                     )
+
+                    email = EmailMultiAlternatives(
+                        subject=asunto,
+                        body=mensaje,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[cliente.email],
+                    )
+                    email.attach_alternative(html_content, "text/html")
+                    email.send()
 
                     pago.recordatorio_enviado = True
                     pago.save(update_fields=["recordatorio_enviado"])
