@@ -132,7 +132,8 @@ def generate_debt_alerts():
 
         policies_con_deuda.add(policy.id)
 
-        mensaje = f"Cliente con deuda en cuota #{pago.numero_cuota}"
+        mensaje = f"Figura una cuota por cuponera vencida #{pago.numero_cuota}"
+        "Cuando realices el pago ante la compañía, podés enviarnos el comprobante por este medio para registrarlo."
 
         alerta = Alert.objects.filter(
             user=cliente.producer,
