@@ -388,9 +388,250 @@ body.light-mode .crm-copy-ok {
   color: #15803d !important;
 }
 
+
+.prioridades-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.prioridad-card {
+  background: #0f2018;
+  border: 1px solid rgba(52,211,100,0.08);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+body.light-mode .prioridad-card {
+  background: #ffffff;
+  border: 1px solid rgba(21,128,61,0.10);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 8px 24px rgba(15,23,42,0.04);
+}
+
+.prioridad-card h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.prioridad-card p {
+  margin: 0 0 14px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+body.light-mode .prioridad-card p {
+  color: #64748b !important;
+}
+
+.prioridad-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prioridad-item {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(15,23,42,0.28);
+  border: 1px solid rgba(148,163,184,0.12);
+  transition: 0.18s ease;
+}
+.prioridad-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.25);
+}
+body.light-mode .prioridad-item {
+  background: #f8fafc;
+  border: 1px solid rgba(148,163,184,0.20);
+}
+
+.prioridad-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #f8fafc;
+}
+
+body.light-mode .prioridad-item strong {
+  color: #0f172a !important;
+}
+
+.prioridad-item span {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+body.light-mode .prioridad-item span {
+  color: #475569 !important;
+}
+
+.prioridad-empty {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+body.light-mode .prioridad-empty {
+  color: #64748b !important;
+}
+
+
+.prioridad-acciones {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.prioridad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: 0.18s ease;
+}
+
+.prioridad-btn-wa {
+  background: rgba(37,211,102,0.14);
+  color: #86efac;
+  border-color: rgba(37,211,102,0.22);
+}
+
+body.light-mode .prioridad-btn-wa {
+  color: #15803d !important;
+}
+
+.prioridad-btn-wa:hover {
+  background: rgba(37,211,102,0.22);
+}
+
+.prioridad-btn-ver {
+  background: rgba(34,197,94,0.12);
+  color: #86efac;
+  border-color: rgba(34,197,94,0.18);
+}
+
+body.light-mode .prioridad-btn-ver {
+  color: #15803d !important;
+}
+
+.prioridad-btn-ver:hover {
+  background: rgba(34,197,94,0.18);
+}
+
+
+.resumen-dia {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 30px;
+}
+
+.resumen-card {
+  background: linear-gradient(135deg, rgba(34,197,94,0.14), rgba(15,32,24,0.95));
+  border: 1px solid rgba(52,211,100,0.12);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+body.light-mode .resumen-card {
+  background: linear-gradient(135deg, rgba(34,197,94,0.10), #ffffff);
+  border: 1px solid rgba(21,128,61,0.12);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 8px 24px rgba(15,23,42,0.04);
+}
+
+.resumen-card-principal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.resumen-label {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.14);
+  color: #86efac;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.light-mode .resumen-label {
+  color: #15803d !important;
+  background: rgba(34,197,94,0.12);
+}
+
+.resumen-titulo {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+body.light-mode .resumen-titulo {
+  color: #0f172a !important;
+}
+
+.resumen-texto {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+body.light-mode .resumen-texto {
+  color: #475569 !important;
+}
+
+.resumen-mini {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.resumen-mini strong {
+  color: #f8fafc;
+  font-size: 26px;
+  line-height: 1;
+}
+
+body.light-mode .resumen-mini strong {
+  color: #0f172a !important;
+}
+
+.resumen-mini span {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+body.light-mode .resumen-mini span {
+  color: #64748b !important;
+}
+
 @media (max-width: 1200px) {
   .radar-container {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .resumen-dia {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .resumen-card-principal {
+    grid-column: 1 / -1;
   }
 }
 
@@ -398,11 +639,23 @@ body.light-mode .crm-copy-ok {
   .radar-container {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .prioridades-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 680px) {
   .dashboard {
     padding: 16px;
+  }
+
+  .resumen-dia {
+    grid-template-columns: 1fr;
+  }
+
+  .resumen-card-principal {
+    grid-column: auto;
   }
 
   .dashboard-header {
@@ -431,35 +684,68 @@ body.light-mode .crm-copy-ok {
 
   <div class="dashboard-header">
     <div class="dashboard-header-left">
-      <h1 class="title">Panel de control</h1>
-      <p class="dashboard-subtitle">Resumen comercial, cobranzas y crecimiento</p>
+      <h1 class="title">Panel de gestión</h1>
+      <p class="dashboard-subtitle">
+        Clientes, pólizas y seguimiento de pagos en un solo lugar
+      </p>
     </div>
 
     <div class="dashboard-header-right">
       <button class="btn-cobranza" onclick="ejecutarCobranza()">
-        Ejecutar cobranza del día
+        Revisar pagos por cuponera 
       </button>
 
       <a href="/polizas/cobranzas/" class="btn-panel">
-        Ver panel completo
+        Ver seguimiento de pagos 
       </a>
+    </div>
+  </div>
+
+
+  <div class="resumen-dia">
+    <div class="resumen-card resumen-card-principal">
+      <span class="resumen-label">Resumen del día</span>
+      <h2 class="resumen-titulo">Prioridades para gestionar hoy</h2>
+      <p class="resumen-texto">
+        Revisá pagos por cuponera, alertas activas y contactos comerciales pendientes desde un solo lugar.
+      </p>
+    </div>
+
+    <div class="resumen-card resumen-mini">
+      <strong>{{ cobranzas_vencidas|default:0 }}</strong>
+      <span>Pagos vencidos</span>
+    </div>
+
+    <div class="resumen-card resumen-mini">
+      <strong>{{ cobranzas_hoy|default:0 }}</strong>
+      <span>Pagos de hoy</span>
+    </div>
+
+    <div class="resumen-card resumen-mini">
+      <strong>{{ cobranzas_proximos|default:0 }}</strong>
+      <span>Próximos pagos</span>
+    </div>
+
+    <div class="resumen-card resumen-mini">
+      <strong>{{ alertas|default:0 }}</strong>
+      <span>Alertas activas</span>
     </div>
   </div>
 
   <div class="radar-container">
 
     <div class="radar vencido">
-      <h3>Vencidos</h3>
+      <h3>Pagos vencidos</h3>
       <span>{{ cobranzas_vencidas|default:0 }}</span>
     </div>
 
     <div class="radar hoy">
-      <h3>Hoy</h3>
+      <h3>Pagos de hoy</h3>
       <span>{{ cobranzas_hoy|default:0 }}</span>
     </div>
 
     <div class="radar proximo">
-      <h3>Próximos</h3>
+      <h3>Próximos pagos</h3>
       <span>{{ cobranzas_proximos|default:0 }}</span>
     </div>
 
@@ -469,8 +755,93 @@ body.light-mode .crm-copy-ok {
     </a>
 
     <div class="radar">
-      <h3>Total deuda</h3>
+      <h3>Total registrado</h3>
       <span>$ {{ deuda_total|default:0 }}</span>
+    </div>
+
+  </div>
+
+
+  <h2 class="section-title">Prioridades de gestión</h2>
+
+  <div class="prioridades-grid">
+
+    <div class="prioridad-card">
+      <h3>Pagos por cuponera vencidos</h3>
+      <p>Comprobantes o pagos que conviene revisar.</p>
+
+      <div class="prioridad-lista">
+        {% for item in cobranzas_urgentes|slice:":5" %}
+          <div class="prioridad-item">
+            <strong>{{ item.cliente }}</strong>
+            <span>Póliza {{ item.numero }} · {{ item.dias }} días</span>
+            <div class="prioridad-acciones">
+              {% if item.telefono %}
+                <a href="https://wa.me/{{ item.telefono }}?text={{ item.mensaje|urlencode }}" target="_blank" class="prioridad-btn prioridad-btn-wa">
+                  WhatsApp
+                </a>
+              {% endif %}
+              <a href="/clientes/ver/{{ item.cliente.id }}/" class="prioridad-btn prioridad-btn-ver">
+                Ver cliente
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="prioridad-empty">No hay pagos vencidos para revisar.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="prioridad-card">
+      <h3>Próximos pagos por cuponera</h3>
+      <p>Pagos próximos a vencer informados por el sistema.</p>
+
+      <div class="prioridad-lista">
+        {% for item in cobranzas_proximas|slice:":5" %}
+          <div class="prioridad-item">
+            <strong>{{ item.cliente }}</strong>
+            <span>Póliza {{ item.numero }} · vence en {{ item.dias }} días</span>
+            <div class="prioridad-acciones">
+              {% if item.telefono %}
+                <a href="https://wa.me/{{ item.telefono }}?text={{ item.mensaje|urlencode }}" target="_blank" class="prioridad-btn prioridad-btn-wa">
+                  WhatsApp
+                </a>
+              {% endif %}
+              <a href="/clientes/ver/{{ item.cliente.id }}/" class="prioridad-btn prioridad-btn-ver">
+                Ver cliente
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="prioridad-empty">No hay pagos próximos por cuponera.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="prioridad-card">
+      <h3>Contactos comerciales</h3>
+      <p>Clientes con pólizas próximas a renovar.</p>
+
+      <div class="prioridad-lista">
+        {% for item in clientes_llamar|slice:":5" %}
+          <div class="prioridad-item">
+            <strong>{{ item.cliente }}</strong>
+            <span>{{ item.cantidad }} póliza/s · {{ item.dias }} días</span>
+            <div class="prioridad-acciones">
+              {% if item.telefono %}
+                <a href="https://wa.me/{{ item.telefono }}?text={{ item.mensaje|urlencode }}" target="_blank" class="prioridad-btn prioridad-btn-wa">
+                  WhatsApp
+                </a>
+              {% endif %}
+              <a href="/clientes/ver/{{ item.cliente_id }}/" class="prioridad-btn prioridad-btn-ver">
+                Ver cliente
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="prioridad-empty">No hay contactos comerciales urgentes.</div>
+        {% endfor %}
+      </div>
     </div>
 
   </div>
@@ -542,7 +913,7 @@ body.light-mode .crm-copy-ok {
 <script>
 
 function ejecutarCobranza(){
-    alert("Cobranza ejecutada");
+    window.location.href = "/polizas/cobranzas/";
 }
 
 function copiarMensaje(btn){
