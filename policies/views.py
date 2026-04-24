@@ -384,7 +384,14 @@ def lista_polizas(request):
     if compania:
         clientes = clientes.filter(policy__company=compania).distinct()
 
-    companias = Policy.objects.values_list("company", flat=True).distinct()
+    if request.user.is_superuser:
+        companias = Policy.objects.values_list("company", flat=True).distinct()
+    else:
+        companias = (
+            Policy.objects.filter(client__producer=request.user)
+            .values_list("company", flat=True)
+            .distinct()
+        )
 
     return render(
         request,
