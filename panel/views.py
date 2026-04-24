@@ -1,33 +1,75 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 from datetime import date, datetime
-from django.db.models import Count, Q
-from django.db.models.functions import ExtractMonth
 import json
 
-from clients.models import Client
-from policies.models import Policy, Payment
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
+from django.db.models.functions import ExtractMonth
+from django.shortcuts import render
+
 from alerts.models import Alert
 from alerts.services import generar_todas_las_alertas
+from clients.models import Client
+from policies.models import Policy
 
 
 User = get_user_model()
 
 
+def _nombre_compania(poliza):
+    return poliza.company or "Sin compañía"
+
+
+def _mensaje_renovacion(poliza):
+    return (
+        f"Hola {poliza.client.first_name}, te escribo de Fuerza Natural Broker. "
+        f"Tu póliza {poliza.policy_number} de {_nombre_compania(poliza)} vence el {poliza.end_date}. "
+        f"Si querés podemos renovarla o revisar mejores opciones."
+    )
+
+
+def _mensaje_cobranza_vencida(poliza):
+    return (
+        f"Hola {poliza.client.first_name}, te escribo de Fuerza Natural Broker. "
+        f"Tenés una cuota vencida de la póliza {poliza.policy_number} ({_nombre_compania(poliza)}). "
+        f"¿Podés enviarnos el comprobante así la registramos?"
+    )
+
+
+def _mensaje_cobranza_proxima(poliza, pago):
+    return (
+        f"Hola {poliza.client.first_name}, te recordamos una cuota próxima a vencer "
+        f"de tu póliza {poliza.policy_number} ({_nombre_compania(poliza)}). "
+        f"Vence el {pago.fecha_vencimiento}."
+    )
+
+
+def _mensaje_cuponera(poliza, proximo_pago):
+    return (
+        f"Hola {poliza.client.first_name}. "
+        f"Te recordamos el pago de la cuponera de tu póliza "
+        f"{poliza.policy_number} de {_nombre_compania(poliza)}. "
+        f"Vence el {proximo_pago}."
+    )
+
+
 @login_required
 def home(request):
-
-    generar_todas_las_alertas()
+    try:
+        generar_todas_las_alertas()
+    except Exception as e:
+        print("⚠️ No se pudieron generar alertas automáticamente:", e)
 
     hoy = date.today()
-    buscar = request.GET.get("buscar", "")
+    buscar = request.GET.get("buscar", "").strip()
 
     if request.user.is_superuser:
-        policies = Policy.objects.select_related("client")
+        policies = Policy.objects.select_related("client").prefetch_related("pagos")
     else:
-        policies = Policy.objects.filter(client__producer=request.user).select_related(
-            "client"
+        policies = (
+            Policy.objects.filter(client__producer=request.user)
+            .select_related("client")
+            .prefetch_related("pagos")
         )
 
     if buscar:
@@ -39,8 +81,6 @@ def home(request):
     polizas_por_vencer = []
     clientes_llamar = []
     pagos_cuponera = []
-
-    # 🔥 NUEVO: COBRANZA INTELIGENTE
     cobranzas_urgentes = []
     cobranzas_proximas = []
 
@@ -50,25 +90,19 @@ def home(request):
     vencen_30 = 0
 
     for p in policies:
-
         dias = (p.end_date - hoy).days
+        mensaje = _mensaje_renovacion(p)
+        telefono = getattr(p.client, "phone", "")
 
         if dias >= 0:
-
-            mensaje = (
-                f"Hola {p.client.first_name}, te escribo de Fuerza Natural Broker. "
-                f"Tu póliza {p.policy_number} de {p.company} vence el {p.end_date}. "
-                f"Si querés podemos renovarla o revisar mejores opciones."
-            )
-
             polizas_por_vencer.append(
                 {
                     "cliente": p.client,
                     "numero": p.policy_number,
-                    "compania": p.company,
+                    "compania": _nombre_compania(p),
                     "vencimiento": p.end_date,
                     "dias": dias,
-                    "telefono": getattr(p.client, "phone", ""),
+                    "telefono": telefono,
                     "mensaje": mensaje,
                 }
             )
@@ -87,94 +121,57 @@ def home(request):
                     {
                         "cliente": p.client,
                         "cliente_id": p.client.id,
-                        "telefono": getattr(p.client, "phone", ""),
+                        "telefono": telefono,
                         "numero": p.policy_number,
                         "dias": dias,
                         "mensaje": mensaje,
                     }
                 )
 
-        # =========================
-        # 🔥 COBRANZA REAL (NUEVO)
-        # =========================
-
         for pago in p.pagos.all():
-
-            telefono = getattr(p.client, "phone", "")
             dias_pago = (pago.fecha_vencimiento - hoy).days
 
-            # 🔴 VENCIDOS
             if pago.estado == "VENCIDO":
-
-                mensaje = (
-                    f"Hola {p.client.first_name}, te escribo de Fuerza Natural Broker. "
-                    f"Tenés una cuota vencida de la póliza {p.policy_number} ({p.company}). "
-                    f"¿Podés enviarnos el comprobante así la registramos?"
-                )
-
                 cobranzas_urgentes.append(
                     {
                         "cliente": p.client,
                         "numero": p.policy_number,
                         "telefono": telefono,
-                        "mensaje": mensaje,
+                        "mensaje": _mensaje_cobranza_vencida(p),
                         "dias": dias_pago,
                     }
                 )
 
-            # 🟠 POR VENCER (5 días)
             elif pago.estado == "PENDIENTE" and 0 <= dias_pago <= 5:
-
-                mensaje = (
-                    f"Hola {p.client.first_name}, te recordamos una cuota próxima a vencer "
-                    f"de tu póliza {p.policy_number} ({p.company}). "
-                    f"Vence el {pago.fecha_vencimiento}."
-                )
-
                 cobranzas_proximas.append(
                     {
                         "cliente": p.client,
                         "numero": p.policy_number,
                         "telefono": telefono,
-                        "mensaje": mensaje,
+                        "mensaje": _mensaje_cobranza_proxima(p, pago),
                         "dias": dias_pago,
                     }
                 )
 
-        # =========================
-        # PAGOS DE CUPONERA
-        # =========================
-
         if p.forma_pago == "CUPONERA" and p.frecuencia_cuponera and p.cuponera_pdf:
-
             proximo_pago = p.proximo_pago_cuponera
 
             if proximo_pago:
-
                 dias_pago = (proximo_pago - hoy).days
 
                 if 0 <= dias_pago <= 5:
-
-                    mensaje_pago = (
-                        f"Hola {p.client.first_name}. "
-                        f"Te recordamos el pago de la cuponera de tu póliza "
-                        f"{p.policy_number} de {p.company}. "
-                        f"Vence el {proximo_pago}."
-                    )
-
                     pagos_cuponera.append(
                         {
                             "cliente": p.client,
                             "numero": p.policy_number,
-                            "company": p.company,
+                            "company": _nombre_compania(p),
                             "fecha": proximo_pago,
-                            "telefono": getattr(p.client, "phone", ""),
-                            "mensaje": mensaje_pago,
+                            "telefono": telefono,
+                            "mensaje": _mensaje_cuponera(p, proximo_pago),
                             "pdf": p.cuponera_pdf,
                         }
                     )
 
-    # 🔥 AGRUPAR CRM DE VENTAS (1 FILA POR CLIENTE)
     clientes_llamar_agrupados = {}
 
     for c in clientes_llamar:
@@ -197,21 +194,19 @@ def home(request):
                 clientes_llamar_agrupados[cid]["mensaje"] = c["mensaje"]
 
     clientes_llamar = sorted(
-        clientes_llamar_agrupados.values(), key=lambda x: x["dias"]
+        clientes_llamar_agrupados.values(),
+        key=lambda x: x["dias"],
     )
 
-    # =========================
-    # ALERTAS REALES
-    # =========================
+    polizas_por_vencer = sorted(polizas_por_vencer, key=lambda x: x["dias"])
+    cobranzas_urgentes = sorted(cobranzas_urgentes, key=lambda x: x["dias"])
+    cobranzas_proximas = sorted(cobranzas_proximas, key=lambda x: x["dias"])
+    pagos_cuponera = sorted(pagos_cuponera, key=lambda x: x["fecha"])
 
     if request.user.is_superuser:
         alertas_count = Alert.objects.filter(resolved=False).count()
     else:
         alertas_count = Alert.objects.filter(user=request.user, resolved=False).count()
-
-    # =========================
-    # RESTO (NO SE TOCA)
-    # =========================
 
     mes_actual = datetime.now().month
     anio_actual = datetime.now().year
@@ -270,7 +265,7 @@ def home(request):
         total_polizas = Policy.objects.filter(client__producer=request.user).count()
         total_usuarios = 1
 
-    companias = [c["company"] for c in produccion_companias]
+    companias = [c["company"] or "Sin compañía" for c in produccion_companias]
     cantidades = [c["total"] for c in produccion_companias]
 
     if request.user.is_superuser:
@@ -295,7 +290,6 @@ def home(request):
     clientes_score = []
 
     for c in clientes_query:
-
         if c.total_polizas >= 4:
             score = "⭐⭐⭐"
         elif c.total_polizas >= 2:
@@ -319,7 +313,6 @@ def home(request):
         "polizas_por_vencer": polizas_por_vencer,
         "clientes_llamar": clientes_llamar,
         "pagos_cuponera": pagos_cuponera,
-        # 🔥 NUEVO
         "cobranzas_urgentes": cobranzas_urgentes,
         "cobranzas_proximas": cobranzas_proximas,
         "vencen_semana": vencen_semana,
