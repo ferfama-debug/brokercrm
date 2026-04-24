@@ -3,14 +3,14 @@ import json
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.db.models.functions import ExtractMonth
 from django.shortcuts import render
 
 from alerts.models import Alert
 from alerts.services import generar_todas_las_alertas
 from clients.models import Client
-from policies.models import Policy
+from policies.models import Policy, Payment
 
 
 User = get_user_model()
@@ -65,12 +65,16 @@ def home(request):
 
     if request.user.is_superuser:
         policies = Policy.objects.select_related("client").prefetch_related("pagos")
+        pagos_base = Payment.objects.select_related("policy", "policy__client")
     else:
         policies = (
             Policy.objects.filter(client__producer=request.user)
             .select_related("client")
             .prefetch_related("pagos")
         )
+        pagos_base = Payment.objects.filter(
+            policy__client__producer=request.user
+        ).select_related("policy", "policy__client")
 
     if buscar:
         policies = policies.filter(
@@ -203,6 +207,37 @@ def home(request):
     cobranzas_proximas = sorted(cobranzas_proximas, key=lambda x: x["dias"])
     pagos_cuponera = sorted(pagos_cuponera, key=lambda x: x["fecha"])
 
+    cobranzas_vencidas = pagos_base.filter(
+        fecha_vencimiento__lt=hoy,
+        fecha_pago__isnull=True,
+    ).count()
+
+    cobranzas_hoy = pagos_base.filter(
+        fecha_vencimiento=hoy,
+        fecha_pago__isnull=True,
+    ).count()
+
+    cobranzas_proximos = pagos_base.filter(
+        fecha_vencimiento__gt=hoy,
+        fecha_vencimiento__lte=hoy.replace(day=hoy.day) if False else hoy,
+    ).count()
+
+    from datetime import timedelta
+
+    cobranzas_proximos = pagos_base.filter(
+        fecha_vencimiento__gt=hoy,
+        fecha_vencimiento__lte=hoy + timedelta(days=3),
+        fecha_pago__isnull=True,
+    ).count()
+
+    deuda_total = (
+        pagos_base.filter(
+            fecha_vencimiento__lt=hoy,
+            fecha_pago__isnull=True,
+        ).aggregate(total=Sum("monto"))["total"]
+        or 0
+    )
+
     if request.user.is_superuser:
         alertas_count = Alert.objects.filter(resolved=False).count()
     else:
@@ -315,6 +350,10 @@ def home(request):
         "pagos_cuponera": pagos_cuponera,
         "cobranzas_urgentes": cobranzas_urgentes,
         "cobranzas_proximas": cobranzas_proximas,
+        "cobranzas_vencidas": cobranzas_vencidas,
+        "cobranzas_hoy": cobranzas_hoy,
+        "cobranzas_proximos": cobranzas_proximos,
+        "deuda_total": deuda_total,
         "vencen_semana": vencen_semana,
         "vencen_7": vencen_7,
         "vencen_15": vencen_15,
