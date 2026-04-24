@@ -944,12 +944,12 @@ function copiarMensaje(btn){
     const estado = btn.parentElement.querySelector(".crm-copy-ok");
 
     navigator.clipboard.writeText(mensaje).then(function() {
-        estado.textContent = "✔ Copiado";
+        estado.textContent = "✔ Mensaje Copiado";
         setTimeout(function(){
             estado.textContent = "";
         }, 1800);
     }).catch(function() {
-        estado.textContent = "No se pudo copiar";
+        estado.textContent = "Error al copiar";
         setTimeout(function(){
             estado.textContent = "";
         }, 1800);
