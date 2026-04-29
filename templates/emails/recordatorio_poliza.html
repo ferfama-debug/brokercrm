@@ -5,60 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recordatorio de póliza</title>
 </head>
-<body style="margin:0;padding:0;background-color:#0f1115;font-family:Arial,Helvetica,sans-serif;color:#f3f4f6;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0f1115;margin:0;padding:24px 12px;">
+
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f5f5f5;margin:0;padding:24px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background-color:#171a21;border-radius:18px;overflow:hidden;">
-          
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+
+          <!-- HEADER -->
           <tr>
-            <td style="background-color:#eef0ff;padding:28px 32px;text-align:center;">
-              <div style="font-size:18px;font-weight:700;color:#111827;letter-spacing:0.3px;">
-                Fuerza Natural Broker
-              </div>
-              <div style="font-size:14px;color:#4b5563;margin-top:8px;">
-                Broker de Seguros
-              </div>
+            <td style="background-color:#0f172a;padding:24px 20px;text-align:center;">
+              <img src="https://crm.fuerzanaturalbroker.com/static/images/img/logo.png"
+                   alt="Fuerza Natural Broker"
+                   style="max-width:200px;display:block;margin:0 auto;border:0;">
             </td>
           </tr>
 
+          <!-- CONTENIDO -->
           <tr>
-            <td style="padding:34px 32px 24px 32px;">
-              <p style="margin:0 0 24px 0;font-size:16px;line-height:1.7;color:#f3f4f6;">
-                Hola <strong>{{ cliente.first_name }}</strong> 👋
+            <td style="padding:28px 24px;">
+
+              <h2 style="margin:0 0 20px 0;font-size:22px;line-height:1.3;color:#1f2937;">
+                Hola {{ cliente.first_name }} 👋
+              </h2>
+
+              <p style="margin:0 0 18px 0;font-size:16px;line-height:1.6;color:#374151;">
+                Te escribimos desde <strong>Fuerza Natural Broker</strong> para recordarte que tu póliza está próxima a vencer.
               </p>
 
-              <p style="margin:0 0 18px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
-                Te escribimos desde <strong>Fuerza Natural Broker de Seguros</strong>.
-              </p>
-
-              <p style="margin:0 0 26px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
-                Te recordamos que tu póliza está próxima a vencer.
-              </p>
-
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#1b1f27;border:1px solid #2a3140;border-radius:16px;margin-bottom:28px;">
+              <!-- CARD -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;margin:24px 0;">
                 <tr>
-                  <td style="padding:22px 24px;">
-                    <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:14px;">
-                      Resumen
-                    </div>
+                  <td style="padding:20px;">
+                    <p style="margin:0 0 12px 0;font-size:13px;line-height:1.4;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">
+                      Detalle de la póliza
+                    </p>
 
-                    <div style="font-size:16px;line-height:1.9;color:#f9fafb;">
+                    <p style="margin:0;font-size:16px;line-height:1.8;color:#1f2937;">
                       <strong>Póliza:</strong> {{ policy.policy_number }}<br>
                       <strong>Compañía:</strong> {{ policy.company|default:"No informada" }}<br>
                       <strong>Vencimiento:</strong> {{ fecha_vencimiento }}<br>
                       <strong>Días restantes:</strong> {{ dias_restantes }}
-                    </div>
+                    </p>
                   </td>
                 </tr>
               </table>
 
               {% if policy.pdf_poliza %}
-              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 28px 0;">
+              <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin:28px auto;">
                 <tr>
-                  <td style="border-radius:14px;background-color:#eef0ff;">
+                  <td style="border-radius:8px;background-color:#2563eb;text-align:center;">
                     <a href="{{ policy.pdf_poliza }}"
-                       style="display:inline-block;padding:16px 24px;font-size:16px;font-weight:700;color:#111827;text-decoration:none;border-radius:14px;">
+                       style="display:inline-block;padding:14px 22px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:8px;">
                       📄 Ver póliza
                     </a>
                   </td>
@@ -66,27 +65,31 @@
               </table>
               {% endif %}
 
-              <p style="margin:0 0 14px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
-                Podés contactarnos para renovarla.
+              <p style="margin:0 0 14px 0;font-size:16px;line-height:1.6;color:#374151;">
+                Te recomendamos gestionar la renovación antes de la fecha indicada para evitar interrupciones en tu cobertura.
               </p>
 
-              <p style="margin:0 0 26px 0;font-size:16px;line-height:1.8;color:#e5e7eb;">
-                Ante cualquier duda, estamos para ayudarte.
+              <p style="margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#555555;">
+                Ante cualquier duda o si necesitás asistencia, podés contactarnos.
               </p>
 
-              <p style="margin:0;font-size:16px;line-height:1.8;color:#d1d5db;">
-                Fuerza Natural Broker de Seguros
+              <p style="margin:0;font-size:16px;line-height:1.6;color:#374151;">
+                Saludos,<br>
+                <strong>Fuerza Natural Broker</strong>
               </p>
+
             </td>
           </tr>
 
+          <!-- FOOTER -->
           <tr>
-            <td style="padding:20px 32px;border-top:1px solid #2a3140;color:#9ca3af;font-size:13px;">
+            <td style="padding:18px 24px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:13px;text-align:center;">
               Fuerza Natural Broker
             </td>
           </tr>
 
         </table>
+
       </td>
     </tr>
   </table>
