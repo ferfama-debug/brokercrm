@@ -68,11 +68,10 @@ class Command(BaseCommand):
                 <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
                     <div style="max-width:520px; margin:auto; background:white; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;">
 
-                        <div style="background:#0f172a; color:white; padding:24px 20px; text-align:center;">
+                        <div style="background:#0f172a; padding:24px 20px; text-align:center;">
                             <img src="https://crm.fuerzanaturalbroker.com/static/images/img/logo.png"
                                  alt="Fuerza Natural Broker"
-                                 style="max-width:180px; margin-bottom:10px;" />
-                            <p style="margin:0; font-size:14px;">Broker de Seguros</p>
+                                 style="max-width:200px; display:block;margin:0 auto;" />
                         </div>
 
                         <div style="padding:28px 24px; color:#1f2937;">
