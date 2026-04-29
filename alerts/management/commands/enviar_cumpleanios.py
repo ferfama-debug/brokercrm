@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.utils import timezone
 
@@ -64,18 +64,52 @@ class Command(BaseCommand):
                 continue
 
             try:
-                send_mail(
-                    subject=f"¡Feliz cumpleaños {cliente.first_name}!",
-                    message=(
-                        f"Hola {cliente.first_name},\n\n"
-                        "Te deseamos un muy feliz cumpleaños.\n\n"
-                        "¡Que tengas un excelente día!\n\n"
-                        "Fuerza Natural Broker"
-                    ),
+                html_content = f"""
+                <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
+                    <div style="max-width:500px; margin:auto; background:white; border-radius:10px; overflow:hidden;">
+
+                        <div style="background:#0f172a; color:white; padding:20px; text-align:center;">
+                            <h2>Fuerza Natural Broker</h2>
+                            <p>Broker de Seguros</p>
+                        </div>
+
+                        <div style="padding:25px;">
+                            <h3>Hola {cliente.first_name} 👋</h3>
+
+                            <p>🎉 Hoy es un día especial.</p>
+
+                            <p>Desde <strong>Fuerza Natural Broker</strong> queremos desearte un muy feliz cumpleaños.</p>
+
+                            <p>Esperamos que tengas un gran día y un excelente año por delante.</p>
+
+                            <div style="text-align:center; margin:30px 0;">
+                                <div style="display:inline-block; background:#2563eb; color:white; padding:12px 20px; border-radius:8px;">
+                                    🎂 ¡Feliz Cumpleaños!
+                                </div>
+                            </div>
+
+                            <p style="font-size:14px; color:#555;">
+                                Gracias por confiar en nosotros para cuidar lo que más valorás.
+                            </p>
+
+                            <p style="margin-top:20px;">
+                                Saludos,<br>
+                                <strong>Fuerza Natural Broker</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                """
+
+                email = EmailMultiAlternatives(
+                    subject=f"🎉 ¡Feliz cumpleaños {cliente.first_name}!",
+                    body="Feliz cumpleaños",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[cliente.email],
-                    fail_silently=False,
+                    to=[cliente.email],
                 )
+
+                email.attach_alternative(html_content, "text/html")
+                email.send()
 
                 Alert.objects.create(
                     user=cliente.producer,
