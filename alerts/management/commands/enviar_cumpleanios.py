@@ -66,33 +66,41 @@ class Command(BaseCommand):
             try:
                 html_content = f"""
                 <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
-                    <div style="max-width:500px; margin:auto; background:white; border-radius:10px; overflow:hidden;">
+                    <div style="max-width:520px; margin:auto; background:white; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;">
 
-                        <div style="background:#0f172a; color:white; padding:20px; text-align:center;">
-                            <h2>Fuerza Natural Broker</h2>
-                            <p>Broker de Seguros</p>
+                        <div style="background:#0f172a; color:white; padding:24px 20px; text-align:center;">
+                            <img src="https://crm.fuerzanaturalbroker.com/static/images/img/logo.png"
+                                 alt="Fuerza Natural Broker"
+                                 style="max-width:180px; margin-bottom:10px;" />
+                            <p style="margin:0; font-size:14px;">Broker de Seguros</p>
                         </div>
 
-                        <div style="padding:25px;">
-                            <h3>Hola {cliente.first_name} 👋</h3>
+                        <div style="padding:28px 24px; color:#1f2937;">
+                            <h2 style="margin-top:0;">Hola {cliente.first_name} 👋</h2>
 
-                            <p>🎉 Hoy es un día especial.</p>
+                            <p style="font-size:16px; line-height:1.5;">
+                                Hoy es un día especial, y desde
+                                <strong>Fuerza Natural Broker</strong>
+                                queremos saludarte y desearte un muy feliz cumpleaños.
+                            </p>
 
-                            <p>Desde <strong>Fuerza Natural Broker</strong> queremos desearte un muy feliz cumpleaños.</p>
-
-                            <p>Esperamos que tengas un gran día y un excelente año por delante.</p>
+                            <p style="font-size:16px; line-height:1.5;">
+                                Esperamos que disfrutes mucho tu día y que este nuevo año venga lleno
+                                de buenos momentos, salud y proyectos cumplidos.
+                            </p>
 
                             <div style="text-align:center; margin:30px 0;">
-                                <div style="display:inline-block; background:#2563eb; color:white; padding:12px 20px; border-radius:8px;">
-                                    🎂 ¡Feliz Cumpleaños!
+                                <div style="display:inline-block; background:#2563eb; color:white; padding:14px 22px; border-radius:8px; font-weight:bold;">
+                                    🎂 ¡Feliz cumpleaños!
                                 </div>
                             </div>
 
-                            <p style="font-size:14px; color:#555;">
-                                Gracias por confiar en nosotros para cuidar lo que más valorás.
+                            <p style="font-size:14px; color:#555; line-height:1.5;">
+                                Gracias por confiar en nosotros para acompañarte en la protección
+                                de lo que más valorás.
                             </p>
 
-                            <p style="margin-top:20px;">
+                            <p style="margin-top:24px; line-height:1.5;">
                                 Saludos,<br>
                                 <strong>Fuerza Natural Broker</strong>
                             </p>
@@ -101,9 +109,20 @@ class Command(BaseCommand):
                 </div>
                 """
 
+                text_content = (
+                    f"Hola {cliente.first_name},\n\n"
+                    "Desde Fuerza Natural Broker queremos saludarte y desearte "
+                    "un muy feliz cumpleaños.\n\n"
+                    "Esperamos que disfrutes mucho tu día y que este nuevo año "
+                    "venga lleno de buenos momentos, salud y proyectos cumplidos.\n\n"
+                    "Gracias por confiar en nosotros.\n\n"
+                    "Saludos,\n"
+                    "Fuerza Natural Broker"
+                )
+
                 email = EmailMultiAlternatives(
                     subject=f"🎉 ¡Feliz cumpleaños {cliente.first_name}!",
-                    body="Feliz cumpleaños",
+                    body=text_content,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[cliente.email],
                 )
