@@ -16,9 +16,7 @@ class Command(BaseCommand):
         hoy = timezone.localdate()
         fechas_objetivo = [hoy + timedelta(days=2)]
 
-        self.stdout.write(
-            f"Ejecutando chequeo para fechas objetivo: {fechas_objetivo[0]} y {fechas_objetivo[1]}"
-        )
+        self.stdout.write(f"Ejecutando chequeo para fechas objetivo: {fechas_objetivo}")
 
         enviados = 0
         omitidos = 0
