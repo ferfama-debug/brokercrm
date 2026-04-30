@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from policies.models import Policy, Payment
+from policies.models import Policy, Payment, EmailLog
 
 
 class Command(BaseCommand):
@@ -106,6 +106,15 @@ class Command(BaseCommand):
                     email.attach_alternative(html_content, "text/html")
                     email.send()
 
+                    EmailLog.objects.create(
+                        policy=policy,
+                        client=cliente,
+                        tipo="VENCIMIENTO_POLIZA",
+                        estado="ENVIADO",
+                        destinatario=cliente.email,
+                        asunto=asunto,
+                    )
+
                     policy.email_vencimiento_enviado = True
                     policy.save(update_fields=["email_vencimiento_enviado"])
 
@@ -115,6 +124,16 @@ class Command(BaseCommand):
                     enviados += 1
 
                 except Exception as e:
+                    EmailLog.objects.create(
+                        policy=policy,
+                        client=cliente,
+                        tipo="VENCIMIENTO_POLIZA",
+                        estado="ERROR",
+                        destinatario=cliente.email if cliente else None,
+                        asunto=asunto if "asunto" in locals() else "",
+                        error=str(e),
+                    )
+
                     self.stdout.write(
                         self.style.ERROR(
                             f"Error enviando email de póliza {policy.policy_number}: {str(e)}"
@@ -223,6 +242,16 @@ class Command(BaseCommand):
                     email.attach_alternative(html_content, "text/html")
                     email.send()
 
+                    EmailLog.objects.create(
+                        policy=policy,
+                        payment=pago,
+                        client=cliente,
+                        tipo="VENCIMIENTO_CUPONERA",
+                        estado="ENVIADO",
+                        destinatario=cliente.email,
+                        asunto=asunto,
+                    )
+
                     pago.recordatorio_enviado = True
                     pago.save(update_fields=["recordatorio_enviado"])
 
@@ -234,6 +263,17 @@ class Command(BaseCommand):
                     enviados += 1
 
                 except Exception as e:
+                    EmailLog.objects.create(
+                        policy=policy,
+                        payment=pago,
+                        client=cliente,
+                        tipo="VENCIMIENTO_CUPONERA",
+                        estado="ERROR",
+                        destinatario=cliente.email if cliente else None,
+                        asunto=asunto if "asunto" in locals() else "",
+                        error=str(e),
+                    )
+
                     self.stdout.write(
                         self.style.ERROR(
                             f"Error enviando email de cuponera "
