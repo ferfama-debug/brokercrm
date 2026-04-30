@@ -13,8 +13,8 @@ class Command(BaseCommand):
     help = "Verifica pólizas y pagos próximos a vencer y envía emails"
 
     def handle(self, *args, **kwargs):
-        hoy = timezone.now().date()
-        fechas_objetivo = [hoy + timedelta(days=1), hoy + timedelta(days=2)]
+        hoy = timezone.localdate()
+        fechas_objetivo = [hoy + timedelta(days=2)]
 
         self.stdout.write(
             f"Ejecutando chequeo para fechas objetivo: {fechas_objetivo[0]} y {fechas_objetivo[1]}"
