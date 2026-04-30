@@ -322,3 +322,52 @@ class Payment(models.Model):
         verbose_name = "Pago"
         verbose_name_plural = "Pagos"
         ordering = ["fecha_vencimiento"]
+
+
+class EmailLog(models.Model):
+    ESTADO_CHOICES = [
+        ("ENVIADO", "Enviado"),
+        ("ERROR", "Error"),
+        ("OMITIDO", "Omitido"),
+    ]
+
+    TIPO_CHOICES = [
+        ("VENCIMIENTO_POLIZA", "Vencimiento de póliza"),
+        ("VENCIMIENTO_CUPONERA", "Vencimiento de cuponera"),
+        ("CUMPLEANOS", "Cumpleaños"),
+    ]
+
+    policy = models.ForeignKey(
+        "Policy",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="email_logs",
+    )
+    payment = models.ForeignKey(
+        "Payment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="email_logs",
+    )
+    client = models.ForeignKey(
+        "clients.Client",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="email_logs",
+    )
+
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES)
+    destinatario = models.EmailField(blank=True, null=True)
+    asunto = models.CharField(max_length=255, blank=True)
+    error = models.TextField(blank=True, null=True)
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-fecha_envio"]
+
+    def __str__(self):
+        return f"{self.tipo} - {self.estado} - {self.destinatario}"
