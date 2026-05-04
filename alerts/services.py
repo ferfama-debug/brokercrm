@@ -5,6 +5,9 @@ from policies.models import Policy, Payment
 from clients.models import Client
 from .models import Alert
 
+# Si llegas a tener un archivo dedicado solo a emails, lo importarías aquí
+# from alerts.emails import enviar_email_cuponera
+
 
 def generate_expiration_alerts():
     today = date.today()
@@ -71,12 +74,17 @@ def generate_expiration_alerts():
 
 
 def generate_payment_reminders():
+    """
+    Detecta cuotas que vencen en 2 días y genera alertas.
+    Aquí es donde se integrará el envío de mail automático.
+    """
     today = date.today()
+    target_date = today + timedelta(days=2)  # Exactamente 2 días antes
 
+    # Buscamos pagos pendientes que vencen en 2 días
     pagos = Payment.objects.filter(
         fecha_pago__isnull=True,
-        fecha_vencimiento__gte=today,
-        fecha_vencimiento__lte=today + timedelta(days=2),
+        fecha_vencimiento=target_date,  # Usamos la fecha exacta de la cuota
         recordatorio_enviado=False,
         policy__forma_pago="CUPONERA",
     ).select_related("policy", "policy__client", "policy__client__producer")
@@ -86,40 +94,32 @@ def generate_payment_reminders():
             continue
 
         cliente = pago.policy.client
-        client_email = (cliente.email or "").strip()
+        producer = cliente.producer
 
-        if not client_email:
-            continue
+        # 1. Crear Alerta interna para el Broker (vos)
+        mensaje_interno = f"Recordatorio: {cliente} tiene el vencimiento de la cuota #{pago.numero_cuota} en 2 días."
 
-        mensaje = f"Cliente con pago próximo a vencer: cuota #{pago.numero_cuota}"
-
-        alerta = Alert.objects.filter(
-            user=cliente.producer,
+        Alert.objects.get_or_create(
+            user=producer,
             policy=pago.policy,
             tipo="PAGO_PROXIMO",
             resolved=False,
-        ).first()
+            defaults={"message": mensaje_interno, "level": "ALTA"},
+        )
 
-        if alerta:
-            if alerta.message != mensaje or alerta.level != "ALTA":
-                alerta.message = mensaje
-                alerta.level = "ALTA"
-                alerta.save()
-        else:
-            Alert.objects.create(
-                user=cliente.producer,
-                policy=pago.policy,
-                tipo="PAGO_PROXIMO",
-                resolved=False,
-                message=mensaje,
-                level="ALTA",
-            )
+        # 2. Lógica de Envío de Email Automático al Cliente
+        # Aquí llamarías a tu función de envío de mail real
+        # success = enviar_email_cuponera(pago)
+        # if success:
+        #     pago.recordatorio_enviado = True
+        #     pago.save()
 
 
 def generate_debt_alerts():
-    pagos_vencidos = Payment.objects.filter(estado="VENCIDO").select_related(
-        "policy", "policy__client", "policy__client__producer"
-    )
+    # Buscamos pagos que ya pasaron su fecha y no están pagados
+    pagos_vencidos = Payment.objects.filter(
+        fecha_vencimiento__lt=date.today(), fecha_pago__isnull=True
+    ).select_related("policy", "policy__client", "policy__client__producer")
 
     policies_con_deuda = set()
 
@@ -129,11 +129,11 @@ def generate_debt_alerts():
 
         policy = pago.policy
         cliente = policy.client
-
         policies_con_deuda.add(policy.id)
 
-        mensaje = f"Figura una cuota por cuponera vencida #{pago.numero_cuota}"
-        "Cuando realices el pago ante la compañía, podés enviarnos el comprobante por este medio para registrarlo."
+        mensaje = (
+            f"Cuota vencida #{pago.numero_cuota} de la póliza {policy.policy_number}"
+        )
 
         alerta = Alert.objects.filter(
             user=cliente.producer,
@@ -142,12 +142,7 @@ def generate_debt_alerts():
             resolved=False,
         ).first()
 
-        if alerta:
-            if alerta.message != mensaje or alerta.level != "CRITICA":
-                alerta.message = mensaje
-                alerta.level = "CRITICA"
-                alerta.save()
-        else:
+        if not alerta:
             Alert.objects.create(
                 user=cliente.producer,
                 policy=policy,
@@ -157,12 +152,9 @@ def generate_debt_alerts():
                 level="CRITICA",
             )
 
-    alertas_deuda = Alert.objects.filter(
-        tipo="DEUDA",
-        resolved=False,
-    ).select_related("policy")
-
-    for alerta in alertas_deuda:
+    # Resolvemos alertas de deuda si el pago ya se registró
+    alertas_activas = Alert.objects.filter(tipo="DEUDA", resolved=False)
+    for alerta in alertas_activas:
         if alerta.policy_id not in policies_con_deuda:
             alerta.resolved = True
             alerta.save()
@@ -207,8 +199,12 @@ def generar_todas_las_alertas():
 
 
 def generar_link_whatsapp(cliente, mensaje):
+    # Intentamos obtener el teléfono de cualquiera de los dos campos posibles
     telefono = getattr(cliente, "phone", "") or getattr(cliente, "telefono", "")
-    telefono = telefono.replace(" ", "").replace("-", "")
+    if not telefono:
+        return "#"
+
+    telefono = str(telefono).replace(" ", "").replace("-", "").replace("+", "")
     texto = quote(mensaje)
     return f"https://wa.me/{telefono}?text={texto}"
 
@@ -218,7 +214,6 @@ def whatsapp_deuda(pago):
         return "#"
 
     cliente = pago.policy.client
-
     mensaje = (
         f"Hola {cliente.first_name}, te escribo por tu póliza N° {pago.policy.policy_number}. "
         f"Tenés una cuota vencida (#{pago.numero_cuota}). "
@@ -233,7 +228,6 @@ def whatsapp_vencimiento(policy):
         return "#"
 
     cliente = policy.client
-
     mensaje = (
         f"Hola {cliente.first_name}, tu póliza N° {policy.policy_number} "
         f"vence el {policy.end_date}. "

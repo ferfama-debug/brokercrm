@@ -86,6 +86,14 @@ class Policy(models.Model):
         db_index=True,
     )
 
+    # NUEVO CAMPO: Para controlar el desfasaje entre inicio de póliza y primer pago
+    fecha_primer_vencimiento_cuponera = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Fecha primer vencimiento cuponera",
+        help_text="Si se deja vacío, se usará la fecha de inicio de la póliza.",
+    )
+
     email_vencimiento_enviado = models.BooleanField(
         default=False,
         verbose_name="Email de vencimiento enviado",
@@ -120,7 +128,6 @@ class Policy(models.Model):
     def _normalizar_url(self, valor):
         if not valor:
             return None
-
         valor = str(valor).strip()
         return valor or None
 
@@ -133,9 +140,11 @@ class Policy(models.Model):
 
         if self.forma_pago != "CUPONERA":
             self.frecuencia_cuponera = None
+            self.fecha_primer_vencimiento_cuponera = None
 
         super().save(*args, **kwargs)
 
+        # Lógica Quirúrgica: Generación de pagos basada en la fecha específica de cuponera
         if self.forma_pago == "CUPONERA" and self.frecuencia_cuponera:
             if self.pagos.exists():
                 return
@@ -144,7 +153,8 @@ class Policy(models.Model):
 
             frecuencia = int(self.frecuencia_cuponera)
 
-            fecha = self.start_date
+            # Priorizamos la fecha manual de cuponera sobre la de inicio de póliza
+            fecha = self.fecha_primer_vencimiento_cuponera or self.start_date
             fecha_fin = self.end_date
 
             if isinstance(fecha, str):
@@ -184,23 +194,16 @@ class Policy(models.Model):
 
     @property
     def proximo_pago_cuponera(self):
-        if self.forma_pago != "CUPONERA":
+        if self.forma_pago != "CUPONERA" or not self.frecuencia_cuponera:
             return None
 
-        if not self.frecuencia_cuponera:
-            return None
-
-        frecuencia = int(self.frecuencia_cuponera)
-        fecha = self.start_date
-        hoy = date.today()
-
-        if isinstance(fecha, str):
-            fecha = date.fromisoformat(fecha)
-
-        while fecha <= hoy:
-            fecha = fecha + relativedelta(months=frecuencia)
-
-        return fecha
+        # Buscamos la primera cuota no pagada
+        proximo = (
+            self.pagos.filter(fecha_pago__isnull=True)
+            .order_by("fecha_vencimiento")
+            .first()
+        )
+        return proximo.fecha_vencimiento if proximo else None
 
     def __str__(self):
         return f"{self.policy_number} - {self.client.nombre_completo()}"
@@ -271,12 +274,10 @@ class Payment(models.Model):
     @property
     def estado_calculado(self):
         hoy = date.today()
-
         if self.fecha_pago:
             return "PAGADO"
 
         dias = (self.fecha_vencimiento - hoy).days
-
         if dias < 0:
             return "VENCIDO"
         elif dias == 0:
@@ -308,7 +309,6 @@ class Payment(models.Model):
     def whatsapp_link(self):
         telefono = getattr(self.policy.client, "telefono", "")
         mensaje = self.mensaje_whatsapp().replace(" ", "%20")
-
         return f"https://wa.me/{telefono}?text={mensaje}"
 
     def save(self, *args, **kwargs):
