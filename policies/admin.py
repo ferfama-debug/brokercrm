@@ -9,7 +9,7 @@ class PolicyAdmin(admin.ModelAdmin):
     list_display = (
         "policy_number",
         "client",
-        "company",
+        "company_obj",  # Cambiado a company_obj para que coincida con tu models.py
         "end_date",
         "estado_colored",
         "email_enviado",
@@ -22,7 +22,7 @@ class PolicyAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "client",
-                    "company_obj",
+                    "company_obj",  # Campo ForeignKey real
                     "policy_number",
                     "tipo_poliza",
                     "insurance_type",
@@ -36,7 +36,7 @@ class PolicyAdmin(admin.ModelAdmin):
                 "fields": (
                     "forma_pago",
                     "frecuencia_cuponera",
-                    "fecha_primer_vencimiento_cuponera",  # Este es el campo que necesitabas ver
+                    "fecha_primer_vencimiento_cuponera",  # EL CAMPO QUE BUSCAMOS
                     "cuponera_pdf",
                 ),
                 "description": "Si la forma de pago es Cuponera, definí aquí cuándo debe vencer la primera cuota.",
@@ -54,7 +54,7 @@ class PolicyAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "company",
+        "company_obj",  # Ajustado al modelo real
         "email_vencimiento_enviado",
         "end_date",
     )
