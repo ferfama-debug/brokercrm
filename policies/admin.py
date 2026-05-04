@@ -9,7 +9,7 @@ class PolicyAdmin(admin.ModelAdmin):
     list_display = (
         "policy_number",
         "client",
-        "company_obj",  # Cambiado a company_obj para que coincida con tu models.py
+        "company_obj",
         "end_date",
         "estado_colored",
         "email_enviado",
@@ -22,21 +22,29 @@ class PolicyAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "client",
-                    "company_obj",  # Campo ForeignKey real
+                    "company_obj",
                     "policy_number",
                     "tipo_poliza",
                     "insurance_type",
                 )
             },
         ),
-        ("Vigencia de Póliza", {"fields": ("start_date", "end_date")}),
+        (
+            "Vigencia de Póliza",
+            {
+                "fields": (
+                    "start_date",
+                    "end_date",  # <--- ESTE FALTABA Y POR ESO NO LO VEÍAS
+                )
+            },
+        ),
         (
             "Configuración de Cuponera y Pagos",
             {
                 "fields": (
                     "forma_pago",
                     "frecuencia_cuponera",
-                    "fecha_primer_vencimiento_cuponera",  # EL CAMPO QUE BUSCAMOS
+                    "fecha_primer_vencimiento_cuponera",
                     "cuponera_pdf",
                 ),
                 "description": "Si la forma de pago es Cuponera, definí aquí cuándo debe vencer la primera cuota.",
@@ -46,15 +54,13 @@ class PolicyAdmin(admin.ModelAdmin):
             "Documentación y Alertas",
             {
                 "fields": ("pdf_poliza", "email_vencimiento_enviado"),
-                "classes": (
-                    "collapse",
-                ),  # Esta sección se puede contraer para mayor limpieza
+                "classes": ("collapse",),
             },
         ),
     )
 
     list_filter = (
-        "company_obj",  # Ajustado al modelo real
+        "company_obj",
         "email_vencimiento_enviado",
         "end_date",
     )
