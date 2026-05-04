@@ -5,6 +5,7 @@ from .models import Policy, Company, Payment
 
 @admin.register(Policy)
 class PolicyAdmin(admin.ModelAdmin):
+    # Configuración de la lista general
     list_display = (
         "policy_number",
         "client",
@@ -12,6 +13,44 @@ class PolicyAdmin(admin.ModelAdmin):
         "end_date",
         "estado_colored",
         "email_enviado",
+    )
+
+    # Organización del formulario de carga/edición
+    fieldsets = (
+        (
+            "Información Básica",
+            {
+                "fields": (
+                    "client",
+                    "company_obj",
+                    "policy_number",
+                    "tipo_poliza",
+                    "insurance_type",
+                )
+            },
+        ),
+        ("Vigencia de Póliza", {"fields": ("start_date", "end_date")}),
+        (
+            "Configuración de Cuponera y Pagos",
+            {
+                "fields": (
+                    "forma_pago",
+                    "frecuencia_cuponera",
+                    "fecha_primer_vencimiento_cuponera",  # Este es el campo que necesitabas ver
+                    "cuponera_pdf",
+                ),
+                "description": "Si la forma de pago es Cuponera, definí aquí cuándo debe vencer la primera cuota.",
+            },
+        ),
+        (
+            "Documentación y Alertas",
+            {
+                "fields": ("pdf_poliza", "email_vencimiento_enviado"),
+                "classes": (
+                    "collapse",
+                ),  # Esta sección se puede contraer para mayor limpieza
+            },
+        ),
     )
 
     list_filter = (
@@ -36,7 +75,6 @@ class PolicyAdmin(admin.ModelAdmin):
 
     def estado_colored(self, obj):
         estado = obj.estado
-
         if estado == "VENCIDA":
             color = "#dc3545"
         elif estado == "POR VENCER":
