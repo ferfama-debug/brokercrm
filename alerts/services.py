@@ -1,16 +1,19 @@
 from datetime import date, timedelta
 from urllib.parse import quote
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 
 from policies.models import Policy, Payment
 from clients.models import Client
 from .models import Alert
 
-# Si llegas a tener un archivo dedicado solo a emails, lo importarías aquí
-# from alerts.emails import enviar_email_cuponera
-
 
 def generate_expiration_alerts():
+    """
+    Genera alertas internas y envía emails de vencimiento a los 30 y 15 días.
+    """
     today = date.today()
+    dias_aviso = [30, 15]
     limite = today + timedelta(days=30)
 
     policies = Policy.objects.filter(
@@ -24,6 +27,7 @@ def generate_expiration_alerts():
 
         days = (policy.end_date - today).days
 
+        # 1. Lógica de niveles para el dashboard interno
         if days <= 7:
             level = "CRITICA"
         elif days <= 15:
@@ -31,60 +35,92 @@ def generate_expiration_alerts():
         else:
             level = "MEDIA"
 
-        mensaje = (
-            f"La póliza {policy.policy_number} del cliente {policy.client} "
-            f"vence en {days} días"
+        mensaje_interno = (
+            f"La póliza {policy.policy_number} de {policy.client} vence en {days} días"
         )
 
-        alerta = Alert.objects.filter(
+        # Actualizar o crear alerta interna en el sistema
+        Alert.objects.update_or_create(
             user=policy.client.producer,
             policy=policy,
             tipo="VENCIMIENTO",
             resolved=False,
-        ).first()
+            defaults={"message": mensaje_interno, "level": level},
+        )
 
-        if alerta:
-            if alerta.message != mensaje or alerta.level != level:
-                alerta.message = mensaje
-                alerta.level = level
-                alerta.save()
-        else:
-            Alert.objects.create(
-                user=policy.client.producer,
-                policy=policy,
-                tipo="VENCIMIENTO",
-                resolved=False,
-                message=mensaje,
-                level=level,
-            )
+        # 2. Envío de Email Automático al Cliente (Solo a los 30 y 15 días)
+        if days in dias_aviso and policy.client.email:
+            enviar_mail_vencimiento_poliza(policy, days)
 
-    alertas_vencimiento = Alert.objects.filter(
+    # Limpieza: Resolver alertas si la póliza ya venció hace más de 30 días
+    Alert.objects.filter(
         tipo="VENCIMIENTO",
         resolved=False,
-    ).select_related("policy")
+        policy__end_date__lt=today - timedelta(days=30),
+    ).update(resolved=True)
 
-    for alerta in alertas_vencimiento:
-        if not alerta.policy:
-            continue
 
-        dias = (alerta.policy.end_date - today).days
-        if dias < 0 or dias > 30:
-            alerta.resolved = True
-            alerta.save()
+def enviar_mail_vencimiento_poliza(policy, dias):
+    """
+    Configuración estética del mail de vencimiento (Naranja).
+    """
+    cliente = policy.client
+
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
+        <div style="max-width:520px; margin:auto; background:white; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;">
+            <div style="background:#0f172a; padding:30px 20px; text-align:center;">
+                <img src="https://crm.fuerzanaturalbroker.com/static/images/img/logo.png" style="width:160px; height:auto; display:block; margin:auto;" />
+            </div>
+            <div style="padding:28px 24px; color:#1f2937;">
+                <h2 style="margin-top:0; text-align:center; color:#ed6c02;">¡Tu póliza vence pronto! ⏳</h2>
+                <p style="font-size:16px; line-height:1.5; text-align:center;">Hola {cliente.first_name}, te informamos que tu cobertura finalizará en <strong>{dias} días</strong>:</p>
+                
+                <div style="background:#fff7ed; padding:16px; border-left:4px solid #ed6c02; margin:20px 0; font-size:15px;">
+                    <strong>Póliza N°:</strong> {policy.policy_number}<br>
+                    <strong>Vence el:</strong> {policy.end_date.strftime('%d/%m/%Y')}
+                </div>
+
+                <p style="font-size:15px; line-height:1.5; color:#4b5563; text-align:center;">
+                    Es fundamental renovarla a tiempo para mantener tu protección activa. 
+                    Si querés avanzar con la renovación o ver nuevas opciones, respondé este correo.
+                </p>
+                
+                <hr style="border:0; border-top:1px solid #e5e7eb; margin:25px 0;">
+                
+                <p style="line-height:1.5; font-size:14px; text-align:center; color:#6b7280;">
+                    Saludos,<br>
+                    <strong>Fuerza Natural Broker de Seguros</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+    """
+
+    try:
+        email = EmailMultiAlternatives(
+            subject=f"⚠️ Aviso de Vencimiento: Póliza {policy.policy_number}",
+            body=f"Hola {cliente.first_name}, tu póliza vence en {dias} días.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[cliente.email],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+    except Exception as e:
+        print(f"Error enviando mail de vencimiento: {e}")
 
 
 def generate_payment_reminders():
     """
-    Detecta cuotas que vencen en 2 días y genera alertas.
-    Aquí es donde se integrará el envío de mail automático.
+    Detecta cuotas que vencen en 2 días y genera alertas internas.
+    Nota: El envío de email de cuponera se maneja desde el comando enviar_cuponeras.py.
     """
     today = date.today()
-    target_date = today + timedelta(days=2)  # Exactamente 2 días antes
+    target_date = today + timedelta(days=2)
 
-    # Buscamos pagos pendientes que vencen en 2 días
     pagos = Payment.objects.filter(
         fecha_pago__isnull=True,
-        fecha_vencimiento=target_date,  # Usamos la fecha exacta de la cuota
+        fecha_vencimiento=target_date,
         recordatorio_enviado=False,
         policy__forma_pago="CUPONERA",
     ).select_related("policy", "policy__client", "policy__client__producer")
@@ -93,30 +129,21 @@ def generate_payment_reminders():
         if not pago.policy or not pago.policy.client:
             continue
 
-        cliente = pago.policy.client
-        producer = cliente.producer
-
-        # 1. Crear Alerta interna para el Broker (vos)
-        mensaje_interno = f"Recordatorio: {cliente} tiene el vencimiento de la cuota #{pago.numero_cuota} en 2 días."
-
         Alert.objects.get_or_create(
-            user=producer,
+            user=pago.policy.client.producer,
             policy=pago.policy,
             tipo="PAGO_PROXIMO",
             resolved=False,
-            defaults={"message": mensaje_interno, "level": "ALTA"},
+            defaults={
+                {
+                    "message": f"Recordatorio: {pago.policy.client} tiene el vencimiento de la cuota #{pago.numero_cuota} en 2 días.",
+                    "level": "ALTA",
+                }
+            },
         )
-
-        # 2. Lógica de Envío de Email Automático al Cliente
-        # Aquí llamarías a tu función de envío de mail real
-        # success = enviar_email_cuponera(pago)
-        # if success:
-        #     pago.recordatorio_enviado = True
-        #     pago.save()
 
 
 def generate_debt_alerts():
-    # Buscamos pagos que ya pasaron su fecha y no están pagados
     pagos_vencidos = Payment.objects.filter(
         fecha_vencimiento__lt=date.today(), fecha_pago__isnull=True
     ).select_related("policy", "policy__client", "policy__client__producer")
@@ -128,41 +155,28 @@ def generate_debt_alerts():
             continue
 
         policy = pago.policy
-        cliente = policy.client
         policies_con_deuda.add(policy.id)
 
-        mensaje = (
-            f"Cuota vencida #{pago.numero_cuota} de la póliza {policy.policy_number}"
-        )
-
-        alerta = Alert.objects.filter(
-            user=cliente.producer,
+        Alert.objects.get_or_create(
+            user=policy.client.producer,
             policy=policy,
             tipo="DEUDA",
             resolved=False,
-        ).first()
+            defaults={
+                {
+                    "message": f"Cuota vencida #{pago.numero_cuota} de la póliza {policy.policy_number}",
+                    "level": "CRITICA",
+                }
+            },
+        )
 
-        if not alerta:
-            Alert.objects.create(
-                user=cliente.producer,
-                policy=policy,
-                tipo="DEUDA",
-                resolved=False,
-                message=mensaje,
-                level="CRITICA",
-            )
-
-    # Resolvemos alertas de deuda si el pago ya se registró
-    alertas_activas = Alert.objects.filter(tipo="DEUDA", resolved=False)
-    for alerta in alertas_activas:
-        if alerta.policy_id not in policies_con_deuda:
-            alerta.resolved = True
-            alerta.save()
+    Alert.objects.filter(tipo="DEUDA", resolved=False).exclude(
+        policy_id__in=policies_con_deuda
+    ).update(resolved=True)
 
 
 def generate_birthday_alerts():
     today = date.today()
-
     clientes = Client.objects.filter(
         fecha_nacimiento__day=today.day,
         fecha_nacimiento__month=today.month,
@@ -174,21 +188,13 @@ def generate_birthday_alerts():
 
         mensaje = f"Hoy es el cumpleaños de {cliente.first_name} {cliente.last_name}"
 
-        alerta = Alert.objects.filter(
+        Alert.objects.get_or_create(
             user=cliente.producer,
             tipo="CUMPLEANIOS",
             message=mensaje,
             resolved=False,
-        ).first()
-
-        if not alerta:
-            Alert.objects.create(
-                user=cliente.producer,
-                tipo="CUMPLEANIOS",
-                resolved=False,
-                message=mensaje,
-                level="MEDIA",
-            )
+            defaults={{"level": "MEDIA"}},
+        )
 
 
 def generar_todas_las_alertas():
@@ -199,7 +205,6 @@ def generar_todas_las_alertas():
 
 
 def generar_link_whatsapp(cliente, mensaje):
-    # Intentamos obtener el teléfono de cualquiera de los dos campos posibles
     telefono = getattr(cliente, "phone", "") or getattr(cliente, "telefono", "")
     if not telefono:
         return "#"
@@ -212,26 +217,12 @@ def generar_link_whatsapp(cliente, mensaje):
 def whatsapp_deuda(pago):
     if not pago.policy or not pago.policy.client:
         return "#"
-
-    cliente = pago.policy.client
-    mensaje = (
-        f"Hola {cliente.first_name}, te escribo por tu póliza N° {pago.policy.policy_number}. "
-        f"Tenés una cuota vencida (#{pago.numero_cuota}). "
-        "¿Querés que te ayude a regularizarla?"
-    )
-
-    return generar_link_whatsapp(cliente, mensaje)
+    mensaje = f"Hola {pago.policy.client.first_name}, te escribo por tu póliza N° {pago.policy.policy_number}. Tenés una cuota vencida (#{pago.numero_cuota}). ¿Querés que te ayude a regularizarla?"
+    return generar_link_whatsapp(pago.policy.client, mensaje)
 
 
 def whatsapp_vencimiento(policy):
     if not policy.client:
         return "#"
-
-    cliente = policy.client
-    mensaje = (
-        f"Hola {cliente.first_name}, tu póliza N° {policy.policy_number} "
-        f"vence el {policy.end_date}. "
-        "¿Querés que avancemos con la renovación?"
-    )
-
-    return generar_link_whatsapp(cliente, mensaje)
+    mensaje = f"Hola {policy.client.first_name}, tu póliza N° {policy.policy_number} vence el {policy.end_date}. ¿Querés que avancemos con la renovación?"
+    return generar_link_whatsapp(policy.client, mensaje)
