@@ -99,6 +99,15 @@ class Policy(models.Model):
         verbose_name="Email de vencimiento enviado",
     )
 
+    # --- CAMPOS DE CONTROL DE GESTIÓN (AÑADIDOS) ---
+    ultimo_envio_cuponera = models.DateField(
+        null=True, blank=True, verbose_name="Última Cuponera Enviada"
+    )
+    ultimo_envio_vencimiento = models.DateField(
+        null=True, blank=True, verbose_name="Último Aviso Vencimiento"
+    )
+    # -----------------------------------------------
+
     pdf_poliza = models.TextField(
         blank=True,
         null=True,
@@ -367,6 +376,8 @@ class EmailLog(models.Model):
     fecha_envio = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "Registro de Email"
+        verbose_name_plural = "Registros de Emails"
         ordering = ["-fecha_envio"]
 
     def __str__(self):
