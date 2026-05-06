@@ -3,7 +3,7 @@ from urllib.parse import quote
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 
-from policies.models import Policy, Payment
+from policies.models import Policy, Payment, EmailLog
 from clients.models import Client
 from .models import Alert
 
@@ -63,6 +63,7 @@ def generate_expiration_alerts():
 def enviar_mail_vencimiento_poliza(policy, dias):
     """
     Configuración estética del mail de vencimiento (Naranja).
+    Anota la fecha de envío en la póliza para control.
     """
     cliente = policy.client
 
@@ -106,14 +107,35 @@ def enviar_mail_vencimiento_poliza(policy, dias):
         )
         email.attach_alternative(html_content, "text/html")
         email.send()
+
+        # Registro de éxito en la póliza y en logs
+        policy.ultimo_envio_vencimiento = date.today()
+        policy.save(update_fields=["ultimo_envio_vencimiento"])
+
+        EmailLog.objects.create(
+            policy=policy,
+            client=cliente,
+            tipo="VENCIMIENTO_POLIZA",
+            estado="ENVIADO",
+            destinatario=cliente.email,
+            asunto=f"Aviso de Vencimiento: Póliza {policy.policy_number}",
+        )
+
     except Exception as e:
         print(f"Error enviando mail de vencimiento: {e}")
+        EmailLog.objects.create(
+            policy=policy,
+            client=cliente,
+            tipo="VENCIMIENTO_POLIZA",
+            estado="ERROR",
+            destinatario=cliente.email,
+            error=str(e),
+        )
 
 
 def generate_payment_reminders():
     """
     Detecta cuotas que vencen en 2 días y genera alertas internas.
-    Nota: El envío de email de cuponera se maneja desde el comando enviar_cuponeras.py.
     """
     today = date.today()
     target_date = today + timedelta(days=2)
@@ -135,10 +157,8 @@ def generate_payment_reminders():
             tipo="PAGO_PROXIMO",
             resolved=False,
             defaults={
-                {
-                    "message": f"Recordatorio: {pago.policy.client} tiene el vencimiento de la cuota #{pago.numero_cuota} en 2 días.",
-                    "level": "ALTA",
-                }
+                "message": f"Recordatorio: {pago.policy.client} tiene el vencimiento de la cuota #{pago.numero_cuota} en 2 días.",
+                "level": "ALTA",
             },
         )
 
@@ -163,10 +183,8 @@ def generate_debt_alerts():
             tipo="DEUDA",
             resolved=False,
             defaults={
-                {
-                    "message": f"Cuota vencida #{pago.numero_cuota} de la póliza {policy.policy_number}",
-                    "level": "CRITICA",
-                }
+                "message": f"Cuota vencida #{pago.numero_cuota} de la póliza {policy.policy_number}",
+                "level": "CRITICA",
             },
         )
 
@@ -191,9 +209,8 @@ def generate_birthday_alerts():
         Alert.objects.get_or_create(
             user=cliente.producer,
             tipo="CUMPLEANIOS",
-            message=mensaje,
             resolved=False,
-            defaults={{"level": "MEDIA"}},
+            defaults={"message": mensaje, "level": "MEDIA"},
         )
 
 
