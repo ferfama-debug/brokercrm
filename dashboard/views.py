@@ -49,6 +49,7 @@ def home(request):
             vencidas += 1
             continue
 
+        # MODIFICACIÓN: Agregamos los campos de control de envío al contexto del Dashboard
         polizas_por_vencer.append(
             {
                 "cliente": p.client,
@@ -56,6 +57,8 @@ def home(request):
                 "compania": p.company,
                 "vencimiento": p.end_date,
                 "dias": dias,
+                "ultimo_envio_vencimiento": p.ultimo_envio_vencimiento,  # <--- Nuevo
+                "ultimo_envio_cuponera": p.ultimo_envio_cuponera,  # <--- Nuevo
             }
         )
 
