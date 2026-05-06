@@ -6,8 +6,8 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "policies",
-            "0020_alter_emaillog_options_policy_ulti...",
-        ),  # He abreviado el nombre, pero usá el nombre EXACTO de tu archivo 0020 (sin el .py)
+            "0020_alter_emaillog_options_policy_ultimo_envio_cuponera_and_more",
+        ),
     ]
 
     operations = [
