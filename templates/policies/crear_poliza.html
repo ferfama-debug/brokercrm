@@ -22,7 +22,6 @@
     <form method="post" enctype="multipart/form-data" id="form-poliza">
       {% csrf_token %}
 
-      <!-- CLIENTE -->
       <div class="form-section">
         <div class="form-section-title titulo-pro">
           Cliente y póliza
@@ -61,21 +60,20 @@
           </div>
 
           <div class="form-grupo">
-            <label>Tipo</label>
-            <select name="tipo_poliza" class="form-control">
-              <option value="AUTO">Auto</option>
-              <option value="MOTO">Moto</option>
-              <option value="HOGAR">Hogar</option>
-              <option value="VIDA">Vida</option>
-              <option value="COMERCIO">Comercio</option>
-              <option value="AP">Accidentes Personales</option>
-              <option value="RC">Responsabilidad Civil</option>
+            <label>Tipo de Riesgo</label>
+            <select name="risk_type" class="form-control">
+              <option value="">Seleccionar riesgo...</option>
+              {% for r in riesgos %}
+                <option value="{{ r.id }}">{{ r.nombre }}</option>
+              {% endfor %}
             </select>
+            <small style="color: #64748b; font-size: 10px; margin-top: 4px;">Si no aparece, cargalo en Administración.</small>
           </div>
+
+          <input type="hidden" name="tipo_poliza" value="OTRO">
         </div>
       </div>
 
-      <!-- VIGENCIA -->
       <div class="form-section">
         <div class="form-section-title titulo-pro">
           Vigencia
@@ -94,7 +92,6 @@
         </div>
       </div>
 
-      <!-- PAGO -->
       <div class="form-section">
         <div class="form-section-title titulo-pro">
           Forma de pago
@@ -111,7 +108,6 @@
             </select>
           </div>
 
-          <!-- GRUPO DINÁMICO PARA CUPONERA -->
           <div id="grupo_frecuencia" style="display:none;" class="form-grupo">
             <label>Frecuencia y Primer Vencimiento</label>
             <div style="display: flex; gap: 10px;">
@@ -124,14 +120,10 @@
               </select>
               <input type="date" name="fecha_primer_vencimiento_cuponera" class="form-control" placeholder="1er Vencimiento">
             </div>
-            <small style="color: #94a3b8; font-size: 10px; margin-top: 4px; display: block;">
-              Completá la fecha si el primer pago difiere del inicio de póliza.
-            </small>
           </div>
         </div>
       </div>
 
-      <!-- DOCUMENTOS -->
       <div class="form-section">
         <div class="form-section-title titulo-pro">
           Documentos
@@ -170,14 +162,6 @@
     </form>
   </div>
 </div>
-
-<!-- Mismos estilos y scripts que ya tenías, solo corregí el toggleFrecuencia -->
-<style>
-/* ... (mismos estilos tuyos) ... */
-.form-grupo { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.form-grupo label { font-size: 12px; color: #94a3b8; font-weight: 500; }
-/* Conservar todo tu CSS original aquí abajo */
-</style>
 
 <script>
 function mostrarNombre(input, id) {

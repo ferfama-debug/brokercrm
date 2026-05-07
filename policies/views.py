@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Policy, Payment, Company
+from .models import Policy, Payment, Company, RiskType  # <--- Agregado RiskType
 from clients.models import Client
 from datetime import date, timedelta
 import os
@@ -135,8 +135,6 @@ def enviar_email_con_fallback(
             if mensaje_html:
                 payload["html"] = mensaje_html
 
-            # Resend API soporta attachments en base64, pero para mantener
-            # el cambio quirúrgico y estable, si falla SMTP usamos Resend sin adjuntos.
             response = requests.post(
                 "https://api.resend.com/emails",
                 headers={
@@ -416,6 +414,9 @@ def crear_poliza(request):
 
     cliente_id = request.GET.get("cliente")
     companias = Company.objects.all().order_by("nombre")
+    riesgos = RiskType.objects.all().order_by(
+        "nombre"
+    )  # <--- Cargamos riesgos dinámicos
 
     if request.method == "POST":
         if request.user.is_superuser:
@@ -436,55 +437,16 @@ def crear_poliza(request):
                     "clientes": clientes,
                     "cliente_id": cliente_id,
                     "companias": companias,
+                    "riesgos": riesgos,  # Agregado aquí también
                     "error": "Debe completar las fechas",
                 },
             )
 
-        print("===== DEBUG SUBIDA POLIZA (CREAR) =====")
-        print("request.FILES keys:", list(request.FILES.keys()))
-
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
-        print("archivo_poliza:", archivo_poliza)
-        print("archivo_cuponera:", archivo_cuponera)
-
-        if archivo_poliza:
-            print("nombre pdf_poliza:", archivo_poliza.name)
-            print("size pdf_poliza:", getattr(archivo_poliza, "size", "N/A"))
-
-        if archivo_cuponera:
-            print("nombre cuponera_pdf:", archivo_cuponera.name)
-            print("size cuponera_pdf:", getattr(archivo_cuponera, "size", "N/A"))
-
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
         cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
-
-        if archivo_poliza and not pdf_url:
-            messages.error(request, "❌ El PDF de la póliza no se pudo subir")
-            return render(
-                request,
-                "policies/crear_poliza.html",
-                {
-                    "clientes": clientes,
-                    "cliente_id": cliente_id,
-                    "companias": companias,
-                    "error": "El PDF de la póliza no se pudo subir",
-                },
-            )
-
-        if archivo_cuponera and not cuponera_url:
-            messages.error(request, "❌ La cuponera no se pudo subir")
-            return render(
-                request,
-                "policies/crear_poliza.html",
-                {
-                    "clientes": clientes,
-                    "cliente_id": cliente_id,
-                    "companias": companias,
-                    "error": "La cuponera no se pudo subir",
-                },
-            )
 
         company_id = request.POST.get("company")
         company_obj = None
@@ -497,11 +459,21 @@ def crear_poliza(request):
             except Exception:
                 company_nombre = request.POST.get("company")
 
+        # Capturamos el riesgo dinámico seleccionado
+        risk_type_id = request.POST.get("risk_type")
+        risk_type_obj = None
+        if risk_type_id:
+            try:
+                risk_type_obj = RiskType.objects.get(id=risk_type_id)
+            except Exception:
+                pass
+
         nueva_poliza = Policy(
             client=client,
             company=company_nombre,
             company_obj=company_obj,
             policy_number=request.POST.get("policy_number"),
+            risk_type=risk_type_obj,  # <--- Guardamos el riesgo dinámico
             tipo_poliza=request.POST.get("tipo_poliza"),
             start_date=start_date,
             end_date=end_date,
@@ -527,6 +499,7 @@ def crear_poliza(request):
             "clientes": clientes,
             "cliente_id": cliente_id,
             "companias": companias,
+            "riesgos": riesgos,  # <--- Enviamos los riesgos al template
         },
     )
 
@@ -552,53 +525,18 @@ def renovar_poliza(request, poliza_id):
                 },
             )
 
-        print("===== DEBUG SUBIDA POLIZA (RENOVAR) =====")
-        print("request.FILES keys:", list(request.FILES.keys()))
-
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
-        print("archivo_poliza:", archivo_poliza)
-        print("archivo_cuponera:", archivo_cuponera)
-
-        if archivo_poliza:
-            print("nombre pdf_poliza:", archivo_poliza.name)
-            print("size pdf_poliza:", getattr(archivo_poliza, "size", "N/A"))
-
-        if archivo_cuponera:
-            print("nombre cuponera_pdf:", archivo_cuponera.name)
-            print("size cuponera_pdf:", getattr(archivo_cuponera, "size", "N/A"))
-
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
         cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
-
-        if archivo_poliza and not pdf_url:
-            messages.error(request, "❌ El PDF de la póliza no se pudo subir")
-            return render(
-                request,
-                "policies/renovar_poliza.html",
-                {
-                    "poliza": poliza,
-                    "error": "El PDF de la póliza no se pudo subir",
-                },
-            )
-
-        if archivo_cuponera and not cuponera_url:
-            messages.error(request, "❌ La cuponera no se pudo subir")
-            return render(
-                request,
-                "policies/renovar_poliza.html",
-                {
-                    "poliza": poliza,
-                    "error": "La cuponera no se pudo subir",
-                },
-            )
 
         nueva_poliza = Policy(
             client=poliza.client,
             company=poliza.company,
             company_obj=poliza.company_obj,
             policy_number=request.POST.get("policy_number"),
+            risk_type=poliza.risk_type,  # Mantenemos el mismo riesgo
             tipo_poliza=poliza.tipo_poliza,
             start_date=start_date,
             end_date=end_date,
@@ -608,8 +546,8 @@ def renovar_poliza(request, poliza_id):
                 if request.POST.get("frecuencia_cuponera")
                 else None
             ),
-            pdf_poliza=pdf_url or None,
-            cuponera_pdf=cuponera_url or None,
+            pdf_poliza=pdf_url or poliza.pdf_poliza,
+            cuponera_pdf=cuponera_url or poliza.cuponera_pdf,
         )
 
         nueva_poliza.save()
@@ -636,16 +574,7 @@ def marcar_pago(request, pago_id):
         )
 
     if request.method == "POST":
-        print("===== DEBUG SUBIDA COMPROBANTE =====")
-        print("request.FILES keys:", list(request.FILES.keys()))
-
         archivo_comprobante = request.FILES.get("comprobante")
-        print("archivo_comprobante:", archivo_comprobante)
-
-        if archivo_comprobante:
-            print("nombre comprobante:", archivo_comprobante.name)
-            print("size comprobante:", getattr(archivo_comprobante, "size", "N/A"))
-
         comprobante_url = procesar_archivo(archivo_comprobante, "comprobantes_pagos")
 
         if archivo_comprobante and not comprobante_url:
@@ -694,19 +623,16 @@ def enviar_poliza(request, poliza_id):
     asunto, mensaje_texto, mensaje_html = construir_email_poliza(cliente, poliza)
 
     adjuntos = []
-
     if poliza.pdf_poliza:
         adjunto_poliza = descargar_adjunto_desde_url(
-            poliza.pdf_poliza,
-            f"poliza_{poliza.policy_number or poliza.id}.pdf",
+            poliza.pdf_poliza, f"poliza_{poliza.id}.pdf"
         )
         if adjunto_poliza:
             adjuntos.append(adjunto_poliza)
 
     if poliza.cuponera_pdf:
         adjunto_cuponera = descargar_adjunto_desde_url(
-            poliza.cuponera_pdf,
-            f"cuponera_{poliza.policy_number or poliza.id}.pdf",
+            poliza.cuponera_pdf, f"cuponera_{poliza.id}.pdf"
         )
         if adjunto_cuponera:
             adjuntos.append(adjunto_cuponera)
@@ -720,12 +646,7 @@ def enviar_poliza(request, poliza_id):
     )
 
     if ok:
-        if proveedor == "smtp":
-            messages.success(request, f"✅ Email enviado a {cliente.email}")
-        elif proveedor == "resend":
-            messages.success(request, f"✅ Email enviado a {cliente.email} por Resend")
-        else:
-            messages.success(request, f"✅ Email enviado a {cliente.email}")
+        messages.success(request, f"✅ Email enviado a {cliente.email}")
     else:
         messages.error(request, f"❌ Error al enviar el email: {proveedor}")
 
