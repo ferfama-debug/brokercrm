@@ -3,6 +3,18 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 
 
+class RiskType(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = "Tipo de Riesgo"
+        verbose_name_plural = "Tipos de Riesgos"
+        ordering = ["nombre"]
+
+
 class Company(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
 
@@ -66,11 +78,20 @@ class Policy(models.Model):
         db_index=True,
     )
 
+    # NUEVO CAMPO DINÁMICO
+    risk_type = models.ForeignKey(
+        RiskType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Tipo de Riesgo (Dinámico)",
+    )
+
     tipo_poliza = models.CharField(
         max_length=20,
         choices=TIPOS_POLIZA,
         default="AUTO",
-        verbose_name="Tipo de póliza",
+        verbose_name="Tipo de póliza (Categoría)",
     )
 
     insurance_type = models.CharField(
@@ -86,7 +107,6 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    # NUEVO CAMPO: Para controlar el desfasaje entre inicio de póliza y primer pago
     fecha_primer_vencimiento_cuponera = models.DateField(
         blank=True,
         null=True,
@@ -99,14 +119,12 @@ class Policy(models.Model):
         verbose_name="Email de vencimiento enviado",
     )
 
-    # --- CAMPOS DE CONTROL DE GESTIÓN (AÑADIDOS) ---
     ultimo_envio_cuponera = models.DateField(
         null=True, blank=True, verbose_name="Última Cuponera Enviada"
     )
     ultimo_envio_vencimiento = models.DateField(
         null=True, blank=True, verbose_name="Último Aviso Vencimiento"
     )
-    # -----------------------------------------------
 
     pdf_poliza = models.TextField(
         blank=True,
@@ -153,7 +171,6 @@ class Policy(models.Model):
 
         super().save(*args, **kwargs)
 
-        # Lógica Quirúrgica: Generación de pagos basada en la fecha específica de cuponera
         if self.forma_pago == "CUPONERA" and self.frecuencia_cuponera:
             if self.pagos.exists():
                 return
@@ -161,8 +178,6 @@ class Policy(models.Model):
             from .models import Payment
 
             frecuencia = int(self.frecuencia_cuponera)
-
-            # Priorizamos la fecha manual de cuponera sobre la de inicio de póliza
             fecha = self.fecha_primer_vencimiento_cuponera or self.start_date
             fecha_fin = self.end_date
 
@@ -173,7 +188,6 @@ class Policy(models.Model):
                 fecha_fin = date.fromisoformat(fecha_fin)
 
             numero = 1
-
             while fecha <= fecha_fin:
                 Payment.objects.create(
                     policy=self, numero_cuota=numero, fecha_vencimiento=fecha
@@ -193,7 +207,6 @@ class Policy(models.Model):
     def estado(self):
         hoy = date.today()
         dias = (self.end_date - hoy).days
-
         if dias < 0:
             return "VENCIDA"
         elif dias <= 30:
@@ -205,8 +218,6 @@ class Policy(models.Model):
     def proximo_pago_cuponera(self):
         if self.forma_pago != "CUPONERA" or not self.frecuencia_cuponera:
             return None
-
-        # Buscamos la primera cuota no pagada
         proximo = (
             self.pagos.filter(fecha_pago__isnull=True)
             .order_by("fecha_vencimiento")
@@ -245,18 +256,14 @@ class Payment(models.Model):
     )
 
     numero_cuota = models.IntegerField(verbose_name="Número de cuota")
-
     fecha_vencimiento = models.DateField(verbose_name="Fecha de vencimiento")
-
     fecha_pago = models.DateField(blank=True, null=True, verbose_name="Fecha de pago")
-
     estado = models.CharField(
         max_length=10,
         choices=ESTADOS,
         default="PENDIENTE",
         verbose_name="Estado",
     )
-
     monto = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -264,13 +271,11 @@ class Payment(models.Model):
         null=True,
         verbose_name="Monto",
     )
-
     comprobante = models.TextField(
         blank=True,
         null=True,
         verbose_name="URL comprobante",
     )
-
     recordatorio_enviado = models.BooleanField(
         default=False,
         verbose_name="Recordatorio enviado",
@@ -285,7 +290,6 @@ class Payment(models.Model):
         hoy = date.today()
         if self.fecha_pago:
             return "PAGADO"
-
         dias = (self.fecha_vencimiento - hoy).days
         if dias < 0:
             return "VENCIDO"
@@ -300,7 +304,6 @@ class Payment(models.Model):
         cliente = self.policy.client.nombre_completo()
         numero_poliza = self.policy.policy_number
         fecha = self.fecha_vencimiento.strftime("%d/%m/%Y")
-
         return (
             f"Hola {cliente} 👋\n\n"
             "Esperamos que te encuentres muy bien.\n\n"
@@ -367,7 +370,6 @@ class EmailLog(models.Model):
         blank=True,
         related_name="email_logs",
     )
-
     tipo = models.CharField(max_length=50, choices=TIPO_CHOICES)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES)
     destinatario = models.EmailField(blank=True, null=True)

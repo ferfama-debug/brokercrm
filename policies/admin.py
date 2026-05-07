@@ -1,6 +1,13 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Policy, Company, Payment
+from .models import Policy, Company, Payment, RiskType  # <--- Agregamos RiskType
+
+
+# Registro del nuevo modelo para que puedas cargar "Celulares", "Notebooks", etc.
+@admin.register(RiskType)
+class RiskTypeAdmin(admin.ModelAdmin):
+    list_display = ("nombre",)
+    search_fields = ("nombre",)
 
 
 @admin.register(Policy)
@@ -10,6 +17,7 @@ class PolicyAdmin(admin.ModelAdmin):
         "policy_number",
         "client",
         "company_obj",
+        "risk_type",  # <--- Agregamos la nueva columna a la vista general
         "end_date",
         "estado_colored",
         "email_enviado",
@@ -24,7 +32,8 @@ class PolicyAdmin(admin.ModelAdmin):
                     "client",
                     "company_obj",
                     "policy_number",
-                    "tipo_poliza",
+                    "risk_type",  # <--- NUEVO CAMPO DINÁMICO
+                    "tipo_poliza",  # Mantenemos el viejo por ahora para referencia
                     "insurance_type",
                 )
             },
@@ -34,7 +43,7 @@ class PolicyAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "start_date",
-                    "end_date",  # <--- ESTE FALTABA Y POR ESO NO LO VEÍAS
+                    "end_date",
                 )
             },
         ),
@@ -60,6 +69,7 @@ class PolicyAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
+        "risk_type",  # <--- Ahora podés filtrar por tus nuevos riesgos
         "company_obj",
         "email_vencimiento_enviado",
         "end_date",
