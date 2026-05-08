@@ -1,20 +1,11 @@
 {% load static %}
-
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
     <meta charset="UTF-8">
-
     <title>CRM Fuerza Natural Brokers</title>
-
-    <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-
         body {
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
@@ -22,7 +13,6 @@
         }
 
         /* TOP BAR */
-
         .topbar {
             height: 60px;
             background: #0f1e2e;
@@ -32,22 +22,18 @@
             justify-content: space-between;
             padding: 0 30px;
         }
-
         .logo {
             font-weight: bold;
             font-size: 20px;
         }
 
-        /* CAMPANA ALERTAS */
-
+        /* CAMPANA ALERTAS - Link directo a la lista */
         .alert-bell {
             position: relative;
             margin-right: 20px;
             cursor: pointer;
-        }
-
-        .alert-bell span {
-            margin-left: 5px;
+            text-decoration: none; /* Quitamos subrayado */
+            color: white;
         }
 
         .alert-dropdown {
@@ -67,6 +53,8 @@
             padding: 10px;
             font-weight: bold;
             border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
         }
 
         .alert-item {
@@ -74,190 +62,87 @@
             border-bottom: 1px solid #eee;
             font-size: 14px;
         }
+        .alert-item:hover { background: #f9fafb; }
+        .alert-item.critica { color: #ff4d4d; }
+        .alert-item.alta { color: #ff9800; }
 
-        .alert-item:last-child {
-            border-bottom: none;
-        }
-
-        .alert-item.critica {
-            color: #ff4d4d;
-        }
-
-        .alert-item.alta {
-            color: #ff9800;
-        }
-
-        .alert-item.media {
-            color: #ffd54f;
-        }
-
-        .alert-bell:hover .alert-dropdown {
-            display: block;
-        }
-
-        /* LAYOUT */
-
-        .layout {
-            display: flex;
-        }
+        .alert-bell:hover .alert-dropdown { display: block; }
 
         /* SIDEBAR */
-
         .sidebar {
             width: 260px;
             background: #1f2d3d;
             height: calc(100vh - 60px);
             padding-top: 20px;
         }
-
         .sidebar a {
             display: block;
             color: white;
             padding: 14px 25px;
             text-decoration: none;
             transition: 0.2s;
-            white-space: nowrap;
         }
-
         .sidebar a:hover {
             background: #32465a;
             padding-left: 30px;
         }
 
         /* ALERT COLORS */
+        .alert-critica { color: #ff4d4d; font-weight: bold; }
+        .alert-alta { color: #ff9800; font-weight: bold; }
+        .alert-media { color: #ffd54f; font-weight: bold; }
 
-        .alert-critica {
-            color: #ff4d4d;
-            font-weight: bold;
-        }
-
-        .alert-alta {
-            color: #ff9800;
-            font-weight: bold;
-        }
-
-        .alert-media {
-            color: #ffd54f;
-            font-weight: bold;
-        }
-
-        /* CONTENT */
-
-        .content {
-            flex: 1;
-            padding: 30px;
-        }
-
-        /* RESPONSIVE */
-
-        @media (max-width: 900px) {
-
-            .sidebar {
-                width: 220px;
-            }
-
-        }
-
+        .content { flex: 1; padding: 30px; }
+        .layout { display: flex; }
     </style>
-
 </head>
-
 <body>
 
-    <!-- TOPBAR -->
-
     <div class="topbar">
-
-        <div class="logo">
-            CRM Fuerza Natural Brokers
-        </div>
+        <div class="logo">Fuerza Natural Broker</div>
 
         <div style="display:flex; align-items:center;">
-
-            <div class="alert-bell">
-
-                🔔 {{ alert_count }}
-
+            <a href="/alertas/" class="alert-bell">
+                🔔 <span>{{ alert_count }}</span>
                 <div class="alert-dropdown">
-
                     <div class="alert-dropdown-header">
                         Últimas alertas
+                        <small style="color: #64748b;">Ver todas</small>
                     </div>
-
                     {% for alerta in ultimas_alertas %}
-
                         <div class="alert-item {{ alerta.level|lower }}">
                             {{ alerta.message }}
                         </div>
-
                     {% empty %}
-
-                        <div class="alert-item">
-                            No hay alertas
-                        </div>
-
+                        <div class="alert-item">No hay alertas</div>
                     {% endfor %}
-
                 </div>
-
-            </div>
-
-            <div>
-                👤 {{ request.user.username }}
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- LAYOUT -->
-
-    <div class="layout">
-
-        <!-- SIDEBAR -->
-
-        <div class="sidebar">
-
-            <a href="/">🏠 Dashboard</a>
-
-            <a href="/clientes/">👥 Clientes</a>
-
-            <a href="/polizas/">📄 Pólizas</a>
-
-            <a href="/polizas/nueva/">➕ Nueva póliza</a>
-
-            <a href="/alertas/">
-
-                🔔 Alertas
-
-                <span class="
-                    {% if alert_color == 'critica' %}alert-critica
-                    {% elif alert_color == 'alta' %}alert-alta
-                    {% elif alert_color == 'media' %}alert-media
-                    {% endif %}
-                ">
-                    ({{ alert_count }})
-                </span>
-
             </a>
 
-            <a href="/admin/">⚙️ Administración</a>
-
-            <a href="/accounts/logout/">🚪 Cerrar sesión</a>
-
+            <div>👤 {{ request.user.username }}</div>
         </div>
+    </div>
 
-        <!-- CONTENT -->
+    <div class="layout">
+        <div class="sidebar">
+            <a href="/">🏠 Dashboard</a>
+            <a href="/clientes/">👥 Clientes</a>
+            <a href="/polizas/">📄 Pólizas</a>
+            <a href="/polizas/cobranzas/">💰 Cobranzas (Pagos)</a> <a href="/polizas/nueva/">➕ Nueva póliza</a>
+            <a href="/alertas/">
+                🔔 Alertas 
+                <span class="{% if alert_color == 'critica' %}alert-critica{% elif alert_color == 'alta' %}alert-alta{% elif alert_color == 'media' %}alert-media{% endif %}">
+                    ({{ alert_count }})
+                </span>
+            </a>
+            <a href="/admin/">⚙️ Administración</a>
+            <a href="/accounts/logout/">🚪 Cerrar sesión</a>
+        </div>
 
         <div class="content">
-
-            {% block content %}
-            {% endblock %}
-
+            {% block content %}{% endblock %}
         </div>
-
     </div>
 
 </body>
-
 </html>

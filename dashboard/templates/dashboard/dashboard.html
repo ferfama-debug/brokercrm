@@ -14,44 +14,47 @@
     }
     .status-sent { background-color: #d1fae5; color: #065f46; border: 1px solid #10b981; }
     .status-pending { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+    
+    /* Estilo para que los títulos parezcan links limpios */
+    .card-header-link {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: color 0.2s;
+    }
+    .card-header-link:hover h2 {
+        color: #10b981; /* El verde de tu broker */
+    }
 </style>
 
 <h1>Fuerza Natural Broker de Seguros</h1>
 
-
 <div class="card">
-
-    <h2>Alertas activas</h2>
-
+    <a href="/alertas/" class="card-header-link">
+        <h2>Alertas activas</h2>
+        <small style="color: #64748b;">Ver todas →</small>
+    </a>
     <ul>
-
         {% for alert in alerts %}
-
             <li>
                 {{ alert.message }} – <strong>{{ alert.level }}</strong>
             </li>
-
         {% empty %}
-
             <li>No hay alertas activas</li>
-
         {% endfor %}
-
     </ul>
-
 </div>
 
-
 <div class="card">
-
-    <h2>Pólizas próximas a vencer</h2>
-
+    <a href="/polizas/" class="card-header-link">
+        <h2>Pólizas próximas a vencer</h2>
+        <small style="color: #64748b;">Ver listado completo →</small>
+    </a>
     <ul style="list-style: none; padding: 0;">
-
         {% for p in polizas_por_vencer %}
-
             <li style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-
                 <div style="margin-bottom: 5px;">
                     <strong>{{ p.cliente }}</strong> – Póliza: {{ p.numero }}<br>
                     <small style="color: #666;">Vence: {{ p.vencimiento|date:"d/m/Y" }} (en {{ p.dias }} días)</small>
@@ -82,26 +85,24 @@
                 <a href="https://wa.me/54{{ p.cliente.phone|cut:' ' }}" target="_blank" class="btn btn-whatsapp" style="font-size: 0.8em; padding: 5px 10px;">
                     WhatsApp
                 </a>
-
             </li>
-
         {% empty %}
-
             <li>No hay pólizas próximas</li>
-
         {% endfor %}
-
     </ul>
-
 </div>
 
+<div class="card" style="background: #f8fafc; border-left: 4px solid #10b981;">
+    <a href="/polizas/cobranzas/" class="card-header-link">
+        <h2 style="margin: 0; font-size: 1.2em;">💰 Ir al Panel de Cobranzas</h2>
+        <span class="status-badge status-sent">¡Tenés pagos pendientes!</span>
+    </a>
+</div>
 
 <div class="card">
-
     <a href="/admin/" class="btn btn-primary">
         Ingresar al panel administrador
     </a>
-
 </div>
 
 {% endblock %}
