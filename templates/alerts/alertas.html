@@ -3,7 +3,7 @@
 
 <div class="page-header">
   <div>
-    <h1 class="page-title">Alertas</h1>
+    <h1 class="page-title">Gestión de Trámites</h1>
     <p class="page-subtitle">Seguimiento de deudas, vencimientos y notificaciones</p>
   </div>
 </div>
@@ -52,7 +52,7 @@
         <div class="alerta-body">
           <div class="alerta-nombre">{{ cliente }}</div>
           <div class="alerta-meta">
-            Deuda vencida: <strong>${{ cliente.total_deuda_vencida }}</strong>
+            Estado: <strong>Falta confirmar pago / comprobante</strong>
           </div>
         </div>
       </div>
@@ -62,9 +62,9 @@
           Ver cliente
         </a>
 
-        <a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola {{ cliente.first_name }},%20tenés%20deuda%20pendiente.%20¿Te%20ayudo%20a%20regularizarla?"
+        <a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola%20{{ cliente.first_name }},%20¿cómo%20estás?%20Te%20escribo%20de%20Fuerza%20Natural%20Broker%20para%20pedirte%20si%20me%20podrías%20enviar%20el%20comprobante%20de%20la%20última%20cuota%20de%20tu%20seguro.%20¡Gracias!"
            target="_blank" class="btn-whatsapp btn-whatsapp-sm">
-          WhatsApp
+          Pedir Comprobante
         </a>
       </div>
 
