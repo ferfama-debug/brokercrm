@@ -60,14 +60,14 @@
           </div>
 
           <div class="form-grupo">
-            <label>Tipo de Riesgo</label>
+            <label>Tipo de Riesgo (Dinámico)</label>
             <select name="risk_type" class="form-control">
               <option value="">Seleccionar riesgo...</option>
               {% for r in riesgos %}
                 <option value="{{ r.id }}">{{ r.nombre }}</option>
               {% endfor %}
             </select>
-            <small style="color: #64748b; font-size: 10px; margin-top: 4px;">Si no aparece, cargalo en Administración.</small>
+            <small style="color: #64748b; font-size: 10px; margin-top: 4px;">Gestionable desde Administración.</small>
           </div>
 
           <input type="hidden" name="tipo_poliza" value="OTRO">
@@ -76,7 +76,7 @@
 
       <div class="form-section">
         <div class="form-section-title titulo-pro">
-          Vigencia
+          Vigencia de Póliza
           <div class="sub-line"></div>
         </div>
 
@@ -94,33 +94,38 @@
 
       <div class="form-section">
         <div class="form-section-title titulo-pro">
-          Forma de pago
+          Facturación y Cobro
           <div class="sub-line"></div>
         </div>
 
         <div class="form-row">
           <div class="form-grupo">
-            <label>Método</label>
+            <label>Método de Pago</label>
             <select name="forma_pago" id="forma_pago" class="form-control">
-              <option value="TARJETA">Tarjeta</option>
-              <option value="CBU">CBU</option>
-              <option value="CUPONERA">Cuponera</option>
+              <option value="TARJETA">Tarjeta de crédito</option>
+              <option value="CBU">Débito / CBU</option>
+              <option value="CUPONERA">Cuponera de pago</option>
             </select>
           </div>
 
-          <div id="grupo_frecuencia" style="display:none;" class="form-grupo">
-            <label>Frecuencia y Primer Vencimiento</label>
-            <div style="display: flex; gap: 10px;">
-              <select name="frecuencia_cuponera" id="frecuencia_cuponera" class="form-control">
-                <option value="">Frecuencia</option>
-                <option value="1">Mensual</option>
-                <option value="3">Trimestral</option>
-                <option value="6">Semestral</option>
-                <option value="12">Anual</option>
-              </select>
-              <input type="date" name="fecha_primer_vencimiento_cuponera" class="form-control" placeholder="1er Vencimiento">
-            </div>
+          <div class="form-grupo">
+            <label>Frecuencia de Refacturación</label>
+            <select name="frecuencia_cuponera" id="frecuencia_cuponera" class="form-control">
+              <option value="1">Mensual</option>
+              <option value="3">Trimestral</option>
+              <option value="4">Cuatrimestral</option>
+              <option value="6">Semestral</option>
+              <option value="12">Anual</option>
+            </select>
           </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-grupo">
+                <label>Fecha de Primer Vencimiento</label>
+                <input type="date" name="fecha_primer_vencimiento_cuponera" class="form-control">
+                <small style="color: #94a3b8; font-size: 10px; margin-top: 4px;">Dejar vacío si coincide con el inicio de vigencia.</small>
+            </div>
         </div>
       </div>
 
@@ -136,7 +141,7 @@
             <div class="drop-icon">📄</div>
             <div class="drop-content">
               <strong>Subir póliza</strong>
-              <span>PDF de la póliza principal</span>
+              <span>Archivo principal</span>
             </div>
             <div id="poliza_nombre" class="file-badge file-badge-empty">Ningún archivo seleccionado</div>
           </label>
@@ -146,7 +151,7 @@
             <div class="drop-icon">💳</div>
             <div class="drop-content">
               <strong>Subir cuponera</strong>
-              <span>PDF con cuotas o medios de pago</span>
+              <span>Medios de pago</span>
             </div>
             <div id="cuponera_nombre" class="file-badge file-badge-empty">Ningún archivo seleccionado</div>
           </label>
@@ -174,20 +179,6 @@ function mostrarNombre(input, id) {
     el.classList.add("file-badge-empty");
   }
 }
-
-const formaPago = document.getElementById("forma_pago");
-const grupoFrecuencia = document.getElementById("grupo_frecuencia");
-
-function toggleFrecuencia() {
-  if (formaPago.value === "CUPONERA") {
-    grupoFrecuencia.style.display = "block";
-  } else {
-    grupoFrecuencia.style.display = "none";
-  }
-}
-
-formaPago.addEventListener("change", toggleFrecuencia);
-document.addEventListener("DOMContentLoaded", toggleFrecuencia);
 </script>
 
 {% endblock %}

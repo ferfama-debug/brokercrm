@@ -27,7 +27,6 @@ class Company(models.Model):
 
 
 class Policy(models.Model):
-
     TIPOS_POLIZA = [
         ("AUTO", "Auto"),
         ("MOTO", "Moto"),
@@ -45,7 +44,7 @@ class Policy(models.Model):
         ("CUPONERA", "Cuponera de pago"),
     ]
 
-    FRECUENCIAS_CUPONERA = [
+    FRECUENCIAS_REFACTURACION = [
         (1, "Mensual"),
         (3, "Trimestral"),
         (4, "Cuatrimestral"),
@@ -78,7 +77,6 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    # NUEVO CAMPO DINÁMICO
     risk_type = models.ForeignKey(
         RiskType,
         on_delete=models.SET_NULL,
@@ -110,7 +108,7 @@ class Policy(models.Model):
     fecha_primer_vencimiento_cuponera = models.DateField(
         blank=True,
         null=True,
-        verbose_name="Fecha primer vencimiento cuponera",
+        verbose_name="Fecha primer vencimiento",
         help_text="Si se deja vacío, se usará la fecha de inicio de la póliza.",
     )
 
@@ -146,10 +144,9 @@ class Policy(models.Model):
     )
 
     frecuencia_cuponera = models.IntegerField(
-        choices=FRECUENCIAS_CUPONERA,
-        blank=True,
-        null=True,
-        verbose_name="Frecuencia de cuponera (meses)",
+        choices=FRECUENCIAS_REFACTURACION,
+        default=1,
+        verbose_name="Frecuencia de refacturación (meses)",
     )
 
     def _normalizar_url(self, valor):
@@ -165,16 +162,10 @@ class Policy(models.Model):
         self.pdf_poliza = self._normalizar_url(self.pdf_poliza)
         self.cuponera_pdf = self._normalizar_url(self.cuponera_pdf)
 
-        if self.forma_pago != "CUPONERA":
-            self.frecuencia_cuponera = None
-            self.fecha_primer_vencimiento_cuponera = None
-
         super().save(*args, **kwargs)
 
-        if self.forma_pago == "CUPONERA" and self.frecuencia_cuponera:
-            if self.pagos.exists():
-                return
-
+        # Generación de cuotas para CUALQUIER método de pago
+        if not self.pagos.exists() and self.frecuencia_cuponera:
             from .models import Payment
 
             frecuencia = int(self.frecuencia_cuponera)
@@ -183,12 +174,12 @@ class Policy(models.Model):
 
             if isinstance(fecha, str):
                 fecha = date.fromisoformat(fecha)
-
             if isinstance(fecha_fin, str):
                 fecha_fin = date.fromisoformat(fecha_fin)
 
             numero = 1
-            while fecha <= fecha_fin:
+            # Generamos cuotas mientras la fecha sea menor a la de fin de vigencia
+            while fecha < fecha_fin:
                 Payment.objects.create(
                     policy=self, numero_cuota=numero, fecha_vencimiento=fecha
                 )
@@ -216,8 +207,6 @@ class Policy(models.Model):
 
     @property
     def proximo_pago_cuponera(self):
-        if self.forma_pago != "CUPONERA" or not self.frecuencia_cuponera:
-            return None
         proximo = (
             self.pagos.filter(fecha_pago__isnull=True)
             .order_by("fecha_vencimiento")
@@ -239,7 +228,6 @@ class Policy(models.Model):
 
 
 class Payment(models.Model):
-
     ESTADOS = [
         ("PENDIENTE", "Pendiente"),
         ("PROXIMO", "Próximo a vencer"),
