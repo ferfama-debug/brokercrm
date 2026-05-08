@@ -164,7 +164,6 @@ class Policy(models.Model):
 
         super().save(*args, **kwargs)
 
-        # Generación de cuotas para CUALQUIER método de pago
         if not self.pagos.exists() and self.frecuencia_cuponera:
             from .models import Payment
 
@@ -178,7 +177,6 @@ class Policy(models.Model):
                 fecha_fin = date.fromisoformat(fecha_fin)
 
             numero = 1
-            # Generamos cuotas mientras la fecha sea menor a la de fin de vigencia
             while fecha < fecha_fin:
                 Payment.objects.create(
                     policy=self, numero_cuota=numero, fecha_vencimiento=fecha
