@@ -1,72 +1,76 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Panel de Control</h1>
+        <p class="page-subtitle">Bienvenido al CRM de Fuerza Natural Broker</p>
+    </div>
+</div>
 
-<style>
-    .status-badge {
-        font-size: 0.85em;
-        padding: 2px 8px;
-        border-radius: 12px;
-        margin-left: 5px;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-    .status-sent { background-color: #d1fae5; color: #065f46; border: 1px solid #10b981; }
-    .status-pending { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
+    <div class="card shadow-glow">
+        <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Clientes Totales</small>
+        <div style="font-size: 24px; font-weight: 600; color: var(--green-400); margin-top: 8px;">{{ clientes }}</div>
+    </div>
+    <div class="card shadow-glow">
+        <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Pólizas Activas</small>
+        <div style="font-size: 24px; font-weight: 600; color: var(--green-400); margin-top: 8px;">{{ polizas }}</div>
+    </div>
+    <div class="card shadow-glow" style="border-left: 2px solid #ef4444;">
+        <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Vencimientos 30 días</small>
+        <div style="font-size: 24px; font-weight: 600; color: #fca5a5; margin-top: 8px;">{{ clientes_hoy }}</div>
+    </div>
+    <div class="card shadow-glow">
+        <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Deuda Exigible</small>
+        <div style="font-size: 24px; font-weight: 600; color: var(--green-400); margin-top: 8px;">${{ deuda_total }}</div>
+    </div>
+</div>
+
+<div class="card shadow-glow" style="border-top: 2px solid var(--green-400); margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: var(--green-400); margin: 0; font-size: 18px;">🚀 CRM de Renovaciones (Próximos 30 días)</h2>
+        <span class="badge badge-green">{{ clientes_hoy }} Pendientes</span>
+    </div>
     
-    .card-header-link {
-        text-decoration: none;
-        color: inherit;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: color 0.2s;
-    }
-    .card-header-link:hover h2 {
-        color: #10b981;
-    }
-
-    .prioridad-urgente { color: #dc2626; font-weight: bold; }
-    .prioridad-alta { color: #ea580c; font-weight: bold; }
-    .prioridad-media { color: #ca8a04; font-weight: bold; }
-</style>
-
-<h1>Fuerza Natural Broker de Seguros</h1>
-
-<div class="card" style="border-top: 4px solid #10b981;">
-    <h2>🚀 CRM de Ventas (Próximos 30 días)</h2>
-    <p><small>Clientes con pólizas por vencer. ¡Es hora de renovar!</small></p>
-    <div class="table-responsive">
-        <table class="table">
+    <div class="table-wrap">
+        <table>
             <thead>
                 <tr>
                     <th>Cliente</th>
                     <th>Prioridad</th>
                     <th>Días</th>
-                    <th>Acción</th>
+                    <th>Compañía / Póliza</th>
+                    <th style="text-align: right;">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in clientes_llamar %}
                 <tr>
-                    <td><strong>{{ item.cliente.nombre_completo }}</strong></td>
+                    <td><strong style="color: var(--text-primary);">{{ item.cliente.nombre_completo }}</strong></td>
                     <td>
-                        <span class="prioridad-{{ item.prioridad|lower }}">
-                            {{ item.prioridad }}
-                        </span>
+                        {% if item.prioridad == "URGENTE" %}
+                            <span class="badge" style="background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid #ef4444;">{{ item.prioridad }}</span>
+                        {% elif item.prioridad == "ALTA" %}
+                            <span class="badge badge-yellow">{{ item.prioridad }}</span>
+                        {% else %}
+                            <span class="badge badge-green">{{ item.prioridad }}</span>
+                        {% endif %}
                     </td>
-                    <td>{{ item.dias }} días</td>
-                    <td>
+                    <td style="font-family: var(--font-mono);">{{ item.dias }}d</td>
+                    <td><small style="color: var(--text-muted);">{{ item.compania }}<br>N° {{ item.numero }}</small></td>
+                    <td style="text-align: right;">
                         <a href="https://wa.me/54{{ item.telefono }}?text={{ item.mensaje|urlencode }}" 
-                           target="_blank" class="btn btn-whatsapp" style="padding: 2px 8px; font-size: 0.8em;">
+                           target="_blank" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">
                             WhatsApp
                         </a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4">No hay renovaciones pendientes para los próximos 30 días.</td>
+                    <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                        No hay renovaciones pendientes para los próximos 30 días.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -74,65 +78,13 @@
     </div>
 </div>
 
-<div class="card">
-    <a href="/alertas/" class="card-header-link">
-        <h2>Notificaciones del Sistema</h2>
-        <small style="color: #64748b;">{{ alertas }} alertas activas →</small>
-    </a>
+<div class="card" style="background: var(--bg-card-hover); border-left: 4px solid var(--green-600);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 style="margin: 0; font-size: 14px; color: var(--text-primary);">💰 Gestión de Cobranzas</h3>
+            <p style="margin: 2px 0 0; font-size: 11px; color: var(--text-muted);">Acceder al panel detallado de pagos pendientes</p>
+        </div>
+        <a href="/polizas/cobranzas/" class="btn btn-secondary">Ir a Cobranzas</a>
+    </div>
 </div>
-
-<div class="card">
-    <a href="/polizas/" class="card-header-link">
-        <h2>Detalle de Pólizas por Vencer</h2>
-        <small style="color: #64748b;">Ver listado completo →</small>
-    </a>
-    <ul style="list-style: none; padding: 0;">
-        {% for p in polizas_por_vencer %}
-            <li style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                <div style="margin-bottom: 5px;">
-                    <strong>{{ p.cliente.nombre_completo }}</strong> – {{ p.compania }} (N° {{ p.numero }})<br>
-                    <small style="color: #666;">Vence: {{ p.vencimiento|date:"d/m/Y" }} (en {{ p.dias }} días)</small>
-                </div>
-
-                <div style="margin-bottom: 8px;">
-                    {% if p.ultimo_envio_vencimiento %}
-                        <span class="status-badge status-sent" title="Último envío: {{ p.ultimo_envio_vencimiento }}">
-                            Aviso Vence: OK ✅
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-pending">
-                            Aviso Vence: Pendiente ⏳
-                        </span>
-                    {% endif %}
-
-                    {% if p.ultimo_envio_cuponera %}
-                        <span class="status-badge status-sent" title="Último envío: {{ p.ultimo_envio_cuponera }}">
-                            Cuponera: OK 📧
-                        </span>
-                    {% else %}
-                        <span class="status-badge status-pending">
-                            Cuponera: Pendiente ⏳
-                        </span>
-                    {% endif %}
-                </div>
-            </li>
-        {% empty %}
-            <li>No hay pólizas próximas</li>
-        {% endfor %}
-    </ul>
-</div>
-
-<div class="card" style="background: #f8fafc; border-left: 4px solid #10b981;">
-    <a href="/polizas/cobranzas/" class="card-header-link">
-        <h2 style="margin: 0; font-size: 1.2em;">💰 Gestión de Cobranzas</h2>
-        <span class="status-badge status-sent">${{ deuda_total }} en deuda</span>
-    </a>
-</div>
-
-<div class="card">
-    <a href="/admin/" class="btn btn-primary">
-        Ingresar al Administrador de Django
-    </a>
-</div>
-
 {% endblock %}
