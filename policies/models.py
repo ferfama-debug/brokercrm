@@ -164,7 +164,12 @@ class Policy(models.Model):
 
         super().save(*args, **kwargs)
 
-        if not self.pagos.exists() and self.frecuencia_cuponera:
+        # SOLO CREAR PAGOS SI ES CUPONERA
+        if (
+            self.forma_pago == "CUPONERA"
+            and not self.pagos.exists()
+            and self.frecuencia_cuponera
+        ):
             from .models import Payment
 
             frecuencia = int(self.frecuencia_cuponera)
