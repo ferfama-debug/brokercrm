@@ -1,9 +1,27 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Policy, Company, Payment, RiskType  # <--- Agregamos RiskType
+from .models import Policy, Company, Payment, RiskType
 
 
-# Registro del nuevo modelo para que puedas cargar "Celulares", "Notebooks", etc.
+# --- NUEVO: Inline para ver pagos dentro de la Póliza ---
+class PaymentInline(admin.TabularInline):
+    model = Payment
+    extra = 0  # No mostrar filas vacías extra
+    fields = (
+        "numero_cuota",
+        "fecha_vencimiento",
+        "fecha_pago",
+        "estado",
+        "comprobante",
+    )
+    readonly_fields = (
+        "numero_cuota",
+        "fecha_vencimiento",
+    )  # Para no editarlos por error aquí
+    can_delete = True
+    show_change_link = True  # Permite ir al detalle del pago si necesitas
+
+
 @admin.register(RiskType)
 class RiskTypeAdmin(admin.ModelAdmin):
     list_display = ("nombre",)
@@ -12,18 +30,19 @@ class RiskTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Policy)
 class PolicyAdmin(admin.ModelAdmin):
-    # Configuración de la lista general
+    # Agregamos el Inline aquí
+    inlines = [PaymentInline]
+
     list_display = (
         "policy_number",
         "client",
         "company_obj",
-        "risk_type",  # <--- Agregamos la nueva columna a la vista general
+        "risk_type",
         "end_date",
         "estado_colored",
         "email_enviado",
     )
 
-    # Organización del formulario de carga/edición
     fieldsets = (
         (
             "Información Básica",
@@ -32,8 +51,8 @@ class PolicyAdmin(admin.ModelAdmin):
                     "client",
                     "company_obj",
                     "policy_number",
-                    "risk_type",  # <--- NUEVO CAMPO DINÁMICO
-                    "tipo_poliza",  # Mantenemos el viejo por ahora para referencia
+                    "risk_type",
+                    "tipo_poliza",
                     "insurance_type",
                 )
             },
@@ -69,7 +88,7 @@ class PolicyAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "risk_type",  # <--- Ahora podés filtrar por tus nuevos riesgos
+        "risk_type",
         "company_obj",
         "email_vencimiento_enviado",
         "end_date",
@@ -121,18 +140,21 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
+    # MEJORA: Agregamos 'get_client' y 'policy' para saber de quién es el pago
     list_display = (
+        "get_client",
         "policy",
         "numero_cuota",
         "fecha_vencimiento",
         "fecha_pago",
         "estado",
-        "recordatorio_enviado",
     )
 
+    # MEJORA: Filtros por cliente y compañía en la barra lateral
     list_filter = (
         "estado",
-        "recordatorio_enviado",
+        "policy__client",
+        "policy__company_obj",
         "fecha_vencimiento",
     )
 
@@ -143,6 +165,12 @@ class PaymentAdmin(admin.ModelAdmin):
     )
 
     ordering = ("fecha_vencimiento",)
+
+    # Función para mostrar el nombre del cliente en la lista de pagos
+    def get_client(self, obj):
+        return obj.policy.client
+
+    get_client.short_description = "Cliente"
 
     def get_queryset(self, request):
         qs = super().get_queryset(request).select_related("policy", "policy__client")
