@@ -1,34 +1,28 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
-
 from django.conf import settings
 from django.conf.urls.static import static
 
 
+# Función de salud simple fuera de bucles
 def health(request):
     return HttpResponse("ok")
 
 
 urlpatterns = [
-    # HEALTH CHECK (RAÍZ)
     path("health/", health),
-    # ADMIN DJANGO
     path("admin/", admin.site.urls),
-    # LOGIN / LOGOUT / HEALTH / CREAR ADMIN
     path("accounts/", include("accounts.urls")),
-    # 🔥 CAMBIO QUIRÚRGICO: Ahora la raíz abre el DASHBOARD
+    # 🔥 LA SOLUCIÓN:
+    # Dejamos el DASHBOARD como la página principal real.
     path("", include("dashboard.urls")),
-    # Mantenemos el panel de bienvenida en otra ruta por si lo necesitas
-    path("bienvenida/", include("panel.urls")),
-    # CLIENTES
+    # Si el logo grande estaba en 'panel', lo movemos a otra ruta para que no choque
+    path("inicio/", include("panel.urls")),
     path("clientes/", include("clients.urls")),
-    # POLIZAS
     path("polizas/", include("policies.urls")),
-    # ALERTAS
     path("alertas/", include("alerts.urls")),
 ]
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
