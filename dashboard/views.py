@@ -34,7 +34,7 @@ def home(request):
     polizas = policies_qs.count()
 
     polizas_por_vencer = []
-    clientes_llamar = []
+    clientes_llamar_lista = []  # Lista temporal para procesar
 
     vencidas = 0
     vencen_7 = 0
@@ -42,14 +42,13 @@ def home(request):
     vencen_30 = 0
 
     for p in policies_qs:
-
         dias = (p.end_date - hoy).days
 
         if dias < 0:
             vencidas += 1
             continue
 
-        # MODIFICACIÓN: Agregamos los campos de control de envío al contexto del Dashboard
+        # Lista de alertas generales
         polizas_por_vencer.append(
             {
                 "cliente": p.client,
@@ -57,59 +56,55 @@ def home(request):
                 "compania": p.company,
                 "vencimiento": p.end_date,
                 "dias": dias,
-                "ultimo_envio_vencimiento": p.ultimo_envio_vencimiento,  # <--- Nuevo
-                "ultimo_envio_cuponera": p.ultimo_envio_cuponera,  # <--- Nuevo
+                "ultimo_envio_vencimiento": p.ultimo_envio_vencimiento,
+                "ultimo_envio_cuponera": p.ultimo_envio_cuponera,
             }
         )
 
-        telefono = getattr(p.client, "phone", "") or getattr(p.client, "telefono", "")
+        # Lógica de CRM de Ventas (Filtro de próximos 30 días)
+        if dias <= 30:
+            telefono = getattr(p.client, "phone", "") or getattr(
+                p.client, "telefono", ""
+            )
 
-        if dias <= 7:
-            vencen_7 += 1
-            prioridad = "URGENTE"
-            orden = 1
+            if dias <= 7:
+                vencen_7 += 1
+                prioridad = "URGENTE"
+                orden = 1
+            elif dias <= 15:
+                vencen_15 += 1
+                prioridad = "ALTA"
+                orden = 2
+            else:
+                vencen_30 += 1
+                prioridad = "MEDIA"
+                orden = 3
 
-        elif dias <= 15:
-            vencen_15 += 1
-            prioridad = "ALTA"
-            orden = 2
+            mensaje = (
+                f"Hola {p.client.nombre_completo()}, te escribo de Fuerza Natural Broker. "
+                f"Tu póliza N° {p.policy_number} de {p.company} vence el {p.end_date.strftime('%d/%m/%Y')}."
+            )
 
-        elif dias <= 30:
-            vencen_30 += 1
-            prioridad = "MEDIA"
-            orden = 3
-        else:
-            continue
+            clientes_llamar_lista.append(
+                {
+                    "cliente": p.client,
+                    "cliente_id": p.client.id,
+                    "numero": p.policy_number,
+                    "telefono": telefono,
+                    "dias": dias,
+                    "mensaje": mensaje,
+                    "prioridad": prioridad,
+                    "orden": orden,
+                }
+            )
 
-        mensaje = (
-            f"Hola {p.client.nombre_completo()}, te escribo de Fuerza Natural Broker. "
-            f"Tu póliza N° {p.policy_number} de {p.company} vence el {p.end_date.strftime('%d/%m/%Y')}."
-        )
+    # Ordenamos por cercanía de fecha
+    clientes_llamar_lista = sorted(clientes_llamar_lista, key=lambda x: x["dias"])
 
-        clientes_llamar.append(
-            {
-                "cliente": p.client,
-                "cliente_id": p.client.id,
-                "numero": p.policy_number,
-                "telefono": telefono,
-                "dias": dias,
-                "mensaje": mensaje,
-                "prioridad": prioridad,
-                "orden": orden,
-            }
-        )
-
-    clientes_llamar = sorted(clientes_llamar, key=lambda x: (x["orden"], x["dias"]))
-
-    urgentes = [c for c in clientes_llamar if c["prioridad"] == "URGENTE"]
-    if urgentes:
-        clientes_llamar = urgentes
-
+    # Agrupamos por cliente para no repetir filas en la tabla si tiene varias pólizas
     clientes_agrupados = {}
-
-    for c in clientes_llamar:
+    for c in clientes_llamar_lista:
         cid = c["cliente_id"]
-
         if cid not in clientes_agrupados:
             clientes_agrupados[cid] = {
                 "cliente": c["cliente"],
@@ -117,15 +112,18 @@ def home(request):
                 "telefono": c["telefono"],
                 "mensaje": c["mensaje"],
                 "dias": c["dias"],
+                "prioridad": c["prioridad"],
                 "cantidad": 1,
             }
         else:
             clientes_agrupados[cid]["cantidad"] += 1
-
+            # Mantener el mensaje de la póliza que vence más pronto
             if c["dias"] < clientes_agrupados[cid]["dias"]:
                 clientes_agrupados[cid]["dias"] = c["dias"]
                 clientes_agrupados[cid]["mensaje"] = c["mensaje"]
+                clientes_agrupados[cid]["prioridad"] = c["prioridad"]
 
+    # Esta es la variable que usa tu template para el recuadro de ventas
     clientes_llamar = sorted(clientes_agrupados.values(), key=lambda x: x["dias"])
     clientes_hoy = len(clientes_llamar)
 
@@ -171,7 +169,6 @@ def home(request):
     )
 
     clientes_score = []
-
     for c in clientes_score_db:
         if c.total_polizas >= 4:
             score = "⭐⭐⭐ Cliente Premium"
@@ -202,16 +199,10 @@ def home(request):
     for item in produccion_companias_db:
         company = (item.get("company") or "").strip()
         total = item.get("total", 0)
-
         if not company:
             company = "Sin compañía"
 
-        produccion_companias.append(
-            {
-                "company": company,
-                "total": total,
-            }
-        )
+        produccion_companias.append({"company": company, "total": total})
         companias.append(company)
         cantidades.append(total)
 
