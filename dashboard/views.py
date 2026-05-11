@@ -14,15 +14,14 @@ def home(request):
     hoy = date.today()
     en_3_dias = hoy + timedelta(days=3)
 
-    # 🔥 CONTADORES GENERALES - MODIFICADO PARA FORZAR VISIBILIDAD
+    # 🔥 CONTADORES GENERALES - VISIBILIDAD TOTAL SIN FILTROS
     if request.user.is_superuser:
         clientes_qs = Client.objects.all()
         policies_qs = Policy.objects.select_related("client").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
     else:
-        # Forzamos .all() para asegurar que Martínez Herrera aparezca
-        # aunque el filtro por usuario esté fallando
+        # Quitamos el filtro por productor para que Martínez Herrera aparezca siempre
         clientes_qs = Client.objects.all()
         policies_qs = Policy.objects.all().select_related("client")
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
@@ -32,7 +31,7 @@ def home(request):
     polizas = policies_qs.count()
 
     polizas_por_vencer = []
-    clientes_llamar_lista = []  # Lista temporal para procesar
+    clientes_llamar_lista = []
 
     vencidas = 0
     vencen_7 = 0
@@ -46,7 +45,6 @@ def home(request):
             vencidas += 1
             continue
 
-        # Lista de alertas generales
         polizas_por_vencer.append(
             {
                 "cliente": p.client,
@@ -59,7 +57,6 @@ def home(request):
             }
         )
 
-        # Lógica de CRM de Ventas (Filtro de próximos 30 días)
         if dias <= 30:
             telefono = getattr(p.client, "phone", "") or getattr(
                 p.client, "telefono", ""
@@ -96,10 +93,7 @@ def home(request):
                 }
             )
 
-    # Ordenamos por cercanía de fecha
-    clientes_llamar_lista = sorted(clientes_llamar_lista, key=lambda x: x["dias"])
-
-    # Agrupamos por cliente para no repetir filas en la tabla si tiene varias pólizas
+    # Agrupamos por cliente para la tabla
     clientes_agrupados = {}
     for c in clientes_llamar_lista:
         cid = c["cliente_id"]
@@ -115,13 +109,11 @@ def home(request):
             }
         else:
             clientes_agrupados[cid]["cantidad"] += 1
-            # Mantener el mensaje de la póliza que vence más pronto
             if c["dias"] < clientes_agrupados[cid]["dias"]:
                 clientes_agrupados[cid]["dias"] = c["dias"]
                 clientes_agrupados[cid]["mensaje"] = c["mensaje"]
                 clientes_agrupados[cid]["prioridad"] = c["prioridad"]
 
-    # Esta es la variable que usa tu template para el recuadro de ventas
     clientes_llamar = sorted(clientes_agrupados.values(), key=lambda x: x["dias"])
     clientes_hoy = len(clientes_llamar)
 
@@ -129,34 +121,27 @@ def home(request):
     cobranzas_vencidas = pagos_qs.filter(
         fecha_vencimiento__lt=hoy, fecha_pago__isnull=True
     ).count()
-
     cobranzas_hoy = pagos_qs.filter(
         fecha_vencimiento=hoy, fecha_pago__isnull=True
     ).count()
-
     cobranzas_proximos = pagos_qs.filter(
         fecha_vencimiento__gt=hoy,
-        fecha_vencimiento__lte=en_3_dias,
+        fecha_vencimiento__lte=hoy + timedelta(days=3),
         fecha_pago__isnull=True,
     ).count()
-
     deuda_total = (
         pagos_qs.filter(estado="VENCIDO").aggregate(total=Sum("monto"))["total"] or 0
     )
-
     cuotas_vencidas = pagos_qs.filter(estado="VENCIDO").count()
-
     proximos_pagos = (
         pagos_qs.filter(estado="PENDIENTE", fecha_vencimiento__gte=hoy).aggregate(
             total=Sum("monto")
         )["total"]
         or 0
     )
-
     cuotas_pendientes = pagos_qs.filter(
         estado="PENDIENTE", fecha_vencimiento__gte=hoy
     ).count()
-
     cobranzas_urgentes = pagos_qs.filter(
         fecha_vencimiento__lte=hoy, fecha_pago__isnull=True
     )
@@ -165,7 +150,6 @@ def home(request):
     clientes_score_db = clientes_qs.annotate(total_polizas=Count("policy")).order_by(
         "-total_polizas"
     )
-
     clientes_score = []
     for c in clientes_score_db:
         if c.total_polizas >= 4:
@@ -174,13 +158,8 @@ def home(request):
             score = "⭐⭐ Buen Cliente"
         else:
             score = "⭐ Cliente Básico"
-
         clientes_score.append(
-            {
-                "cliente": c,
-                "polizas": c.total_polizas,
-                "score": score,
-            }
+            {"cliente": c, "polizas": c.total_polizas, "score": score}
         )
 
     # 🏢 PRODUCCIÓN
@@ -189,17 +168,13 @@ def home(request):
         .annotate(total=Count("id"))
         .order_by("-total", "company")
     )
-
     produccion_companias = []
     companias = []
     cantidades = []
 
     for item in produccion_companias_db:
-        company = (item.get("company") or "").strip()
+        company = (item.get("company") or "Sin compañía").strip()
         total = item.get("total", 0)
-        if not company:
-            company = "Sin compañía"
-
         produccion_companias.append({"company": company, "total": total})
         companias.append(company)
         cantidades.append(total)
@@ -211,10 +186,8 @@ def home(request):
         .annotate(total=Count("id"))
         .order_by("mes")
     )
-
     meses = []
     crecimiento_totales = []
-
     for item in crecimiento_db:
         if item["mes"]:
             meses.append(item["mes"].strftime("%b %Y"))
@@ -248,4 +221,5 @@ def home(request):
         "produccion_companias": produccion_companias,
     }
 
-    return render(request, "panel/dashboard.html", context)
+    # 🔥 LA RUTA AL TEMPLATE AHORA ES INDEPENDIENTE
+    return render(request, "dashboard/dashboard.html", context)
