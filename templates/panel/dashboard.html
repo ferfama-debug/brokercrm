@@ -869,49 +869,58 @@ body.light-mode .resumen-mini span {
 
   </div>
 
-  <h2 class="section-title">CRM de Ventas</h2>
+  <h2 class="section-title">CRM de Ventas - Gestión Mensual</h2>
 
   <table>
-    <tr>
-      <th>Cliente</th>
-      <th>Pólizas</th>
-      <th>Próximo contacto</th>
-      <th>Acciones</th>
-      <th>Ver</th>
-    </tr>
-
-    {% for c in clientes_llamar %}
-    <tr>
-      <td>
-        <div class="crm-contacto">
-          <span class="crm-cliente">{{ c.cliente }}</span>
-          <span class="crm-subinfo">{{ c.telefono }}</span>
-        </div>
-      </td>
-      <td>{{ c.cantidad }}</td>
-      <td><span class="crm-dias">{{ c.dias }}</span></td>
-      <td>
-        <div class="crm-acciones">
-          <a href="https://wa.me/{{ c.telefono }}?text={{ c.mensaje|urlencode }}" target="_blank" class="crm-btn crm-btn-wa">
-            WhatsApp
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Pólizas</th>
+        <th>Próximo contacto</th>
+        <th>Acciones</th>
+        <th>Ver</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in clientes_llamar %}
+      <tr>
+        <td>
+          <div class="crm-contacto">
+            <span class="crm-cliente">{{ c.cliente }}</span>
+            <span class="crm-subinfo">{{ c.telefono }}</span>
+          </div>
+        </td>
+        <td>{{ c.cantidad }}</td>
+        <td><span class="crm-dias">{{ c.dias }} días</span></td>
+        <td>
+          <div class="crm-acciones">
+            <a href="https://wa.me/{{ c.telefono|cut:' ' }}?text={{ c.mensaje|urlencode }}" target="_blank" class="crm-btn crm-btn-wa">
+              WhatsApp
+            </a>
+            <button type="button" class="crm-btn crm-btn-copy" onclick="copiarMensaje(this)" data-mensaje="{{ c.mensaje|escape }}">
+              Copiar mensaje
+            </button>
+            <span class="crm-copy-ok"></span>
+          </div>
+        </td>
+        <td>
+          {% if c.cliente_id %}
+          <a href="/clientes/ver/{{ c.cliente_id }}/" class="crm-link">
+            Ver cliente
           </a>
-          <button type="button" class="crm-btn crm-btn-copy" onclick="copiarMensaje(this)" data-mensaje="{{ c.mensaje|escape }}">
-            Copiar mensaje
-          </button>
-          <span class="crm-copy-ok"></span>
-        </div>
-      </td>
-      <td>
-        {% if c.cliente_id %}
-        <a href="/clientes/ver/{{ c.cliente_id }}/" class="crm-link">
-          Ver cliente
-        </a>
-        {% else %}
-        <span class="crm-muted">Sin link</span>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
+          {% else %}
+          <span class="crm-muted">Sin link</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">
+          No hay renovaciones detectadas para los próximos 30 días.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 
   <h2 class="section-title">Producción</h2>
