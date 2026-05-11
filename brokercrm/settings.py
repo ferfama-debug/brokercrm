@@ -45,7 +45,7 @@ ALLOWED_HOSTS = [
 
 
 # =========================
-# LOGGING
+# LOGGING (RECUPERADO COMPLETO)
 # =========================
 
 LOGGING = {
@@ -154,15 +154,16 @@ WSGI_APPLICATION = "brokercrm.wsgi.application"
 # =========================
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+USE_SQLITE_LOCAL = os.environ.get("USE_SQLITE_LOCAL", "False") == "True"
 
-if DATABASE_URL:
+if DATABASE_URL and not USE_SQLITE_LOCAL:
     import dj_database_url
 
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=not DEBUG,
+            ssl_require=False,  # Cambiado a False para estabilidad en Render
         )
     }
 else:
@@ -220,7 +221,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # =========================
-# SEGURIDAD
+# SEGURIDAD (CORREGIDO)
 # =========================
 
 CSRF_TRUSTED_ORIGINS = [
@@ -234,13 +235,13 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
+# Ajuste para evitar el Error 500 en el primer deploy de Render
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = False
 
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
-
-SECURE_SSL_REDIRECT = not DEBUG
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -308,13 +309,13 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get(
 SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "documents")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("⚠️ SUPABASE no configurado correctamente (variables faltantes)")
+    print("SUPABASE no configurado correctamente (variables faltantes)")
     SUPABASE_URL = None
     SUPABASE_KEY = None
 else:
-    print("✅ SUPABASE configurado")
-    print("✅ SUPABASE URL:", SUPABASE_URL)
-    print("✅ SUPABASE BUCKET:", SUPABASE_BUCKET)
+    print("SUPABASE configurado")
+    print("SUPABASE URL:", SUPABASE_URL)
+    print("SUPABASE BUCKET:", SUPABASE_BUCKET)
     default_db = DATABASES["default"]
     print("DB ENGINE:", default_db.get("ENGINE"))
     print("DB NAME:", default_db.get("NAME"))
