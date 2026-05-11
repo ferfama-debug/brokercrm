@@ -18,7 +18,7 @@ urlpatterns = [
     # LOGIN / LOGOUT / HEALTH / CREAR ADMIN
     path("accounts/", include("accounts.urls")),
     # PANEL PRINCIPAL
-    path("", include("panel.urls")),
+    path("", include("dashboard.urls")),
     # CLIENTES
     path("clientes/", include("clients.urls")),
     # POLIZAS
