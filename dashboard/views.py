@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from clients.models import Client
 from policies.models import Policy, Payment
-from django.contrib.auth.models import User
+from accounts.models import User
 from datetime import date, timedelta
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
