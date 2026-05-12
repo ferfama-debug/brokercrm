@@ -30,9 +30,16 @@
     </div>
 
     <div class="form-row">
+      <!-- CIRUGÍA QUIRÚRGICA: Se muestra el Tipo de Riesgo dinámico -->
       <div class="form-grupo">
-        <label>Tipo</label>
-        <div class="dato">{{ poliza.tipo_poliza }}</div>
+        <label>Tipo de Riesgo</label>
+        <div class="dato">
+          {% if poliza.risk_type %}
+            {{ poliza.risk_type.nombre }}
+          {% else %}
+            No especificado
+          {% endif %}
+        </div>
       </div>
 
       <div class="form-grupo">
@@ -41,21 +48,28 @@
       </div>
     </div>
 
-    {% if poliza.forma_pago == "CUPONERA" and poliza.frecuencia_cuponera %}
     <div class="form-row">
+      <!-- Se mantiene la Categoría (Tipo) como dato secundario -->
+      <div class="form-grupo">
+        <label>Categoría</label>
+        <div class="dato">{{ poliza.get_tipo_poliza_display }}</div>
+      </div>
+
+      {% if poliza.forma_pago == "CUPONERA" and poliza.frecuencia_cuponera %}
       <div class="form-grupo">
         <label>Frecuencia</label>
         <div class="dato">
           {% if poliza.frecuencia_cuponera == 1 %}Mensual
           {% elif poliza.frecuencia_cuponera == 3 %}Trimestral
+          {% elif poliza.frecuencia_cuponera == 4 %}Cuatrimestral
           {% elif poliza.frecuencia_cuponera == 6 %}Semestral
           {% elif poliza.frecuencia_cuponera == 12 %}Anual
           {% else %}{{ poliza.frecuencia_cuponera }}
           {% endif %}
         </div>
       </div>
+      {% endif %}
     </div>
-    {% endif %}
 
     <div class="form-row">
       <div class="form-grupo">
