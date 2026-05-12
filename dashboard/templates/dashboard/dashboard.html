@@ -66,15 +66,10 @@
 
                     <td>
                         <small style="color: var(--text-muted);">
-                            {# Lógica de seguridad para evitar Error 500 #}
-                            {% if item.poliza %}
-                                {{ item.poliza.company.nombre }}
-                            {% else %}
-                                {{ item.compania|default:"---" }}
-                            {% endif %}
-                            <br>
+                            {# Mostramos la compañía que ahora sí viaja en el diccionario #}
+                            {{ item.compania|default:"---" }}<br>
                             <span style="color: var(--green-400); font-size: 11px;">
-                                N° {% if item.poliza %}{{ item.poliza.policy_number }}{% else %}{{ item.numero|default:"S/N" }}{% endif %}
+                                N° {{ item.n_poliza|default:"S/N" }}
                             </span>
                         </small>
                     </td>

@@ -17,13 +17,14 @@ def home(request):
     # 🔥 CONTADORES GENERALES - VISIBILIDAD TOTAL SIN FILTROS
     if request.user.is_superuser:
         clientes_qs = Client.objects.all()
-        policies_qs = Policy.objects.select_related("client").all()
+        # Agregamos select_related("company") para que cargue la marca de la póliza
+        policies_qs = Policy.objects.select_related("client", "company").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
     else:
         # Quitamos el filtro por productor para que Martínez Herrera aparezca siempre
         clientes_qs = Client.objects.all()
-        policies_qs = Policy.objects.all().select_related("client")
+        policies_qs = Policy.objects.all().select_related("client", "company")
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
 
@@ -85,6 +86,9 @@ def home(request):
                     "cliente": p.client,
                     "cliente_id": p.client.id,
                     "numero": p.policy_number,
+                    "compania_obj": str(
+                        p.company
+                    ),  # Guardamos el nombre de la compañía
                     "telefono": telefono,
                     "dias": dias,
                     "mensaje": mensaje,
@@ -106,6 +110,8 @@ def home(request):
                 "dias": c["dias"],
                 "prioridad": c["prioridad"],
                 "cantidad": 1,
+                "compania": c["compania_obj"],  # Pasamos la compañía al grupo
+                "n_poliza": c["numero"],  # Pasamos el número al grupo
             }
         else:
             clientes_agrupados[cid]["cantidad"] += 1
@@ -113,6 +119,8 @@ def home(request):
                 clientes_agrupados[cid]["dias"] = c["dias"]
                 clientes_agrupados[cid]["mensaje"] = c["mensaje"]
                 clientes_agrupados[cid]["prioridad"] = c["prioridad"]
+                clientes_agrupados[cid]["compania"] = c["compania_obj"]
+                clientes_agrupados[cid]["n_poliza"] = c["numero"]
 
     clientes_llamar = sorted(clientes_agrupados.values(), key=lambda x: x["dias"])
     clientes_hoy = len(clientes_llamar)
@@ -190,7 +198,7 @@ def home(request):
     crecimiento_totales = []
     for item in crecimiento_db:
         if item["mes"]:
-            meses.append(item["mes"].strftime("%b %Y"))
+            mes.append(item["mes"].strftime("%b %Y"))
             crecimiento_totales.append(item["total"])
 
     context = {
