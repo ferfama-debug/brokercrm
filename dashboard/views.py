@@ -17,7 +17,7 @@ def home(request):
     # 🔥 CONTADORES GENERALES - VISIBILIDAD TOTAL SIN FILTROS
     if request.user.is_superuser:
         clientes_qs = Client.objects.all()
-        # FIX: Eliminado "company" de select_related porque es un CharField, no una relación.
+        # FIX: Eliminado "company" de select_related porque es un CharField
         policies_qs = Policy.objects.select_related("client").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
@@ -30,7 +30,8 @@ def home(request):
     clientes = clientes_qs.count()
     polizas = policies_qs.count()
 
-    polizas_por_vencer = []
+    # Sincronización con base.html
+    ultimas_alertas = []
     clientes_llamar_lista = []
 
     vencidas = 0
@@ -45,19 +46,21 @@ def home(request):
             vencidas += 1
             continue
 
-        polizas_por_vencer.append(
-            {
-                "cliente": p.client,
-                "numero": p.policy_number,
-                "compania": p.company,
-                "vencimiento": p.end_date,
-                "dias": dias,
-                "ultimo_envio_vencimiento": p.ultimo_envio_vencimiento,
-                "ultimo_envio_cuponera": p.ultimo_envio_cuponera,
-            }
-        )
-
+        # Lógica para la CAMPANITA (espera level y message)
         if dias <= 30:
+            lvl = "info"
+            if dias <= 7:
+                lvl = "danger"
+            elif dias <= 15:
+                lvl = "warning"
+
+            ultimas_alertas.append(
+                {
+                    "message": f"{p.client.nombre_completo()} - Vence en {dias} días",
+                    "level": lvl,
+                }
+            )
+
             telefono = getattr(p.client, "phone", "") or getattr(
                 p.client, "telefono", ""
             )
@@ -85,9 +88,7 @@ def home(request):
                     "cliente": p.client,
                     "cliente_id": p.client.id,
                     "numero": p.policy_number,
-                    "compania_texto": str(
-                        p.company
-                    ),  # Capturamos el texto de la compañía
+                    "compania_texto": str(p.company),
                     "telefono": telefono,
                     "dias": dias,
                     "mensaje": mensaje,
@@ -109,8 +110,8 @@ def home(request):
                 "dias": c["dias"],
                 "prioridad": c["prioridad"],
                 "cantidad": 1,
-                "compania": c["compania_texto"],  # Inyectamos compañía en el grupo
-                "n_poliza": c["numero"],  # Inyectamos número en el grupo
+                "compania": c["compania_texto"],
+                "n_poliza": c["numero"],
             }
         else:
             clientes_agrupados[cid]["cantidad"] += 1
@@ -124,7 +125,7 @@ def home(request):
     clientes_llamar = sorted(clientes_agrupados.values(), key=lambda x: x["dias"])
     clientes_hoy = len(clientes_llamar)
 
-    # 🔥 COBRANZAS
+    # 🔥 COBRANZAS (Tus bloques originales intactos)
     cobranzas_vencidas = pagos_qs.filter(
         fecha_vencimiento__lt=hoy, fecha_pago__isnull=True
     ).count()
@@ -153,7 +154,7 @@ def home(request):
         fecha_vencimiento__lte=hoy, fecha_pago__isnull=True
     )
 
-    # ⭐ SCORE
+    # ⭐ SCORE (Original intacto)
     clientes_score_db = clientes_qs.annotate(total_polizas=Count("policy")).order_by(
         "-total_polizas"
     )
@@ -169,7 +170,7 @@ def home(request):
             {"cliente": c, "polizas": c.total_polizas, "score": score}
         )
 
-    # 🏢 PRODUCCIÓN
+    # 🏢 PRODUCCIÓN (Original intacto)
     produccion_companias_db = (
         policies_qs.values("company")
         .annotate(total=Count("id"))
@@ -186,26 +187,34 @@ def home(request):
         companias.append(company)
         cantidades.append(total)
 
-    # 📈 CRECIMIENTO
+    # 📈 CRECIMIENTO (Original intacto con fix de 'meses')
     crecimiento_db = (
-        policies_qs.annotate(mes=TruncMonth("start_date"))
-        .values("mes")
+        policies_qs.annotate(mes_p=TruncMonth("start_date"))
+        .values("mes_p")
         .annotate(total=Count("id"))
-        .order_by("mes")
+        .order_by("mes_p")
     )
     meses = []
     crecimiento_totales = []
     for item in crecimiento_db:
-        if item["mes"]:
-            # FIX: Corregido a "meses" para coincidir con la definición superior.
-            meses.append(item["mes"].strftime("%b %Y"))
+        if item["mes_p"]:
+            meses.append(item["mes_p"].strftime("%b %Y"))
             crecimiento_totales.append(item["total"])
+
+    # Color para el menú lateral
+    alert_color = "media"
+    if vencen_7 > 0:
+        alert_color = "critica"
+    elif vencen_15 > 0:
+        alert_color = "alta"
 
     context = {
         "clientes": clientes,
         "polizas": polizas,
         "usuarios": usuarios,
-        "alertas": len(polizas_por_vencer),
+        "alert_count": len(ultimas_alertas),  # Para la campanita
+        "ultimas_alertas": ultimas_alertas,  # Para la campanita
+        "alert_color": alert_color,
         "clientes_hoy": clientes_hoy,
         "cobranzas_vencidas": cobranzas_vencidas,
         "cobranzas_hoy": cobranzas_hoy,
@@ -219,7 +228,6 @@ def home(request):
         "vencen_7": vencen_7,
         "vencen_15": vencen_15,
         "vencen_30": vencen_30,
-        "polizas_por_vencer": polizas_por_vencer,
         "clientes_score": clientes_score,
         "clientes_llamar": clientes_llamar,
         "companias": companias,
