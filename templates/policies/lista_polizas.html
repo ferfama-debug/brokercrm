@@ -8,7 +8,6 @@
   </div>
 </div>
 
-<!-- FILTRO -->
 <div class="card" style="margin-bottom: 20px;">
   <form method="get" class="filtro-form">
     <label class="form-label" style="margin-bottom:0;">Filtrar por compañía</label>
@@ -21,7 +20,6 @@
   </form>
 </div>
 
-<!-- LISTA DE CLIENTES -->
 <div class="clientes-lista">
   {% for cliente in clientes %}
   <div class="cliente-box">
@@ -203,20 +201,22 @@ body.light-mode .tipo-pill {
   gap: 12px;
 }
 
+/* 🟢 FIX QUIRÚRGICO: AVATAR LEIBLE 🟢 */
 .cliente-avatar-lg {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--green-700), var(--green-900));
-  border: 1px solid var(--border-strong);
+  background: linear-gradient(135deg, var(--green-600), var(--green-800));
+  border: 1px solid var(--green-400);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--green-300);
+  font-size: 14px;
+  font-weight: 800; /* Letra bien gruesa para lectura */
+  color: #ffffff !important; /* Blanco puro para máximo contraste */
   flex-shrink: 0;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .cliente-nombre-texto {
@@ -366,10 +366,12 @@ body.light-mode .cliente-header:hover {
   background: #f0fdf4 !important;
 }
 
+/* 🟢 FIX AVATAR MODO CLARO 🟢 */
 body.light-mode .cliente-avatar-lg {
   background: linear-gradient(135deg, #15803d, #166534) !important;
   border-color: rgba(16, 185, 129, 0.20) !important;
-  color: #dcfce7 !important;
+  color: #ffffff !important; /* Siempre blanco para lectura */
+  font-weight: 800 !important;
 }
 
 body.light-mode .polizas-count {
