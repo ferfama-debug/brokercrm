@@ -145,7 +145,7 @@
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
             <label>Método de Pago</label>
-            <select name="forma_pago" id="forma_pago" class="form-control">
+            <select name="forma_pago" id="forma_pago" class="form-control" onchange="toggleCuponeraFields()">
               <option value="TARJETA">Tarjeta de crédito</option>
               <option value="CBU">Débito / CBU</option>
               <option value="CUPONERA">Cuponera de pago</option>
@@ -153,8 +153,8 @@
           </div>
 
           <div class="form-grupo">
-            <label>Inicio vencimiento pago</label>
-            <input type="date" name="fecha_primer_vencimiento" class="form-control required" required>
+            <label id="label_vencimiento">Inicio vencimiento pago</label>
+            <input type="date" name="fecha_primer_vencimiento_cuponera" id="fecha_primer_vencimiento_cuponera" class="form-control">
           </div>
 
           <div class="form-grupo">
@@ -214,6 +214,25 @@ function mostrarNombre(input, id) {
     el.style.color = "var(--text-muted)";
   }
 }
+
+function toggleCuponeraFields() {
+  var formaPago = document.getElementById('forma_pago').value;
+  var inputVenc = document.getElementById('fecha_primer_vencimiento_cuponera');
+  var labelVenc = document.getElementById('label_vencimiento');
+  
+  if (formaPago === 'CUPONERA') {
+    inputVenc.required = true;
+    labelVenc.innerText = "Inicio vencimiento pago *";
+    labelVenc.style.color = "var(--green-400)";
+  } else {
+    inputVenc.required = false;
+    labelVenc.innerText = "Inicio vencimiento pago";
+    labelVenc.style.color = "var(--text-secondary)";
+  }
+}
+
+// Ejecutar al inicio por si hay un valor pre-cargado
+document.addEventListener('DOMContentLoaded', toggleCuponeraFields);
 </script>
 
 {% endblock %}

@@ -524,9 +524,9 @@ def crear_poliza(request):
                 if request.POST.get("frecuencia_cuponera")
                 else 1  # Default mensual
             ),
-            # FIX QUIRÚRGICO: Ajuste de nombre de parámetro para coincidir con el formulario
+            # CIRUGÍA QUIRÚRGICA: Nombre del campo coincide exactamente con models.py
             fecha_primer_vencimiento_cuponera=request.POST.get(
-                "fecha_primer_vencimiento"
+                "fecha_primer_vencimiento_cuponera"
             )
             or None,
             pdf_poliza=pdf_url or None,
@@ -593,9 +593,9 @@ def renovar_poliza(request, poliza_id):
                 if request.POST.get("frecuencia_cuponera")
                 else 1
             ),
-            # FIX QUIRÚRGICO: Agregada captura de fecha en renovación
+            # CIRUGÍA QUIRÚRGICA: Captura de fecha también en renovación
             fecha_primer_vencimiento_cuponera=request.POST.get(
-                "fecha_primer_vencimiento"
+                "fecha_primer_vencimiento_cuponera"
             )
             or None,
             pdf_poliza=pdf_url or poliza.pdf_poliza,
