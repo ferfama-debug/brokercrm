@@ -142,7 +142,7 @@
           <div class="sub-line"></div>
         </div>
 
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
             <label>Método de Pago</label>
             <select name="forma_pago" id="forma_pago" class="form-control">
@@ -150,6 +150,11 @@
               <option value="CBU">Débito / CBU</option>
               <option value="CUPONERA">Cuponera de pago</option>
             </select>
+          </div>
+
+          <div class="form-grupo">
+            <label>Inicio vencimiento pago</label>
+            <input type="date" name="fecha_primer_vencimiento" class="form-control required" required>
           </div>
 
           <div class="form-grupo">
