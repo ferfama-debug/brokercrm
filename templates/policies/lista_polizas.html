@@ -27,7 +27,7 @@
     <div class="cliente-header" onclick="togglePolizas('cliente{{ cliente.id }}', this)">
       <div class="cliente-header-left">
         <div class="cliente-avatar-lg">
-          {{ cliente|truncatechars:2|upper }}
+          {{ cliente.nombre|slice:":1"|upper }}
         </div>
         <span class="cliente-nombre-texto">{{ cliente }}</span>
       </div>
