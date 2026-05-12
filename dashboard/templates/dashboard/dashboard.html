@@ -66,9 +66,15 @@
 
                     <td>
                         <small style="color: var(--text-muted);">
-                            {{ item.poliza.company.nombre|default:item.compania_nombre|default:"---" }}<br>
+                            {# Lógica de seguridad para evitar Error 500 #}
+                            {% if item.poliza %}
+                                {{ item.poliza.company.nombre }}
+                            {% else %}
+                                {{ item.compania|default:"---" }}
+                            {% endif %}
+                            <br>
                             <span style="color: var(--green-400); font-size: 11px;">
-                                N° {{ item.poliza.policy_number|default:item.n_poliza|default:"S/N" }}
+                                N° {% if item.poliza %}{{ item.poliza.policy_number }}{% else %}{{ item.numero|default:"S/N" }}{% endif %}
                             </span>
                         </small>
                     </td>
