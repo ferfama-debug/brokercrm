@@ -17,14 +17,13 @@ def home(request):
     # 🔥 CONTADORES GENERALES - VISIBILIDAD TOTAL SIN FILTROS
     if request.user.is_superuser:
         clientes_qs = Client.objects.all()
-        # Agregamos select_related("company") para que cargue la marca de la póliza
-        policies_qs = Policy.objects.select_related("client", "company").all()
+        # FIX: Eliminado "company" de select_related porque es un CharField, no una relación.
+        policies_qs = Policy.objects.select_related("client").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
     else:
-        # Quitamos el filtro por productor para que Martínez Herrera aparezca siempre
         clientes_qs = Client.objects.all()
-        policies_qs = Policy.objects.all().select_related("client", "company")
+        policies_qs = Policy.objects.all().select_related("client")
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
 
@@ -86,9 +85,9 @@ def home(request):
                     "cliente": p.client,
                     "cliente_id": p.client.id,
                     "numero": p.policy_number,
-                    "compania_obj": str(
+                    "compania_texto": str(
                         p.company
-                    ),  # Guardamos el nombre de la compañía
+                    ),  # Capturamos el texto de la compañía
                     "telefono": telefono,
                     "dias": dias,
                     "mensaje": mensaje,
@@ -110,8 +109,8 @@ def home(request):
                 "dias": c["dias"],
                 "prioridad": c["prioridad"],
                 "cantidad": 1,
-                "compania": c["compania_obj"],  # Pasamos la compañía al grupo
-                "n_poliza": c["numero"],  # Pasamos el número al grupo
+                "compania": c["compania_texto"],  # Inyectamos compañía en el grupo
+                "n_poliza": c["numero"],  # Inyectamos número en el grupo
             }
         else:
             clientes_agrupados[cid]["cantidad"] += 1
@@ -119,7 +118,7 @@ def home(request):
                 clientes_agrupados[cid]["dias"] = c["dias"]
                 clientes_agrupados[cid]["mensaje"] = c["mensaje"]
                 clientes_agrupados[cid]["prioridad"] = c["prioridad"]
-                clientes_agrupados[cid]["compania"] = c["compania_obj"]
+                clientes_agrupados[cid]["compania"] = c["compania_texto"]
                 clientes_agrupados[cid]["n_poliza"] = c["numero"]
 
     clientes_llamar = sorted(clientes_agrupados.values(), key=lambda x: x["dias"])
@@ -198,6 +197,7 @@ def home(request):
     crecimiento_totales = []
     for item in crecimiento_db:
         if item["mes"]:
+            # FIX: Corregido a "meses" para coincidir con la definición superior.
             meses.append(item["mes"].strftime("%b %Y"))
             crecimiento_totales.append(item["total"])
 
@@ -229,5 +229,4 @@ def home(request):
         "produccion_companias": produccion_companias,
     }
 
-    # 🔥 LA RUTA AL TEMPLATE AHORA ES INDEPENDIENTE
     return render(request, "dashboard/dashboard.html", context)
