@@ -63,17 +63,20 @@
                         {% endif %}
                     </td>
                     <td style="font-family: var(--font-mono);">{{ item.dias }}d</td>
-                    
+
                     <td>
                         <small style="color: var(--text-muted);">
-                            {{ item.poliza.company.nombre }}<br>
-                            <span style="color: var(--green-400); font-size: 11px;">N° {{ item.poliza.policy_number }}</span>
+                            {{ item.poliza.company.nombre|default:item.compania_nombre|default:"---" }}<br>
+                            <span style="color: var(--green-400); font-size: 11px;">
+                                N° {{ item.poliza.policy_number|default:item.n_poliza|default:"S/N" }}
+                            </span>
                         </small>
                     </td>
+
                     <td style="text-align: right;">
                         <a href="https://wa.me/54{{ item.telefono }}?text={{ item.mensaje|urlencode }}" 
-                           target="_blank" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">
-                            WhatsApp
+                        target="_blank" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">
+                        WhatsApp
                         </a>
                     </td>
                 </tr>
