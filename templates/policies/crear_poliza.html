@@ -1,12 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
 
+<style>
+  /* Ajustes quirúrgicos para mejorar la legibilidad de los campos */
+  .form-grupo { margin-bottom: 20px; }
+  .form-grupo label { 
+    display: block; 
+    margin-bottom: 8px; 
+    color: var(--text-secondary); /* Usa tu verde suave */
+    font-size: 12px; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+  }
+  .form-control {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--border) !important;
+    padding: 12px !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-primary) !important;
+  }
+  .form-control:focus {
+    border-color: var(--green-400) !important;
+    background: rgba(52, 211, 100, 0.05) !important;
+  }
+  .form-section-title {
+    margin-top: 10px;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+</style>
+
 <div class="page-header">
   <div>
     <h1 class="page-title">Nueva póliza</h1>
     <p class="page-subtitle">Completá los datos para registrar una nueva póliza</p>
   </div>
-  </div>
+</div>
 
 {% if error %}
 <div class="card" style="margin-bottom: 16px; border-color: rgba(239,68,68,0.25);">
@@ -27,7 +59,7 @@
           <div class="sub-line"></div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
             <label>Cliente</label>
             <select name="client" class="form-control required" required>
@@ -43,11 +75,11 @@
 
           <div class="form-grupo">
             <label>N° Póliza</label>
-            <input type="text" name="policy_number" class="form-control required" required>
+            <input type="text" name="policy_number" class="form-control required" required placeholder="Ej: 123456789">
           </div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 15px;">
           <div class="form-grupo">
             <label>Compañía</label>
             <select name="company" class="form-control required" required>
@@ -66,20 +98,17 @@
                 <option value="{{ r.id }}">{{ r.nombre }}</option>
               {% endfor %}
             </select>
-            <small style="color: #64748b; font-size: 10px; margin-top: 4px;">Gestionable desde Administración.</small>
           </div>
-
-          <input type="hidden" name="tipo_poliza" value="OTRO">
         </div>
       </div>
 
-      <div class="form-section">
+      <div class="form-section" style="margin-top: 30px;">
         <div class="form-section-title titulo-pro">
           Vigencia de Póliza
           <div class="sub-line"></div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
             <label>Fecha de inicio</label>
             <input type="date" name="start_date" class="form-control required" required>
@@ -91,13 +120,13 @@
         </div>
       </div>
 
-      <div class="form-section">
+      <div class="form-section" style="margin-top: 30px;">
         <div class="form-section-title titulo-pro">
           Facturación y Cobro
           <div class="sub-line"></div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
             <label>Método de Pago</label>
             <select name="forma_pago" id="forma_pago" class="form-control">
@@ -118,48 +147,34 @@
             </select>
           </div>
         </div>
-
-        <div class="form-row">
-            <div class="form-grupo">
-                <label>Fecha de Primer Vencimiento</label>
-                <input type="date" name="fecha_primer_vencimiento_cuponera" class="form-control">
-                <small style="color: #94a3b8; font-size: 10px; margin-top: 4px;">Dejar vacío si coincide con el inicio de vigencia.</small>
-            </div>
-        </div>
       </div>
 
-      <div class="form-section">
+      <div class="form-section" style="margin-top: 30px;">
         <div class="form-section-title titulo-pro">
           Documentos
           <div class="sub-line"></div>
         </div>
 
-        <div class="upload-grid">
+        <div class="upload-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <input type="file" id="pdf_poliza" name="pdf_poliza" accept=".pdf,application/pdf" class="file-input-hidden" onchange="mostrarNombre(this, 'poliza_nombre')">
-          <label for="pdf_poliza" class="drop-zone drop-zone-premium">
-            <div class="drop-icon">📄</div>
-            <div class="drop-content">
-              <strong>Subir póliza</strong>
-              <span>Archivo principal</span>
-            </div>
-            <div id="poliza_nombre" class="file-badge file-badge-empty">Ningún archivo seleccionado</div>
+          <label for="pdf_poliza" class="drop-zone drop-zone-premium" style="border: 1px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer;">
+            <div class="drop-icon" style="font-size: 24px; margin-bottom: 10px;">📄</div>
+            <strong>Subir póliza</strong>
+            <div id="poliza_nombre" style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">Ningún archivo seleccionado</div>
           </label>
 
           <input type="file" id="cuponera_pdf" name="cuponera_pdf" accept=".pdf,application/pdf" class="file-input-hidden" onchange="mostrarNombre(this, 'cuponera_nombre')">
-          <label for="cuponera_pdf" class="drop-zone drop-zone-premium">
-            <div class="drop-icon">💳</div>
-            <div class="drop-content">
-              <strong>Subir cuponera</strong>
-              <span>Medios de pago</span>
-            </div>
-            <div id="cuponera_nombre" class="file-badge file-badge-empty">Ningún archivo seleccionado</div>
+          <label for="cuponera_pdf" class="drop-zone drop-zone-premium" style="border: 1px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer;">
+            <div class="drop-icon" style="font-size: 24px; margin-bottom: 10px;">💳</div>
+            <strong>Subir cuponera</strong>
+            <div id="cuponera_nombre" style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">Ningún archivo seleccionado</div>
           </label>
         </div>
       </div>
 
-      <div class="form-actions">
+      <div class="form-actions" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 15px;">
         <a href="/polizas/" class="btn btn-ghost">Cancelar</a>
-        <button type="submit" class="btn btn-primary btn-pro">
+        <button type="submit" class="btn btn-primary btn-pro" style="padding: 12px 30px;">
           Guardar póliza
         </button>
       </div>
@@ -172,10 +187,10 @@ function mostrarNombre(input, id) {
   var el = document.getElementById(id);
   if (input.files && input.files.length > 0) {
     el.innerText = input.files[0].name;
-    el.classList.remove("file-badge-empty");
+    el.style.color = "var(--green-400)";
   } else {
     el.innerText = "Ningún archivo seleccionado";
-    el.classList.add("file-badge-empty");
+    el.style.color = "var(--text-muted)";
   }
 }
 </script>
