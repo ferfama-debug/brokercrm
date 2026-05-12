@@ -4,33 +4,38 @@
 <div class="page-header">
     <div>
         <h1 class="page-title">Panel de Control</h1>
-        <p class="page-subtitle">Bienvenido al CRM de Fuerza Natural Broker</p>
+        <p class="page-subtitle">Gestión integral de Fuerza Natural Broker</p>
     </div>
 </div>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
-    <div class="card shadow-glow">
+    
+    <a href="/clientes/" class="card shadow-glow" style="text-decoration: none; display: block; transition: transform 0.2s ease;">
         <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Clientes Totales</small>
         <div style="font-size: 24px; font-weight: 600; color: var(--green-400); margin-top: 8px;">{{ clientes }}</div>
-    </div>
-    <div class="card shadow-glow">
+    </a>
+
+    <a href="/polizas/" class="card shadow-glow" style="text-decoration: none; display: block; transition: transform 0.2s ease;">
         <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Pólizas Activas</small>
         <div style="font-size: 24px; font-weight: 600; color: var(--green-400); margin-top: 8px;">{{ polizas }}</div>
-    </div>
-    <div class="card shadow-glow" style="border-left: 2px solid #ef4444;">
+    </a>
+
+    <a href="/alertas/" class="card shadow-glow" style="text-decoration: none; display: block; transition: transform 0.2s ease; border-left: 2px solid #ef4444;">
         <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Vencimientos 30 días</small>
         <div style="font-size: 24px; font-weight: 600; color: #fca5a5; margin-top: 8px;">{{ clientes_hoy }}</div>
-    </div>
-    <div class="card shadow-glow">
+    </a>
+
+    <a href="/polizas/cobranzas/" class="card shadow-glow" style="text-decoration: none; display: block; transition: transform 0.2s ease;">
         <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 600; font-size: 10px;">Deuda Exigible</small>
         <div style="font-size: 24px; font-weight: 600; color: var(--green-400); margin-top: 8px;">${{ deuda_total }}</div>
-    </div>
+    </a>
+
 </div>
 
 <div class="card shadow-glow" style="border-top: 2px solid var(--green-400); margin-bottom: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="color: var(--green-400); margin: 0; font-size: 18px;">🚀 CRM de Renovaciones (Próximos 30 días)</h2>
-        <span class="badge badge-green">{{ clientes_hoy }} Pendientes</span>
+        <h2 style="color: var(--green-400); margin: 0; font-size: 18px;"> CRM de Renovaciones Próximas</h2>
+        <span class="badge badge-green">{{ clientes_hoy }} Clientes por contactar</span>
     </div>
     
     <div class="table-wrap">
@@ -81,10 +86,21 @@
 <div class="card" style="background: var(--bg-card-hover); border-left: 4px solid var(--green-600);">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h3 style="margin: 0; font-size: 14px; color: var(--text-primary);">💰 Gestión de Cobranzas</h3>
-            <p style="margin: 2px 0 0; font-size: 11px; color: var(--text-muted);">Acceder al panel detallado de pagos pendientes</p>
+            <h3 style="margin: 0; font-size: 14px; color: var(--text-primary);"> Gestión de Cobranzas</h3>
+            <p style="margin: 2px 0 0; font-size: 11px; color: var(--text-muted);">Ver detalle de pagos y cuotas pendientes</p>
         </div>
         <a href="/polizas/cobranzas/" class="btn btn-secondary">Ir a Cobranzas</a>
     </div>
 </div>
+
+<div class="card" style="margin-top: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 style="margin: 0; font-size: 14px; color: var(--text-primary);"> Panel Administrativo</h3>
+            <p style="margin: 2px 0 0; font-size: 11px; color: var(--text-muted);">Gestionar base de datos del sistema</p>
+        </div>
+        <a href="/admin/" class="btn btn-ghost" style="border: 1px solid var(--border);">Django Admin</a>
+    </div>
+</div>
+
 {% endblock %}
