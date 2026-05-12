@@ -198,7 +198,7 @@ def home(request):
     crecimiento_totales = []
     for item in crecimiento_db:
         if item["mes"]:
-            mes.append(item["mes"].strftime("%b %Y"))
+            meses.append(item["mes"].strftime("%b %Y"))
             crecimiento_totales.append(item["total"])
 
     context = {
