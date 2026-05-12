@@ -7,7 +7,7 @@
   .form-grupo label { 
     display: block; 
     margin-bottom: 8px; 
-    color: var(--text-secondary); /* Usa tu verde suave */
+    color: var(--text-secondary); 
     font-size: 12px; 
     font-weight: 600; 
     text-transform: uppercase; 
@@ -79,7 +79,7 @@
           </div>
         </div>
 
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 15px;">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 15px;">
           <div class="form-grupo">
             <label>Compañía</label>
             <select name="company" class="form-control required" required>
@@ -91,12 +91,22 @@
           </div>
 
           <div class="form-grupo">
-            <label>Tipo de Riesgo (Dinámico)</label>
+            <label>Tipo de Riesgo</label>
             <select name="risk_type" class="form-control">
               <option value="">Seleccionar riesgo...</option>
               {% for r in riesgos %}
                 <option value="{{ r.id }}">{{ r.nombre }}</option>
               {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-grupo">
+            <label>Categoría (Tipo de Póliza)</label>
+            <select name="tipo_poliza" class="form-control required" required>
+              <option value="OTRO">Otro</option>
+              <option value="AUTO">Automotor</option>
+              <option value="HOGAR">Hogar</option>
+              <option value="VIDA">Vida</option>
             </select>
           </div>
         </div>
