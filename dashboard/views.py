@@ -17,7 +17,6 @@ def home(request):
     # 🔥 CONTADORES GENERALES - VISIBILIDAD TOTAL SIN FILTROS
     if request.user.is_superuser:
         clientes_qs = Client.objects.all()
-        # FIX: Eliminado "company" de select_related porque es un CharField
         policies_qs = Policy.objects.select_related("client").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
@@ -27,8 +26,13 @@ def home(request):
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
 
+    # CIRUGÍA QUIRÚRGICA: Conteo de pólizas activas vs anuladas
+    # Las activas son las que NO están anuladas
+    polizas_activas_count = policies_qs.filter(anulada=False).count()
+    polizas_anuladas_count = policies_qs.filter(anulada=True).count()
+
     clientes = clientes_qs.count()
-    polizas = policies_qs.count()
+    polizas = polizas_activas_count  # Usamos las activas para el contador principal
 
     # Sincronización con base.html
     ultimas_alertas = []
@@ -39,14 +43,16 @@ def home(request):
     vencen_15 = 0
     vencen_30 = 0
 
-    for p in policies_qs:
+    # Filtramos para que el CRM de renovaciones no muestre pólizas que ya fueron anuladas
+    policies_para_alertas = policies_qs.filter(anulada=False)
+
+    for p in policies_para_alertas:
         dias = (p.end_date - hoy).days
 
         if dias < 0:
             vencidas += 1
             continue
 
-        # Lógica para la CAMPANITA (espera level y message)
         if dias <= 30:
             lvl = "info"
             if dias <= 7:
@@ -125,7 +131,7 @@ def home(request):
     clientes_llamar = sorted(clientes_agrupados.values(), key=lambda x: x["dias"])
     clientes_hoy = len(clientes_llamar)
 
-    # 🔥 COBRANZAS (Tus bloques originales intactos)
+    # 🔥 COBRANZAS (Intacto)
     cobranzas_vencidas = pagos_qs.filter(
         fecha_vencimiento__lt=hoy, fecha_pago__isnull=True
     ).count()
@@ -154,7 +160,7 @@ def home(request):
         fecha_vencimiento__lte=hoy, fecha_pago__isnull=True
     )
 
-    # ⭐ SCORE (Original intacto)
+    # ⭐ SCORE (Intacto)
     clientes_score_db = clientes_qs.annotate(total_polizas=Count("policy")).order_by(
         "-total_polizas"
     )
@@ -170,7 +176,7 @@ def home(request):
             {"cliente": c, "polizas": c.total_polizas, "score": score}
         )
 
-    # 🏢 PRODUCCIÓN (Original intacto)
+    # 🏢 PRODUCCIÓN (Intacto)
     produccion_companias_db = (
         policies_qs.values("company")
         .annotate(total=Count("id"))
@@ -187,7 +193,7 @@ def home(request):
         companias.append(company)
         cantidades.append(total)
 
-    # 📈 CRECIMIENTO (Original intacto con fix de 'meses')
+    # 📈 CRECIMIENTO (Intacto)
     crecimiento_db = (
         policies_qs.annotate(mes_p=TruncMonth("start_date"))
         .values("mes_p")
@@ -201,7 +207,6 @@ def home(request):
             meses.append(item["mes_p"].strftime("%b %Y"))
             crecimiento_totales.append(item["total"])
 
-    # Color para el menú lateral
     alert_color = "media"
     if vencen_7 > 0:
         alert_color = "critica"
@@ -211,9 +216,10 @@ def home(request):
     context = {
         "clientes": clientes,
         "polizas": polizas,
+        "polizas_anuladas_count": polizas_anuladas_count,  # Enviamos el dato al HTML
         "usuarios": usuarios,
-        "alert_count": len(ultimas_alertas),  # Para la campanita
-        "ultimas_alertas": ultimas_alertas,  # Para la campanita
+        "alert_count": len(ultimas_alertas),
+        "ultimas_alertas": ultimas_alertas,
         "alert_color": alert_color,
         "clientes_hoy": clientes_hoy,
         "cobranzas_vencidas": cobranzas_vencidas,
