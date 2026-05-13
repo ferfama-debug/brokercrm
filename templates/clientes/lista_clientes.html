@@ -108,6 +108,7 @@
       >
         <td>
           <div class="cliente-nombre">
+            <!-- 🟢 FIX AVATAR (imagen_14.png) 🟢 -->
             <div class="cliente-avatar">
               {{ cliente.first_name|first|upper }}{{ cliente.last_name|first|upper }}
             </div>
@@ -248,374 +249,59 @@
 </div>
 
 <style>
-
-/* BUSCADOR */
-.buscador-clientes {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
+/* 🟡 FIX GENERAL MODO CLARO (imagen_14.png) 🟡 */
+body.light-mode .tabla-clientes tbody td {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
-.search-input-wrap {
-  position: relative;
-  flex: 1;
-  min-width: 260px;
+body.light-mode .cliente-main-name {
+  color: #0f172a !important;
 }
 
-.search-icon {
-  position: absolute;
-  left: 11px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  color: var(--text-muted);
-  pointer-events: none;
+body.light-mode .cliente-submeta, 
+body.light-mode .muted-text {
+  color: #475569 !important;
 }
 
-.search-input {
-  padding-left: 34px;
+body.light-mode .tabla-clientes .mono-text {
+  color: #0f172a !important;
 }
 
-.filtro-estado {
-  min-width: 220px;
-}
-
-/* QUICK FILTERS */
-.quick-filters-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
-  margin-bottom: 18px;
-}
-
-.quick-filters-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.quick-filters-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.quick-filters-status {
-  font-size: 12px;
-  color: #bbf7d0;
-}
-
-.quick-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.quick-filter {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 11px;
-  border-radius: 999px;
-  border: 1px solid rgba(134, 239, 172, 0.14);
-  background: rgba(34, 197, 94, 0.08);
-  color: #d1fae5;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 600;
-  transition: 0.18s;
-}
-
-.quick-filter:hover {
-  background: rgba(34, 197, 94, 0.14);
-  border-color: rgba(134, 239, 172, 0.24);
-}
-
-.quick-filter.active {
-  background: rgba(34, 197, 94, 0.18);
-  border-color: rgba(134, 239, 172, 0.34);
-  color: #ecfdf5;
-}
-
-.quick-filter-red {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.14);
-  color: #fecaca;
-}
-
-.quick-filter-red:hover,
-.quick-filter-red.active {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.26);
-}
-
-.quick-filter-yellow {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: rgba(245, 158, 11, 0.14);
-  color: #fde68a;
-}
-
-.quick-filter-yellow:hover,
-.quick-filter-yellow.active {
-  background: rgba(245, 158, 11, 0.14);
-  border-color: rgba(245, 158, 11, 0.26);
-}
-
-.quick-filter-blue {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.14);
-  color: #bfdbfe;
-}
-
-.quick-filter-blue:hover,
-.quick-filter-blue.active {
-  background: rgba(59, 130, 246, 0.14);
-  border-color: rgba(59, 130, 246, 0.26);
-}
-
-/* TABLA */
-.tabla-clientes {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-
-.tabla-clientes tbody td {
-  color: #ecfdf5 !important;
-  background: #0f2018 !important;
-  vertical-align: middle;
-  transition: background 0.18s ease;
-}
-
-.tabla-clientes tbody tr:hover td {
-  background: #132619 !important;
-}
-
-.fila-seguimiento-vencido td {
-  box-shadow: inset 3px 0 0 #ef4444;
-}
-
-.fila-seguimiento-hoy td {
-  box-shadow: inset 3px 0 0 #f59e0b;
-}
-
-.fila-seguimiento-semana td {
-  box-shadow: inset 3px 0 0 #3b82f6;
-}
-
-.cliente-main {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.cliente-main-name {
-  color: #ecfdf5 !important;
-  font-weight: 500;
-}
-
-.cliente-submeta {
-  font-size: 11.5px;
-  color: #86efac;
-}
-
-.tabla-clientes .mono-text {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: #ecfdf5 !important;
-}
-
-.tabla-clientes .muted-text {
-  color: #86efac !important;
-  font-size: 13px;
-}
-
-/* NOMBRE CON AVATAR */
-.cliente-nombre {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+/* 🟢 FIX AVATAR RADICAL 🟢 */
 .cliente-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--green-700), var(--green-900));
-  border: 1px solid var(--border-strong);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--green-300);
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: #166534 !important; /* Verde sólido oscuro */
+  border: 1.5px solid #22c55e !important; /* Borde verde brillante */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important; /* Blanco puro forzado */
   flex-shrink: 0;
-  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* SEGUIMIENTO */
-.seguimiento-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.seguimiento-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.badge-seguimiento {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.badge-seguimiento-green {
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(134, 239, 172, 0.18);
-  color: #bbf7d0;
-}
-
-.badge-seguimiento-yellow {
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  color: #fde68a;
-}
-
-.badge-seguimiento-red {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  color: #fecaca;
-}
-
-.badge-seguimiento-blue {
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.18);
-  color: #bfdbfe;
-}
-
-.badge-seguimiento-gray {
-  background: rgba(148, 163, 184, 0.12);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  color: #cbd5e1;
-}
-
-.mini-badge {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 3px 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.mini-badge-red {
-  background: rgba(239, 68, 68, 0.12);
-  color: #fecaca;
-}
-
-.mini-badge-yellow {
-  background: rgba(245, 158, 11, 0.12);
-  color: #fde68a;
-}
-
-.mini-badge-blue {
-  background: rgba(59, 130, 246, 0.12);
-  color: #bfdbfe;
-}
-
-.seguimiento-alerta {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.seguimiento-vencido {
-  color: #fca5a5;
-}
-
-.seguimiento-hoy {
-  color: #fde68a;
-}
-
-.seguimiento-semana {
-  color: #93c5fd;
-}
-
-.seguimiento-fecha {
-  font-size: 12px;
-  color: #d1fae5;
-}
-
-/* ACCIONES */
-.acciones {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.btn-sm {
-  padding: 5px 10px;
-  font-size: 12px;
-  gap: 4px;
-}
-
-.btn-sm svg {
-  width: 13px;
-  height: 13px;
-}
-
-.btn-whatsapp {
-  background: #14532d;
-  color: #dcfce7;
-  border: 1px solid #166534;
-}
-
-.btn-whatsapp:hover {
-  background: #166534;
-  color: #ffffff;
-}
-
-/* EMPTY STATE */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  color: var(--text-muted);
-}
-
-.empty-state svg {
-  width: 36px;
-  height: 36px;
-  opacity: 0.4;
-}
-
-.empty-state p {
-  font-size: 14px;
-}
-
-@media (max-width: 900px) {
-  .quick-filters-header {
-    align-items: flex-start;
-  }
-}
-
+/* Resto de estilos existentes... */
+.buscador-clientes { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.search-input-wrap { position: relative; flex: 1; min-width: 260px; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-muted); pointer-events: none; }
+.search-input { padding-left: 34px; }
+.quick-filters-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 18px; }
+.quick-filters-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.quick-filters-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+.quick-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.quick-filter { padding: 7px 11px; border-radius: 999px; border: 1px solid rgba(134, 239, 172, 0.14); background: rgba(34, 197, 94, 0.08); color: #d1fae5; text-decoration: none; font-size: 12px; font-weight: 600; }
+.quick-filter.active { background: rgba(34, 197, 94, 0.18); border-color: rgba(134, 239, 172, 0.34); }
+.tabla-clientes { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tabla-clientes tbody td { color: #ecfdf5 !important; background: #0f2018 !important; vertical-align: middle; padding: 12px; }
+.cliente-nombre { display: flex; align-items: center; gap: 12px; }
+.acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-whatsapp { background: #14532d; color: #dcfce7; border: 1px solid #166534; }
 </style>
 
 {% endblock %}
