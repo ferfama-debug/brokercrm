@@ -77,6 +77,15 @@ class Policy(models.Model):
         db_index=True,
     )
 
+    # 🔥 NUEVO CAMPO: PATENTE / DOMINIO
+    patente = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name="Patente / Dominio",
+        db_index=True,  # Índice para búsqueda rápida
+    )
+
     risk_type = models.ForeignKey(
         RiskType,
         on_delete=models.SET_NULL,
@@ -149,7 +158,6 @@ class Policy(models.Model):
         verbose_name="Frecuencia de refacturación (meses)",
     )
 
-    # --- CAMPOS DE ANULACIÓN ---
     anulada = models.BooleanField(default=False, verbose_name="¿Póliza Anulada?")
     fecha_anulacion = models.DateField(
         null=True, blank=True, verbose_name="Fecha de Anulación"
@@ -173,7 +181,6 @@ class Policy(models.Model):
 
         super().save(*args, **kwargs)
 
-        # SOLO CREAR PAGOS SI ES CUPONERA Y NO ESTÁ ANULADA
         if (
             self.forma_pago == "CUPONERA"
             and not self.anulada
@@ -240,6 +247,7 @@ class Policy(models.Model):
         indexes = [
             models.Index(fields=["end_date"]),
             models.Index(fields=["policy_number"]),
+            models.Index(fields=["patente"]),  # Índice para optimizar el buscador
         ]
 
 

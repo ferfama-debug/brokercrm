@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Policy, Payment, Company, RiskType  # <--- Mantenemos RiskType
+from .models import Policy, Payment, Company, RiskType
 from clients.models import Client
 from datetime import date, timedelta
 import os
@@ -366,6 +366,10 @@ def panel_cobranzas(request):
 
 @login_required
 def lista_polizas(request):
+    """
+    CIRUGÍA QUIRÚRGICA: Buscador inteligente potenciado.
+    Ahora busca por Nombre, Apellido, N° Póliza, DNI y Patente.
+    """
     compania = request.GET.get("compania")
     buscar = request.GET.get("buscar")
 
@@ -377,10 +381,13 @@ def lista_polizas(request):
         )
 
     if buscar:
+        # Buscador Multicampo (DNI y Patente incluidos)
         clientes = clientes.filter(
             Q(first_name__icontains=buscar)
             | Q(last_name__icontains=buscar)
+            | Q(dni__icontains=buscar)  # Búsqueda por DNI
             | Q(policy__policy_number__icontains=buscar)
+            | Q(policy__patente__icontains=buscar)  # Búsqueda por Patente
         ).distinct()
 
     if compania:
@@ -418,7 +425,7 @@ def crear_poliza(request):
 
     cliente_id = request.GET.get("cliente")
     companias = Company.objects.all().order_by("nombre")
-    riesgos = RiskType.objects.all().order_by("nombre")  # <--- Agregado
+    riesgos = RiskType.objects.all().order_by("nombre")
 
     if request.method == "POST":
         if request.user.is_superuser:
@@ -439,58 +446,17 @@ def crear_poliza(request):
                     "clientes": clientes,
                     "cliente_id": cliente_id,
                     "companias": companias,
-                    "riesgos": riesgos,  # <--- Agregado
+                    "riesgos": riesgos,
                     "error": "Debe completar las fechas",
                 },
             )
 
         print("===== DEBUG SUBIDA POLIZA (CREAR) =====")
-        print("request.FILES keys:", list(request.FILES.keys()))
-
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
-        print("archivo_poliza:", archivo_poliza)
-        print("archivo_cuponera:", archivo_cuponera)
-
-        if archivo_poliza:
-            print("nombre pdf_poliza:", archivo_poliza.name)
-            print("size pdf_poliza:", getattr(archivo_poliza, "size", "N/A"))
-
-        if archivo_cuponera:
-            print("nombre cuponera_pdf:", archivo_cuponera.name)
-            print("size cuponera_pdf:", getattr(archivo_cuponera, "size", "N/A"))
-
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
         cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
-
-        if archivo_poliza and not pdf_url:
-            messages.error(request, "❌ El PDF de la póliza no se pudo subir")
-            return render(
-                request,
-                "policies/crear_poliza.html",
-                {
-                    "clientes": clientes,
-                    "cliente_id": cliente_id,
-                    "companias": companias,
-                    "riesgos": riesgos,  # <--- Agregado
-                    "error": "El PDF de la póliza no se pudo subir",
-                },
-            )
-
-        if archivo_cuponera and not cuponera_url:
-            messages.error(request, "❌ La cuponera no se pudo subir")
-            return render(
-                request,
-                "policies/crear_poliza.html",
-                {
-                    "clientes": clientes,
-                    "cliente_id": cliente_id,
-                    "companias": companias,
-                    "riesgos": riesgos,  # <--- Agregado
-                    "error": "La cuponera no se pudo subir",
-                },
-            )
 
         company_id = request.POST.get("company")
         company_obj = None
@@ -503,7 +469,6 @@ def crear_poliza(request):
             except Exception:
                 company_nombre = request.POST.get("company")
 
-        # Captura de Riesgo Dinámico
         risk_type_id = request.POST.get("risk_type")
         risk_type_obj = None
         if risk_type_id:
@@ -517,18 +482,17 @@ def crear_poliza(request):
             company=company_nombre,
             company_obj=company_obj,
             policy_number=request.POST.get("policy_number"),
-            risk_type=risk_type_obj,  # <--- Agregado
+            patente=request.POST.get("patente"),  # Captura de Patente
+            risk_type=risk_type_obj,
             tipo_poliza=request.POST.get("tipo_poliza"),
             start_date=start_date,
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
-            # REFACTURACIÓN: Captura frecuencia siempre
             frecuencia_cuponera=(
                 int(request.POST.get("frecuencia_cuponera"))
                 if request.POST.get("frecuencia_cuponera")
-                else 1  # Default mensual
+                else 1
             ),
-            # CIRUGÍA QUIRÚRGICA: Nombre del campo coincide exactamente con models.py
             fecha_primer_vencimiento_cuponera=request.POST.get(
                 "fecha_primer_vencimiento_cuponera"
             )
@@ -549,7 +513,7 @@ def crear_poliza(request):
             "clientes": clientes,
             "cliente_id": cliente_id,
             "companias": companias,
-            "riesgos": riesgos,  # <--- Agregado
+            "riesgos": riesgos,
         },
     )
 
@@ -587,6 +551,7 @@ def renovar_poliza(request, poliza_id):
             company=poliza.company,
             company_obj=poliza.company_obj,
             policy_number=request.POST.get("policy_number"),
+            patente=request.POST.get("patente") or poliza.patente,
             risk_type=poliza.risk_type,
             tipo_poliza=poliza.tipo_poliza,
             start_date=start_date,
@@ -597,7 +562,6 @@ def renovar_poliza(request, poliza_id):
                 if request.POST.get("frecuencia_cuponera")
                 else 1
             ),
-            # CIRUGÍA QUIRÚRGICA: Captura de fecha también en renovación
             fecha_primer_vencimiento_cuponera=request.POST.get(
                 "fecha_primer_vencimiento_cuponera"
             )
@@ -731,10 +695,6 @@ def detalle_poliza(request, poliza_id):
 
 @login_required
 def anular_poliza(request, poliza_id):
-    """
-    CIRUGÍA QUIRÚRGICA: Función para gestionar la baja de una póliza y
-    limpiar el historial de cobranzas asociado.
-    """
     if request.user.is_superuser:
         poliza = get_object_or_404(Policy, id=poliza_id)
     else:
@@ -743,13 +703,11 @@ def anular_poliza(request, poliza_id):
     if request.method == "POST":
         motivo = request.POST.get("motivo_anulacion", "Sin motivo especificado")
 
-        # 1. Marcar póliza como anulada
         poliza.anulada = True
         poliza.fecha_anulacion = date.today()
         poliza.motivo_anulacion = motivo
         poliza.save()
 
-        # 2. Anular todos los pagos pendientes para que no aparezcan en alertas
         pagos_pendientes = poliza.pagos.filter(fecha_pago__isnull=True)
         for pago in pagos_pendientes:
             pago.estado = "ANULADO"
@@ -766,9 +724,6 @@ def anular_poliza(request, poliza_id):
 
 @login_required
 def reporte_anulaciones(request):
-    """
-    NUEVA VISTA: Extrae el listado histórico de pólizas dadas de baja.
-    """
     if request.user.is_superuser:
         polizas_anuladas = Policy.objects.filter(anulada=True).select_related(
             "client", "risk_type"
