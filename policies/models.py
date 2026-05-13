@@ -149,6 +149,15 @@ class Policy(models.Model):
         verbose_name="Frecuencia de refacturación (meses)",
     )
 
+    # --- CAMPOS DE ANULACIÓN ---
+    anulada = models.BooleanField(default=False, verbose_name="¿Póliza Anulada?")
+    fecha_anulacion = models.DateField(
+        null=True, blank=True, verbose_name="Fecha de Anulación"
+    )
+    motivo_anulacion = models.TextField(
+        null=True, blank=True, verbose_name="Motivo de la baja"
+    )
+
     def _normalizar_url(self, valor):
         if not valor:
             return None
@@ -164,9 +173,10 @@ class Policy(models.Model):
 
         super().save(*args, **kwargs)
 
-        # SOLO CREAR PAGOS SI ES CUPONERA
+        # SOLO CREAR PAGOS SI ES CUPONERA Y NO ESTÁ ANULADA
         if (
             self.forma_pago == "CUPONERA"
+            and not self.anulada
             and not self.pagos.exists()
             and self.frecuencia_cuponera
         ):
@@ -199,6 +209,9 @@ class Policy(models.Model):
 
     @property
     def estado(self):
+        if self.anulada:
+            return "ANULADA"
+
         hoy = date.today()
         dias = (self.end_date - hoy).days
         if dias < 0:
@@ -237,6 +250,7 @@ class Payment(models.Model):
         ("HOY", "Vence hoy"),
         ("PAGADO", "Pagado"),
         ("VENCIDO", "Vencido"),
+        ("ANULADO", "Anulado"),
     ]
 
     policy = models.ForeignKey(
@@ -278,6 +292,9 @@ class Payment(models.Model):
 
     @property
     def estado_calculado(self):
+        if self.policy.anulada:
+            return "ANULADO"
+
         hoy = date.today()
         if self.fecha_pago:
             return "PAGADO"
