@@ -30,7 +30,6 @@
     </div>
 
     <div class="form-row">
-      <!-- CIRUGÍA QUIRÚRGICA: Se muestra el Tipo de Riesgo dinámico -->
       <div class="form-grupo">
         <label>Tipo de Riesgo</label>
         <div class="dato">
@@ -49,29 +48,6 @@
     </div>
 
     <div class="form-row">
-      <!-- Se mantiene la Categoría (Tipo) como dato secundario -->
-      <div class="form-grupo">
-        <label>Categoría</label>
-        <div class="dato">{{ poliza.get_tipo_poliza_display }}</div>
-      </div>
-
-      {% if poliza.forma_pago == "CUPONERA" and poliza.frecuencia_cuponera %}
-      <div class="form-grupo">
-        <label>Frecuencia</label>
-        <div class="dato">
-          {% if poliza.frecuencia_cuponera == 1 %}Mensual
-          {% elif poliza.frecuencia_cuponera == 3 %}Trimestral
-          {% elif poliza.frecuencia_cuponera == 4 %}Cuatrimestral
-          {% elif poliza.frecuencia_cuponera == 6 %}Semestral
-          {% elif poliza.frecuencia_cuponera == 12 %}Anual
-          {% else %}{{ poliza.frecuencia_cuponera }}
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
-    </div>
-
-    <div class="form-row">
       <div class="form-grupo">
         <label>Inicio</label>
         <div class="dato">{{ poliza.start_date }}</div>
@@ -82,6 +58,23 @@
         <div class="dato">{{ poliza.end_date }}</div>
       </div>
     </div>
+
+    {% if poliza.forma_pago == "CUPONERA" and poliza.frecuencia_cuponera %}
+    <div class="form-row">
+      <div class="form-grupo">
+        <label>Frecuencia de Refacturación</label>
+        <div class="dato">
+          {% if poliza.frecuencia_cuponera == 1 %}Mensual
+          {% elif poliza.frecuencia_cuponera == 3 %}Trimestral
+          {% elif poliza.frecuencia_cuponera == 4 %}Cuatrimestral
+          {% elif poliza.frecuencia_cuponera == 6 %}Semestral
+          {% elif poliza.frecuencia_cuponera == 12 %}Anual
+          {% else %}{{ poliza.frecuencia_cuponera }} meses
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
 
   <!-- DOCUMENTOS -->
@@ -89,7 +82,6 @@
     <div class="form-section-title">Documentos</div>
 
     <div class="form-row">
-
       {% if poliza.pdf_poliza %}
         <a href="{{ poliza.pdf_poliza }}" target="_blank" class="btn btn-primary">
           📄 Ver póliza PDF
@@ -113,7 +105,6 @@
       {% else %}
         <span class="dato">No hay cuponera cargada</span>
       {% endif %}
-
     </div>
   </div>
 
