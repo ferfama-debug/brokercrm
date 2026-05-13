@@ -9,7 +9,7 @@
     margin-top: 20px;
   }
   .info-box {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--bg-card); /* Usamos la variable del sistema */
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
@@ -17,7 +17,7 @@
   .info-label {
     font-size: 11px;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-muted); /* Adaptable */
     font-weight: 700;
     letter-spacing: 1px;
     margin-bottom: 8px;
@@ -27,27 +27,56 @@
   }
   .info-value {
     font-size: 15px;
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary); /* Adaptable */
+    background: rgba(120, 120, 120, 0.05);
     padding: 12px;
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
   }
+  
+  /* Patente: Forzamos contraste para que siempre se lea */
   .patente-destacada {
-    background: linear-gradient(135deg, #166534 0%, #064e3b 100%);
-    border: 1.5px solid #22c55e;
+    background: #166534 !important;
     color: #ffffff !important;
     font-family: var(--font-mono);
     font-weight: 800;
     font-size: 18px;
     text-align: center;
     letter-spacing: 2px;
+    border: 2px solid #22c55e !important;
   }
+
+  /* Fix específico para modo claro basado en imagen_12.png */
+  body.light-mode .info-value {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #e2e8f0 !important;
+  }
+  body.light-mode .info-label {
+    color: #64748b !important;
+  }
+
   .doc-btn-group {
     display: flex;
     gap: 12px;
     margin-top: 15px;
   }
+
+  /* Botones que se veían mal en la imagen_12 */
+  .btn-doc-pro {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-pdf { background: #166534; color: white; border: 1px solid #22c55e; }
+  .btn-cup { background: #1e293b; color: white; border: 1px solid #475569; }
+  
+  body.light-mode .btn-cup { background: #334155; }
 </style>
 
 <div class="page-header">
@@ -60,14 +89,13 @@
   </a>
 </div>
 
-<!-- ESTADO DE ANULACIÓN -->
 {% if poliza.anulada %}
 <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 12px; padding: 20px; margin-bottom: 25px; display: flex; align-items: center; gap: 20px;">
   <div style="font-size: 30px;">🚫</div>
   <div>
     <h3 style="color: #ef4444; margin: 0; font-size: 16px;">PÓLIZA ANULADA</h3>
-    <p style="color: #fca5a5; margin: 5px 0 0 0; font-size: 13px;">
-      Dada de baja el {{ poliza.fecha_anulacion|date:"d/m/Y" }} - Motivo: {{ poliza.motivo_anulacion|default:"No especificado" }}
+    <p style="color: #991b1b; margin: 5px 0 0 0; font-size: 13px;">
+      Baja: {{ poliza.fecha_anulacion|date:"d/m/Y" }} - Motivo: {{ poliza.motivo_anulacion|default:"No especificado" }}
     </p>
   </div>
 </div>
@@ -75,16 +103,14 @@
 
 <div class="detail-grid">
   
-  <!-- COLUMNA 1: CLIENTE Y VEHÍCULO -->
   <div class="info-box">
-    <div class="form-section-title" style="margin-top:0;">Identificación</div>
+    <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Identificación</div>
     
     <div style="margin-bottom: 20px;">
       <label class="info-label"> Cliente</label>
       <div class="info-value">{{ poliza.client }}</div>
     </div>
 
-    <!-- 🟢 CAMPO DE PATENTE DESTACADO 🟢 -->
     <div style="margin-bottom: 20px;">
       <label class="info-label"> Patente / Dominio</label>
       <div class="info-value patente-destacada">
@@ -98,9 +124,8 @@
     </div>
   </div>
 
-  <!-- COLUMNA 2: TÉCNICO Y FECHAS -->
   <div class="info-box">
-    <div class="form-section-title" style="margin-top:0;">Vigencia y Riesgo</div>
+    <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Vigencia y Riesgo</div>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
       <div>
@@ -126,32 +151,30 @@
 
 </div>
 
-<!-- SECCIÓN DE DOCUMENTOS -->
 <div class="info-box" style="margin-top: 25px;">
-  <div class="form-section-title" style="margin-top:0;">Documentación Digital</div>
+  <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Documentación Digital</div>
   <div class="doc-btn-group">
     {% if poliza.pdf_poliza or poliza.pdf_url %}
-      <a href="{% if poliza.pdf_poliza %}{{ poliza.pdf_poliza }}{% else %}{{ poliza.pdf_url }}{% endif %}" target="_blank" class="btn btn-primary" style="background: #166534; border-color: #22c55e;">
+      <a href="{% if poliza.pdf_poliza %}{{ poliza.pdf_poliza }}{% else %}{{ poliza.pdf_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-pdf">
         📄 Ver Póliza PDF
       </a>
-    {% else %}
-      <div class="info-value" style="font-size: 12px; opacity: 0.6;">Sin PDF de póliza</div>
     {% endif %}
 
     {% if poliza.cuponera_pdf or poliza.cuponera_url %}
-      <a href="{% if poliza.cuponera_pdf %}{{ poliza.cuponera_pdf }}{% else %}{{ poliza.cuponera_url }}{% endif %}" target="_blank" class="btn btn-secondary" style="background: #1e293b; border-color: #475569;">
+      <a href="{% if poliza.cuponera_pdf %}{{ poliza.cuponera_pdf }}{% else %}{{ poliza.cuponera_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-cup">
         💳 Ver Cuponera
       </a>
-    {% else %}
-      <div class="info-value" style="font-size: 12px; opacity: 0.6;">Sin Cuponera</div>
+    {% endif %}
+    
+    {% if not poliza.pdf_poliza and not poliza.pdf_url and not poliza.cuponera_pdf and not poliza.cuponera_url %}
+       <div class="info-value" style="font-size: 12px; opacity: 0.6; border: 1px dashed var(--border);">No hay documentos cargados</div>
     {% endif %}
   </div>
 </div>
 
-<!-- ACCIONES DE GESTIÓN -->
 {% if not poliza.anulada %}
 <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
-    <a href="{% url 'anular_poliza' poliza.id %}" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px; transition: all 0.3s;">
+    <a href="{% url 'anular_poliza' poliza.id %}" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px;">
         🚫 Proceder a la Anulación
     </a>
 </div>
