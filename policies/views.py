@@ -341,13 +341,17 @@ def panel_cobranzas(request):
             policy__client__producer=request.user
         ).select_related("policy", "policy__client")
 
-    vencidos = pagos.filter(fecha_vencimiento__lt=hoy, fecha_pago__isnull=True)
-    hoy_vencen = pagos.filter(fecha_vencimiento=hoy, fecha_pago__isnull=True)
+    vencidos = pagos.filter(fecha_vencimiento__lt=hoy, fecha_pago__isnull=True).exclude(
+        estado="ANULADO"
+    )
+    hoy_vencen = pagos.filter(fecha_vencimiento=hoy, fecha_pago__isnull=True).exclude(
+        estado="ANULADO"
+    )
     proximos = pagos.filter(
         fecha_vencimiento__gt=hoy,
         fecha_vencimiento__lte=en_3_dias,
         fecha_pago__isnull=True,
-    )
+    ).exclude(estado="ANULADO")
 
     return render(
         request,
@@ -723,3 +727,38 @@ def detalle_poliza(request, poliza_id):
             "poliza": poliza,
         },
     )
+
+
+@login_required
+def anular_poliza(request, poliza_id):
+    """
+    CIRUGÍA QUIRÚRGICA: Función para gestionar la baja de una póliza y
+    limpiar el historial de cobranzas asociado.
+    """
+    if request.user.is_superuser:
+        poliza = get_object_or_404(Policy, id=poliza_id)
+    else:
+        poliza = get_object_or_404(Policy, id=poliza_id, client__producer=request.user)
+
+    if request.method == "POST":
+        motivo = request.POST.get("motivo_anulacion", "Sin motivo especificado")
+
+        # 1. Marcar póliza como anulada
+        poliza.anulada = True
+        poliza.fecha_anulacion = date.today()
+        poliza.motivo_anulacion = motivo
+        poliza.save()
+
+        # 2. Anular todos los pagos pendientes para que no aparezcan en alertas
+        pagos_pendientes = poliza.pagos.filter(fecha_pago__isnull=True)
+        for pago in pagos_pendientes:
+            pago.estado = "ANULADO"
+            pago.save()
+
+        messages.warning(
+            request,
+            f"⚠️ La póliza {poliza.policy_number} ha sido anulada y sus cobros cancelados.",
+        )
+        return redirect(f"/clientes/ver/{poliza.client.id}/")
+
+    return render(request, "policies/anular_poliza_confirmar.html", {"poliza": poliza})

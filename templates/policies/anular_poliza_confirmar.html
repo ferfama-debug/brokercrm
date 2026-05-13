@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Anular Póliza {{ poliza.policy_number }}</h1>
+    <p class="page-subtitle">Esta acción marcará la póliza como inactiva y cancelará los cobros pendientes.</p>
+  </div>
+</div>
+
+<div class="card form-card">
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="form-section">
+      <div class="form-section-title">Confirmación de Baja</div>
+      
+      <div class="form-grupo">
+        <label>Motivo de la anulación</label>
+        <textarea name="motivo_anulacion" class="form-control" rows="4" placeholder="Ej: Pedido por el cliente debido a venta del vehículo..." required style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: white; width: 100%; padding: 12px; border-radius: 8px;"></textarea>
+      </div>
+      
+      <div style="margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid #ef4444;">
+        <p style="color: #fecaca; font-size: 14px; margin: 0;">
+          <strong>Atención:</strong> Al confirmar, todos los pagos <strong>pendientes</strong> de esta póliza se marcarán como "ANULADO" y no aparecerán más en el Panel de Cobranzas.
+        </p>
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
+      <a href="/policies/{{ poliza.id }}/" class="btn btn-ghost">Cancelar</a>
+      <button type="submit" class="btn btn-danger" style="background: #ef4444; color: white; padding: 10px 25px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">
+        Confirmar Anulación
+      </button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

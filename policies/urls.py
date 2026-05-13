@@ -1,9 +1,8 @@
 from django.urls import path
-from django.http import HttpResponse  # ✅ NUEVO
+from django.http import HttpResponse
 from . import views
 
 
-# ✅ NUEVO
 def health(request):
     return HttpResponse("ok")
 
@@ -15,8 +14,8 @@ urlpatterns = [
     path("renovar/<int:poliza_id>/", views.renovar_poliza, name="renovar_poliza"),
     path("pago/<int:pago_id>/", views.marcar_pago, name="marcar_pago"),
     path("enviar/<int:poliza_id>/", views.enviar_poliza, name="enviar_poliza"),
-    # 🔥 NUEVA (health check)
+    # 🔥 NUEVA RUTA DE ANULACIÓN
+    path("anular/<int:poliza_id>/", views.anular_poliza, name="anular_poliza"),
     path("health/", health),
-    # 🔥 YA EXISTENTE
     path("<int:poliza_id>/", views.detalle_poliza, name="detalle_poliza"),
 ]
