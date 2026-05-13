@@ -68,6 +68,7 @@
           <div class="sub-line"></div>
         </div>
 
+        <!-- 🟢 FILA 1: CLIENTE Y N° PÓLIZA -->
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
             <label>Cliente</label>
@@ -88,7 +89,13 @@
           </div>
         </div>
 
+        <!-- 🟢 FILA 2: PATENTE Y COMPAÑÍA 🟢 -->
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 15px;">
+          <div class="form-grupo">
+            <label style="color: var(--green-400);">Patente / Dominio</label>
+            <input type="text" name="patente" class="form-control" placeholder="Ej: ABC123 o AF123JK">
+          </div>
+
           <div class="form-grupo">
             <label>Compañía</label>
             <select name="company" class="form-control required" required>
@@ -98,8 +105,11 @@
               {% endfor %}
             </select>
           </div>
+        </div>
 
-          <div class="form-grupo">
+        <!-- FILA 3: RIESGO DINÁMICO -->
+        <div class="form-row" style="margin-top: 15px;">
+          <div class="form-grupo" style="max-width: 50%;">
             <label>Tipo de Riesgo (Dinámico)</label>
             <select name="risk_type" class="form-control">
               <option value="">Seleccionar riesgo...</option>
