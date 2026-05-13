@@ -14,8 +14,10 @@ urlpatterns = [
     path("renovar/<int:poliza_id>/", views.renovar_poliza, name="renovar_poliza"),
     path("pago/<int:pago_id>/", views.marcar_pago, name="marcar_pago"),
     path("enviar/<int:poliza_id>/", views.enviar_poliza, name="enviar_poliza"),
-    # 🔥 NUEVA RUTA DE ANULACIÓN
+    # RUTA DE ANULACIÓN
     path("anular/<int:poliza_id>/", views.anular_poliza, name="anular_poliza"),
+    # 🔥 NUEVA RUTA: REPORTE DE ANULACIONES
+    path("reporte-anulaciones/", views.reporte_anulaciones, name="reporte_anulaciones"),
     path("health/", health),
     path("<int:poliza_id>/", views.detalle_poliza, name="detalle_poliza"),
 ]

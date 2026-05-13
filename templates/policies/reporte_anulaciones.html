@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Reporte de Anulaciones</h1>
+    <p class="page-subtitle">Listado histórico de pólizas dadas de baja por los clientes.</p>
+  </div>
+  <a href="{% url 'lista_polizas' %}" class="btn btn-ghost">
+    Volver a Pólizas
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Fecha Baja</th>
+          <th>Cliente</th>
+          <th>N° Póliza</th>
+          <th>Compañía / Riesgo</th>
+          <th>Motivo de Anulación</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in polizas_anuladas %}
+        <tr>
+          <td style="font-weight: bold; color: #ef4444;">
+            {{ p.fecha_anulacion|date:"d/m/Y" }}
+          </td>
+          <td>{{ p.client }}</td>
+          <td>{{ p.policy_number }}</td>
+          <td>
+            <div style="font-size: 13px;">{{ p.company }}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">
+                {% if p.risk_type %}{{ p.risk_type.nombre }}{% else %}Otro{% endif %}
+            </div>
+          </td>
+          <td style="max-width: 300px; font-size: 13px; color: #cbd5e1; font-style: italic;">
+            "{{ p.motivo_anulacion }}"
+          </td>
+          <td>
+            <a href="{% url 'detalle_poliza' p.id %}" class="btn btn-sm btn-ghost">Ver Detalle</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+            No se registran pólizas anuladas en el sistema.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

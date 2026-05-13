@@ -762,3 +762,24 @@ def anular_poliza(request, poliza_id):
         return redirect(f"/clientes/ver/{poliza.client.id}/")
 
     return render(request, "policies/anular_poliza_confirmar.html", {"poliza": poliza})
+
+
+@login_required
+def reporte_anulaciones(request):
+    """
+    NUEVA VISTA: Extrae el listado histórico de pólizas dadas de baja.
+    """
+    if request.user.is_superuser:
+        polizas_anuladas = Policy.objects.filter(anulada=True).select_related(
+            "client", "risk_type"
+        )
+    else:
+        polizas_anuladas = Policy.objects.filter(
+            anulada=True, client__producer=request.user
+        ).select_related("client", "risk_type")
+
+    return render(
+        request,
+        "policies/reporte_anulaciones.html",
+        {"polizas_anuladas": polizas_anuladas},
+    )
