@@ -13,6 +13,23 @@
 
 <div class="card form-card">
 
+  <!-- ESTADO DE ANULACIÓN (CIRUGÍA QUIRÚRGICA) -->
+  {% if poliza.anulada %}
+  <div class="form-section" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+    <div class="form-section-title" style="color: #ef4444; border-bottom-color: rgba(239, 68, 68, 0.2);">Póliza Anulada</div>
+    <div class="form-row">
+      <div class="form-grupo">
+        <label style="color: #fca5a5;">Fecha de Baja</label>
+        <div class="dato" style="background: rgba(239, 68, 68, 0.1); color: #fecaca;">{{ poliza.fecha_anulacion|date:"d/m/Y" }}</div>
+      </div>
+      <div class="form-grupo">
+        <label style="color: #fca5a5;">Motivo de la Anulación</label>
+        <div class="dato" style="background: rgba(239, 68, 68, 0.1); color: #fecaca;">{{ poliza.motivo_anulacion|default:"No especificado" }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- DATOS -->
   <div class="form-section">
     <div class="form-section-title">Información</div>
@@ -108,6 +125,15 @@
     </div>
   </div>
 
+  <!-- GESTIÓN DE BAJA (BOTÓN) -->
+  {% if not poliza.anulada %}
+  <div class="form-section" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 25px; display: flex; justify-content: flex-end;">
+      <a href="{% url 'anular_poliza' poliza.id %}" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; transition: all 0.3s;">
+          🚫 Anular Póliza
+      </a>
+  </div>
+  {% endif %}
+
 </div>
 
 <style>
@@ -116,6 +142,9 @@
   background: rgba(255,255,255,0.03);
   border-radius: 8px;
   color: #e2e8f0;
+}
+.btn:hover {
+  opacity: 0.8;
 }
 </style>
 
