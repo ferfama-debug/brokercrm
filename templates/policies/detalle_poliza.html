@@ -1,151 +1,160 @@
 {% extends "base.html" %}
 {% block content %}
 
+<style>
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+  }
+  .info-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .info-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-value {
+    font-size: 15px;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .patente-destacada {
+    background: linear-gradient(135deg, #166534 0%, #064e3b 100%);
+    border: 1.5px solid #22c55e;
+    color: #ffffff !important;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+  .doc-btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+  }
+</style>
+
 <div class="page-header">
   <div>
     <h1 class="page-title">Póliza {{ poliza.policy_number }}</h1>
-    <p class="page-subtitle">Detalle completo de la póliza</p>
+    <p class="page-subtitle">Detalle completo y gestión de documentos</p>
   </div>
   <a href="/clientes/ver/{{ poliza.client.id }}/" class="btn btn-ghost">
-    ← Volver
+    ← Volver al cliente
   </a>
 </div>
 
-<div class="card form-card">
-
-  <!-- ESTADO DE ANULACIÓN (CIRUGÍA QUIRÚRGICA) -->
-  {% if poliza.anulada %}
-  <div class="form-section" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
-    <div class="form-section-title" style="color: #ef4444; border-bottom-color: rgba(239, 68, 68, 0.2);">Póliza Anulada</div>
-    <div class="form-row">
-      <div class="form-grupo">
-        <label style="color: #fca5a5;">Fecha de Baja</label>
-        <div class="dato" style="background: rgba(239, 68, 68, 0.1); color: #fecaca;">{{ poliza.fecha_anulacion|date:"d/m/Y" }}</div>
-      </div>
-      <div class="form-grupo">
-        <label style="color: #fca5a5;">Motivo de la Anulación</label>
-        <div class="dato" style="background: rgba(239, 68, 68, 0.1); color: #fecaca;">{{ poliza.motivo_anulacion|default:"No especificado" }}</div>
-      </div>
-    </div>
+<!-- ESTADO DE ANULACIÓN -->
+{% if poliza.anulada %}
+<div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 12px; padding: 20px; margin-bottom: 25px; display: flex; align-items: center; gap: 20px;">
+  <div style="font-size: 30px;">🚫</div>
+  <div>
+    <h3 style="color: #ef4444; margin: 0; font-size: 16px;">PÓLIZA ANULADA</h3>
+    <p style="color: #fca5a5; margin: 5px 0 0 0; font-size: 13px;">
+      Dada de baja el {{ poliza.fecha_anulacion|date:"d/m/Y" }} - Motivo: {{ poliza.motivo_anulacion|default:"No especificado" }}
+    </p>
   </div>
-  {% endif %}
+</div>
+{% endif %}
 
-  <!-- DATOS -->
-  <div class="form-section">
-    <div class="form-section-title">Información</div>
+<div class="detail-grid">
+  
+  <!-- COLUMNA 1: CLIENTE Y VEHÍCULO -->
+  <div class="info-box">
+    <div class="form-section-title" style="margin-top:0;">Identificación</div>
+    
+    <div style="margin-bottom: 20px;">
+      <label class="info-label">👤 Cliente</label>
+      <div class="info-value">{{ poliza.client }}</div>
+    </div>
 
-    <div class="form-row">
-      <div class="form-grupo">
-        <label>Cliente</label>
-        <div class="dato">{{ poliza.client }}</div>
-      </div>
-
-      <div class="form-grupo">
-        <label>Compañía</label>
-        <div class="dato">{{ poliza.company }}</div>
+    <!-- 🟢 CAMPO DE PATENTE DESTACADO 🟢 -->
+    <div style="margin-bottom: 20px;">
+      <label class="info-label">🚗 Patente / Dominio</label>
+      <div class="info-value patente-destacada">
+        {{ poliza.patente|default:"SIN CARGAR" }}
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-grupo">
-        <label>Tipo de Riesgo</label>
-        <div class="dato">
-          {% if poliza.risk_type %}
-            {{ poliza.risk_type.nombre }}
-          {% else %}
-            No especificado
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="form-grupo">
-        <label>Forma de pago</label>
-        <div class="dato">{{ poliza.get_forma_pago_display }}</div>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-grupo">
-        <label>Inicio</label>
-        <div class="dato">{{ poliza.start_date }}</div>
-      </div>
-
-      <div class="form-grupo">
-        <label>Vencimiento</label>
-        <div class="dato">{{ poliza.end_date }}</div>
-      </div>
-    </div>
-
-    {% if poliza.forma_pago == "CUPONERA" and poliza.frecuencia_cuponera %}
-    <div class="form-row">
-      <div class="form-grupo">
-        <label>Frecuencia de Refacturación</label>
-        <div class="dato">
-          {% if poliza.frecuencia_cuponera == 1 %}Mensual
-          {% elif poliza.frecuencia_cuponera == 3 %}Trimestral
-          {% elif poliza.frecuencia_cuponera == 4 %}Cuatrimestral
-          {% elif poliza.frecuencia_cuponera == 6 %}Semestral
-          {% elif poliza.frecuencia_cuponera == 12 %}Anual
-          {% else %}{{ poliza.frecuencia_cuponera }} meses
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- DOCUMENTOS -->
-  <div class="form-section">
-    <div class="form-section-title">Documentos</div>
-
-    <div class="form-row">
-      {% if poliza.pdf_poliza %}
-        <a href="{{ poliza.pdf_poliza }}" target="_blank" class="btn btn-primary">
-          📄 Ver póliza PDF
-        </a>
-      {% elif poliza.pdf_url %}
-        <a href="{{ poliza.pdf_url }}" target="_blank" class="btn btn-primary">
-          📄 Ver póliza PDF
-        </a>
-      {% else %}
-        <span class="dato">No hay póliza cargada</span>
-      {% endif %}
-
-      {% if poliza.cuponera_pdf %}
-        <a href="{{ poliza.cuponera_pdf }}" target="_blank" class="btn btn-secondary">
-          💳 Ver cuponera
-        </a>
-      {% elif poliza.cuponera_url %}
-        <a href="{{ poliza.cuponera_url }}" target="_blank" class="btn btn-secondary">
-          💳 Ver cuponera
-        </a>
-      {% else %}
-        <span class="dato">No hay cuponera cargada</span>
-      {% endif %}
+    <div>
+      <label class="info-label">🏢 Compañía</label>
+      <div class="info-value">{{ poliza.company }}</div>
     </div>
   </div>
 
-  <!-- GESTIÓN DE BAJA (BOTÓN) -->
-  {% if not poliza.anulada %}
-  <div class="form-section" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 25px; display: flex; justify-content: flex-end;">
-      <a href="{% url 'anular_poliza' poliza.id %}" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; transition: all 0.3s;">
-          🚫 Anular Póliza
-      </a>
+  <!-- COLUMNA 2: TÉCNICO Y FECHAS -->
+  <div class="info-box">
+    <div class="form-section-title" style="margin-top:0;">Vigencia y Riesgo</div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+      <div>
+        <label class="info-label">📅 Inicio</label>
+        <div class="info-value">{{ poliza.start_date|date:"d/m/Y" }}</div>
+      </div>
+      <div>
+        <label class="info-label">⌛ Vencimiento</label>
+        <div class="info-value">{{ poliza.end_date|date:"d/m/Y" }}</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label class="info-label">🛡️ Tipo de Riesgo</label>
+      <div class="info-value">{{ poliza.risk_type.nombre|default:"No especificado" }}</div>
+    </div>
+
+    <div>
+      <label class="info-label">💳 Forma de Pago</label>
+      <div class="info-value">{{ poliza.get_forma_pago_display }}</div>
+    </div>
   </div>
-  {% endif %}
 
 </div>
 
-<style>
-.dato {
-  padding: 10px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 8px;
-  color: #e2e8f0;
-}
-.btn:hover {
-  opacity: 0.8;
-}
-</style>
+<!-- SECCIÓN DE DOCUMENTOS -->
+<div class="info-box" style="margin-top: 25px;">
+  <div class="form-section-title" style="margin-top:0;">Documentación Digital</div>
+  <div class="doc-btn-group">
+    {% if poliza.pdf_poliza or poliza.pdf_url %}
+      <a href="{% if poliza.pdf_poliza %}{{ poliza.pdf_poliza }}{% else %}{{ poliza.pdf_url }}{% endif %}" target="_blank" class="btn btn-primary" style="background: #166534; border-color: #22c55e;">
+        📄 Ver Póliza PDF
+      </a>
+    {% else %}
+      <div class="info-value" style="font-size: 12px; opacity: 0.6;">Sin PDF de póliza</div>
+    {% endif %}
+
+    {% if poliza.cuponera_pdf or poliza.cuponera_url %}
+      <a href="{% if poliza.cuponera_pdf %}{{ poliza.cuponera_pdf }}{% else %}{{ poliza.cuponera_url }}{% endif %}" target="_blank" class="btn btn-secondary" style="background: #1e293b; border-color: #475569;">
+        💳 Ver Cuponera
+      </a>
+    {% else %}
+      <div class="info-value" style="font-size: 12px; opacity: 0.6;">Sin Cuponera</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ACCIONES DE GESTIÓN -->
+{% if not poliza.anulada %}
+<div style="margin-top: 30px; display: flex; justify-content: flex-end;">
+    <a href="{% url 'anular_poliza' poliza.id %}" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px; transition: all 0.3s;">
+        🚫 Proceder a la Anulación
+    </a>
+</div>
+{% endif %}
 
 {% endblock %}
