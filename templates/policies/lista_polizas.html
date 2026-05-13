@@ -6,6 +6,10 @@
     <h1 class="page-title">Pólizas por cliente</h1>
     <p class="page-subtitle">Expandí cada cliente para ver sus pólizas activas</p>
   </div>
+  <!-- 🟢 AGREGADO: BOTÓN DE ACCESO AL REPORTE 🟢 -->
+  <a href="{% url 'reporte_anulaciones' %}" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+    📊 Ver Reporte de Bajas
+  </a>
 </div>
 
 <div class="card" style="margin-bottom: 20px;">
@@ -60,7 +64,8 @@
           <tbody>
             {% for poliza in cliente.policy_set.all %}
             {% if not compania_seleccionada or poliza.company == compania_seleccionada %}
-            <tr>
+            <!-- 🟢 AGREGADO: OPACIDAD SI ESTÁ ANULADA 🟢 -->
+            <tr {% if poliza.anulada %}style="opacity: 0.6;"{% endif %}>
               <td>
                 <a href="/polizas/{{ poliza.id }}/" class="link-poliza-numero">
                   {{ poliza.policy_number }}
@@ -71,7 +76,10 @@
               <td><span class="mono-val">{{ poliza.start_date }}</span></td>
               <td><span class="mono-val">{{ poliza.end_date }}</span></td>
               <td>
-                {% if poliza.estado == "ACTIVA" %}
+                <!-- 🟢 MODIFICADO: LÓGICA DE BADGE PARA ANULADA 🟢 -->
+                {% if poliza.anulada %}
+                  <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">ANULADA</span>
+                {% elif poliza.estado == "ACTIVA" %}
                   <span class="badge badge-green">ACTIVA</span>
                 {% elif poliza.estado == "POR VENCER" %}
                   <span class="badge badge-yellow">POR VENCER</span>
