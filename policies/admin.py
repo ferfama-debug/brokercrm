@@ -3,10 +3,10 @@ from django.utils.html import format_html
 from .models import Policy, Company, Payment, RiskType
 
 
-# --- NUEVO: Inline para ver pagos dentro de la Póliza ---
+# --- Inline para ver pagos dentro de la Póliza ---
 class PaymentInline(admin.TabularInline):
     model = Payment
-    extra = 0  # No mostrar filas vacías extra
+    extra = 0
     fields = (
         "numero_cuota",
         "fecha_vencimiento",
@@ -17,9 +17,9 @@ class PaymentInline(admin.TabularInline):
     readonly_fields = (
         "numero_cuota",
         "fecha_vencimiento",
-    )  # Para no editarlos por error aquí
+    )
     can_delete = True
-    show_change_link = True  # Permite ir al detalle del pago si necesitas
+    show_change_link = True
 
 
 @admin.register(RiskType)
@@ -30,11 +30,12 @@ class RiskTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Policy)
 class PolicyAdmin(admin.ModelAdmin):
-    # Agregamos el Inline aquí
     inlines = [PaymentInline]
 
+    # CIRUGÍA: Agregada 'patente' al listado principal
     list_display = (
         "policy_number",
+        "patente",  # <-- Nueva columna visible
         "client",
         "company_obj",
         "risk_type",
@@ -51,6 +52,7 @@ class PolicyAdmin(admin.ModelAdmin):
                     "client",
                     "company_obj",
                     "policy_number",
+                    "patente",  # <-- Campo agregado para edición manual
                     "risk_type",
                     "tipo_poliza",
                     "insurance_type",
@@ -94,8 +96,10 @@ class PolicyAdmin(admin.ModelAdmin):
         "end_date",
     )
 
+    # CIRUGÍA: 'patente' agregada al buscador inteligente del admin
     search_fields = (
         "policy_number",
+        "patente",  # <-- Ahora podés buscar por patente también en el admin
         "client__first_name",
         "client__last_name",
     )
@@ -140,7 +144,6 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    # MEJORA: Agregamos 'get_client' y 'policy' para saber de quién es el pago
     list_display = (
         "get_client",
         "policy",
@@ -150,7 +153,6 @@ class PaymentAdmin(admin.ModelAdmin):
         "estado",
     )
 
-    # MEJORA: Filtros por cliente y compañía en la barra lateral
     list_filter = (
         "estado",
         "policy__client",
@@ -166,7 +168,6 @@ class PaymentAdmin(admin.ModelAdmin):
 
     ordering = ("fecha_vencimiento",)
 
-    # Función para mostrar el nombre del cliente en la lista de pagos
     def get_client(self, obj):
         return obj.policy.client
 
