@@ -32,10 +32,10 @@
     border-bottom: 1px solid var(--border);
   }
 
-  /* FIX QUIRÚRGICO: Contraste para selectores (compañías, clientes, etc.) */
+  /* FIX QUIRÚRGICO: Contraste para selectores */
   select option {
-    background-color: #ffffff !important; /* Fondo blanco para las opciones */
-    color: #1a1a1a !important;           /* Texto negro para legibilidad */
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
   }
 </style>
 
@@ -58,6 +58,9 @@
   <div class="card form-card">
     <form method="post" enctype="multipart/form-data" id="form-poliza">
       {% csrf_token %}
+
+      <!-- CAMPO OCULTO: Seteamos la categoría como OTRO automáticamente para la DB -->
+      <input type="hidden" name="tipo_poliza" value="OTRO">
 
       <div class="form-section">
         <div class="form-section-title titulo-pro">
@@ -85,7 +88,7 @@
           </div>
         </div>
 
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 15px;">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 15px;">
           <div class="form-grupo">
             <label>Compañía</label>
             <select name="company" class="form-control required" required>
@@ -97,22 +100,12 @@
           </div>
 
           <div class="form-grupo">
-            <label>Tipo de Riesgo</label>
+            <label>Tipo de Riesgo (Dinámico)</label>
             <select name="risk_type" class="form-control">
               <option value="">Seleccionar riesgo...</option>
               {% for r in riesgos %}
                 <option value="{{ r.id }}">{{ r.nombre }}</option>
               {% endfor %}
-            </select>
-          </div>
-
-          <div class="form-grupo">
-            <label>Categoría (Tipo de Póliza)</label>
-            <select name="tipo_poliza" class="form-control required" required>
-              <option value="OTRO">Otro</option>
-              <option value="AUTO">Automotor</option>
-              <option value="HOGAR">Hogar</option>
-              <option value="VIDA">Vida</option>
             </select>
           </div>
         </div>
@@ -231,7 +224,6 @@ function toggleCuponeraFields() {
   }
 }
 
-// Ejecutar al inicio por si hay un valor pre-cargado
 document.addEventListener('DOMContentLoaded', toggleCuponeraFields);
 </script>
 
