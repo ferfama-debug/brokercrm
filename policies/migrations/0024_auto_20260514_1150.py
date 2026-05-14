@@ -10,18 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="policy",
-            name="ultimo_envio_vencimiento",
-            field=models.DateField(
-                blank=True, null=True, verbose_name="Último Aviso Vencimiento"
-            ),
-        ),
-        migrations.AddField(
-            model_name="policy",
-            name="ultimo_envio_cuponera",
-            field=models.DateField(
-                blank=True, null=True, verbose_name="Última Cuponera Enviada"
-            ),
-        ),
+        # Se deja vacío porque las columnas ya fueron creadas manualmente
     ]
