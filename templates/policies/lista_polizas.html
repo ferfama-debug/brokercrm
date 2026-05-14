@@ -38,7 +38,9 @@
 
 <div class="clientes-lista">
   {% for cliente in clientes %}
-  <div class="cliente-box">
+  
+  {# 🟢 CIRUGÍA LÓGICA: Identificar clientes sin pólizas vigentes 🟢 #}
+  <div class="cliente-box {% if cliente.anulada %}box-cliente-anulado{% endif %}">
 
     <div class="cliente-header" onclick="togglePolizas('cliente{{ cliente.id }}', this)">
       <div class="cliente-header-left">
@@ -53,6 +55,9 @@
       <div class="cliente-header-right">
         <span class="polizas-count">
           {{ cliente.policy_set.all|length }} póliza{{ cliente.policy_set.all|length|pluralize }}
+          {% if cliente.anulada %}
+            <span class="label-anulado-mini">(ANULADA)</span>
+          {% endif %}
         </span>
         <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"/>
@@ -101,11 +106,11 @@
               </td>
               <td>
                 <div style="display: flex; gap: 5px;">
-                    {% if poliza.pdf_url %}
-                      <a href="{{ poliza.pdf_url }}" target="_blank" title="Ver PDF" style="color: #86efac;">📄</a>
+                    {% if poliza.pdf_poliza %}
+                      <a href="{{ poliza.pdf_poliza }}" target="_blank" title="Ver PDF" style="color: #86efac;">📄</a>
                     {% endif %}
-                    {% if poliza.cuponera_url %}
-                      <a href="{{ poliza.cuponera_url }}" target="_blank" title="Ver Cuponera" style="color: #60a5fa;">💳</a>
+                    {% if poliza.cuponera_pdf %}
+                      <a href="{{ poliza.cuponera_pdf }}" target="_blank" title="Ver Cuponera" style="color: #60a5fa;">💳</a>
                     {% endif %}
                 </div>
               </td>
@@ -186,7 +191,7 @@
     color: #ef4444;
 }
 
-/* 🔥 RESTO DE ESTILOS EXISTENTES (OPTIMIZADOS) */
+/* 🔥 ESTILOS EXISTENTES */
 body.light-mode .tabla-polizas thead th { background: #f8fafc !important; color: #334155 !important; }
 body.light-mode .tabla-polizas tbody td { background: #ffffff !important; color: #0f172a !important; }
 .clientes-lista { display: flex; flex-direction: column; gap: 10px; }
@@ -199,6 +204,12 @@ body.light-mode .tabla-polizas tbody td { background: #ffffff !important; color:
 .tabla-polizas tbody td { padding: 11px 16px; border-bottom: 1px solid rgba(52, 211, 100, 0.08); color: #ecfdf5 !important; background: #0f2018 !important; }
 .chevron-icon { width: 16px; height: 16px; transition: transform 0.25s ease; }
 .chevron-icon.open { transform: rotate(180deg); }
+
+/* 🟢 CIRUGÍA VISUAL: ESTILOS PARA ANULADOS 🟢 */
+.box-cliente-anulado { border-color: rgba(239, 68, 68, 0.2) !important; opacity: 0.8; }
+.box-cliente-anulado .cliente-avatar-lg { background: #334155 !important; border-color: #475569 !important; }
+.box-cliente-anulado .cliente-nombre-texto { color: #94a3b8; }
+.label-anulado-mini { color: #ef4444; font-size: 10px; margin-left: 5px; font-weight: bold; }
 </style>
 
 <script>
