@@ -393,13 +393,23 @@ def lista_polizas(request):
     if compania:
         clientes = clientes.filter(policy__company=compania).distinct()
 
+    # --- CORRECCIÓN: Lista de compañías única y ordenada ---
     if request.user.is_superuser:
-        companias = Policy.objects.values_list("company", flat=True).distinct()
+        companias = (
+            Policy.objects.exclude(company__isnull=True)
+            .exclude(company="")
+            .values_list("company", flat=True)
+            .distinct()
+            .order_by("company")
+        )
     else:
         companias = (
             Policy.objects.filter(client__producer=request.user)
+            .exclude(company__isnull=True)
+            .exclude(company="")
             .values_list("company", flat=True)
             .distinct()
+            .order_by("company")
         )
 
     return render(
