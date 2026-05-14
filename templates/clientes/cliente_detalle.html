@@ -52,7 +52,8 @@
 
   <div class="header-actions">
     {% if cliente.permite_whatsapp and cliente.telefono_normalizado %}
-    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }}%21%20%C2%BFC%C3%B3mo%20est%C3%A1s%3F%20Te%20contacto%20de%20Fuerza%20Natural%20Broker."
+    <!-- SALUDO LIMPIO -->
+    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20*{{ cliente.first_name|upper }}*%21%20Espero%20que%20te%20encuentres%20muy%20bien.%20Te%20contacto%20de%20*Fuerza%20Natural%20Broker*."
        target="_blank" class="btn btn-whatsapp">
       <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -74,7 +75,7 @@
     </form>
 
     {% if polizas_por_vencer > 0 %}
-    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }}%21%20Te%20aviso%20que%20tu%20p%C3%B3liza%20est%C3%A1%20pr%C3%B3xima%20a%20vencer.%20%C2%BFLa%20renovamos%3F"
+    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=%E2%8F%B0%20*HOLA%20{{ cliente.first_name|upper }}*%21%20Tu%20p%C3%B3liza%20est%C3%A1%20pr%C3%B3xima%20a%20vencer.%20%C2%BFLa%20renovamos%3F"
        target="_blank" class="btn btn-secondary">
       Renovar
     </a>
@@ -357,8 +358,8 @@
                   {% endif %}
 
                   {% if cliente.permite_whatsapp and cliente.telefono_normalizado %}
-                  <!-- 🟢 WHATSAPP INTELIGENTE: Incluye Datos y Links dinámicos 🟢 -->
-                  <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }}%20%F0%9F%91%8B%0A%0AEsperamos%20que%20te%20encuentres%20muy%20bien.%0A%0ATe%20escribimos%20desde%20*Fuerza%20Natural%20Broker%20de%20Seguros*%20para%20enviarte%20la%20documentaci%C3%B3n%20de%20tu%20p%C3%B3liza.%0A%0A%F0%9F%93%8C%20P%C3%B3liza%20N%C2%B0:%20{{ p.policy_number }}%0A%F0%9F%8F%A2%20Compa%C3%B1%C3%ADa:%20{{ p.company }}%0A%F0%9F%93%85%20Vencimiento%3A%20{{ p.end_date|date:'d/m/Y' }}{% if p.pdf_poliza or p.pdf_url %}%0A%0A%F0%9F%93%84%20P%C3%B3liza:%20{% if p.pdf_poliza %}{{ p.pdf_poliza|urlencode }}{% elif p.pdf_url %}{{ p.pdf_url|urlencode }}{% endif %}{% endif %}{% if p.cuponera_pdf or p.cuponera_url %}%0A%F0%9F%92%B3%20Cuponera:%20{% if p.cuponera_pdf %}{{ p.cuponera_pdf|urlencode }}{% elif p.cuponera_url %}{{ p.cuponera_url|urlencode }}{% endif %}{% endif %}%0A%0ASi%20ten%C3%A9s%20alguna%20consulta%20o%20necesit%C3%A1s%20asistencia%2C%20estamos%20para%20ayudarte.%0A%0ASaludos%20cordiales%2C%0A*Fuerza%20Natural%20Broker%20de%20Seguros*"
+                  <!-- 🟢 FIX WHATSAPP ESTÉTICO (imagen_15.png) 🟢 -->
+                  <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=%F0%9F%93%84%20*HOLA%20{{ cliente.first_name|upper }}*%0A%0AEsperamos%20que%20te%20encuentres%20muy%20bien.%0A%0ATe%20enviamos%20la%20documentaci%C3%B3n%20de%20tu%20seguro%20de%20*{{ p.company }}*.%0A%0A%E2%9E%A1%20*P%C3%B3liza%3A*%20{{ p.policy_number }}%0A%E2%9E%A1%20*Vencimiento%3A*%20{{ p.end_date|date:'d/m/Y' }}%0A%0A%F0%9F%91%87%20*DESCARGAR%20AQU%C3%8D%3A*%0A%0A{% if p.pdf_poliza or p.pdf_url %}%F0%9F%93%84%20*P%C3%B3liza%20Digital%3A*%0A{{ p.pdf_poliza|default:p.pdf_url|urlencode }}%0A{% endif %}{% if p.cuponera_pdf or p.cuponera_url %}%0A%F0%9F%92%B3%20*Cuponera%3A*%0A{{ p.cuponera_pdf|default:p.cuponera_url|urlencode }}{% endif %}%0A%0AQuedamos%20a%20tu%20disposici%C3%B3n.%0A*Fuerza%20Natural%20Broker*"
                      target="_blank" class="btn-whatsapp btn-whatsapp-sm">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
