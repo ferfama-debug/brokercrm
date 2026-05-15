@@ -178,42 +178,8 @@ class Policy(models.Model):
         self.pdf_poliza = self._normalizar_url(self.pdf_poliza)
         self.cuponera_pdf = self._normalizar_url(self.cuponera_pdf)
 
-        # Guardamos primero para tener una ID válida de póliza
+        # 100% Limpio: El modelo solo guarda los datos de la póliza
         super().save(*args, **kwargs)
-
-        # 🟢 CIRUGÍA: GENERACIÓN INTELIGENTE DE CUOTAS RESTANTES 🟢
-        if (
-            self.forma_pago == "CUPONERA"
-            and not self.anulada
-            and self.frecuencia_cuponera
-        ):
-            from .models import Payment
-
-            frecuencia = int(self.frecuencia_cuponera)
-            fecha = self.fecha_primer_vencimiento_cuponera or self.start_date
-            fecha_fin = self.end_date
-
-            if isinstance(fecha, str):
-                fecha = date.fromisoformat(fecha)
-            if isinstance(fecha_fin, str):
-                fecha_fin = date.fromisoformat(fecha_fin)
-
-            numero = 1
-            while fecha < fecha_fin:
-                # Verificamos si la cuota ya existe (así no duplicamos la primera cuota manual)
-                cuota_existe = self.pagos.filter(numero_cuota=numero).exists()
-
-                if not cuota_existe:
-                    Payment.objects.create(
-                        policy=self,
-                        numero_cuota=numero,
-                        fecha_vencimiento=fecha,
-                        estado="PENDIENTE",
-                    )
-
-                # Avanzamos al siguiente mes según la frecuencia
-                fecha = fecha + relativedelta(months=frecuencia)
-                numero += 1
 
     @property
     def pdf_url(self):
