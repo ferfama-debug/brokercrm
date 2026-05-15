@@ -513,34 +513,32 @@ def crear_poliza(request):
 
         nueva_poliza.save()
 
-        # 🟢 CIRUGÍA BACKEND DEFINITIVA: GENERACIÓN FORZADA POR MESES REALES 🟢
+        # 🟢 CIRUGÍA BACKEND: Tanda de cuotas basada estrictamente en la Frecuencia 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
-            fecha_venc = (
+            base_date = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
                 or nueva_poliza.start_date
             )
-            fecha_limite = nueva_poliza.end_date
 
-            if isinstance(fecha_venc, str):
-                fecha_venc = date.fromisoformat(fecha_venc)
-            if isinstance(fecha_limite, str):
-                fecha_limite = date.fromisoformat(fecha_limite)
+            if isinstance(base_date, str):
+                base_date = date.fromisoformat(base_date)
 
-            # Si la fecha límite ingresada quedó igual o menor, asumimos vigencia estándar (ej: cuatrimestral/semestral)
-            # Para evitar que el bucle se muera, forzamos la creación de 4 cuotas mensuales base si no hay rango claro.
-            n_cuotas_a_generar = 4 if fecha_venc >= fecha_limite else 12
+            # Se generan X cantidad de cuotas mensuales según el paquete de refacturación (Ej: Trimestral = 3 cuotas)
+            n_cuotas_a_generar = frecuencia_int
 
-            for n_cuota in range(1, n_cuotas_a_generar + 1):
+            for i in range(n_cuotas_a_generar):
+                fecha_vencimiento_calculada = base_date + relativedelta(months=i)
+                n_cuota = i + 1
+
                 if not Payment.objects.filter(
                     policy=nueva_poliza, numero_cuota=n_cuota
                 ).exists():
                     Payment.objects.create(
                         policy=nueva_poliza,
                         numero_cuota=n_cuota,
-                        fecha_vencimiento=fecha_venc,
+                        fecha_vencimiento=fecha_vencimiento_calculada,
                         estado="PENDIENTE",
                     )
-                fecha_venc = fecha_venc + relativedelta(months=frecuencia_int)
 
         messages.success(request, "✅ Póliza creada correctamente")
         return redirect(f"/clientes/ver/{client.id}/")
@@ -610,32 +608,31 @@ def renovar_poliza(request, poliza_id):
 
         nueva_poliza.save()
 
-        # 🟢 CIRUGÍA BACKEND DEFINITIVA: GENERACIÓN FORZADA EN RENOVACIONES 🟢
+        # 🟢 CIRUGÍA BACKEND: Tanda de cuotas basada estrictamente en la Frecuencia (Renovación) 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
-            fecha_venc = (
+            base_date = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
                 or nueva_poliza.start_date
             )
-            fecha_limite = nueva_poliza.end_date
 
-            if isinstance(fecha_venc, str):
-                fecha_venc = date.fromisoformat(fecha_venc)
-            if isinstance(fecha_limite, str):
-                fecha_limite = date.fromisoformat(fecha_limite)
+            if isinstance(base_date, str):
+                base_date = date.fromisoformat(base_date)
 
-            n_cuotas_a_generar = 4 if fecha_venc >= fecha_limite else 12
+            n_cuotas_a_generar = frecuencia_int
 
-            for n_cuota in range(1, n_cuotas_a_generar + 1):
+            for i in range(n_cuotas_a_generar):
+                fecha_vencimiento_calculada = base_date + relativedelta(months=i)
+                n_cuota = i + 1
+
                 if not Payment.objects.filter(
                     policy=nueva_poliza, numero_cuota=n_cuota
                 ).exists():
                     Payment.objects.create(
                         policy=nueva_poliza,
                         numero_cuota=n_cuota,
-                        fecha_vencimiento=fecha_venc,
+                        fecha_vencimiento=fecha_vencimiento_calculada,
                         estado="PENDIENTE",
                     )
-                fecha_venc = fecha_venc + relativedelta(months=frecuencia_int)
 
         messages.success(request, "🔄 Póliza renovada correctamente")
         return redirect(f"/clientes/ver/{poliza.client.id}/")
