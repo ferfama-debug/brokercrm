@@ -6,6 +6,7 @@ from clients.models import Client
 from datetime import date, timedelta
 import os
 import requests
+from dateutil.relativedelta import relativedelta
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -487,6 +488,9 @@ def crear_poliza(request):
             except Exception:
                 pass
 
+        frecuencia_val = request.POST.get("frecuencia_cuponera")
+        frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
+
         nueva_poliza = Policy(
             client=client,
             company=company_nombre,
@@ -498,11 +502,7 @@ def crear_poliza(request):
             start_date=start_date,
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
-            frecuencia_cuponera=(
-                int(request.POST.get("frecuencia_cuponera"))
-                if request.POST.get("frecuencia_cuponera")
-                else 1
-            ),
+            frecuencia_cuponera=frecuencia_int,
             fecha_primer_vencimiento_cuponera=request.POST.get(
                 "fecha_primer_vencimiento_cuponera"
             )
@@ -512,6 +512,33 @@ def crear_poliza(request):
         )
 
         nueva_poliza.save()
+
+        # 🟢 CIRUGÍA BACKEND: Forzar la generación de cuotas desde la Vista 🟢
+        if nueva_poliza.forma_pago == "CUPONERA":
+            fecha_venc = (
+                nueva_poliza.fecha_primer_vencimiento_cuponera
+                or nueva_poliza.start_date
+            )
+            fecha_limite = nueva_poliza.end_date
+
+            if isinstance(fecha_venc, str):
+                fecha_venc = date.fromisoformat(fecha_venc)
+            if isinstance(fecha_limite, str):
+                fecha_limite = date.fromisoformat(fecha_limite)
+
+            n_cuota = 1
+            while fecha_venc < fecha_limite:
+                if not Payment.objects.filter(
+                    policy=nueva_poliza, numero_cuota=n_cuota
+                ).exists():
+                    Payment.objects.create(
+                        policy=nueva_poliza,
+                        numero_cuota=n_cuota,
+                        fecha_vencimiento=fecha_venc,
+                        estado="PENDIENTE",
+                    )
+                fecha_venc = fecha_venc + relativedelta(months=frecuencia_int)
+                n_cuota += 1
 
         messages.success(request, "✅ Póliza creada correctamente")
         return redirect(f"/clientes/ver/{client.id}/")
@@ -556,6 +583,9 @@ def renovar_poliza(request, poliza_id):
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
         cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
 
+        frecuencia_val = request.POST.get("frecuencia_cuponera")
+        frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
+
         nueva_poliza = Policy(
             client=poliza.client,
             company=poliza.company,
@@ -567,11 +597,7 @@ def renovar_poliza(request, poliza_id):
             start_date=start_date,
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
-            frecuencia_cuponera=(
-                int(request.POST.get("frecuencia_cuponera"))
-                if request.POST.get("frecuencia_cuponera")
-                else 1
-            ),
+            frecuencia_cuponera=frecuencia_int,
             fecha_primer_vencimiento_cuponera=request.POST.get(
                 "fecha_primer_vencimiento_cuponera"
             )
@@ -581,6 +607,33 @@ def renovar_poliza(request, poliza_id):
         )
 
         nueva_poliza.save()
+
+        # 🟢 CIRUGÍA BACKEND: Forzar la generación de cuotas en Renovaciones 🟢
+        if nueva_poliza.forma_pago == "CUPONERA":
+            fecha_venc = (
+                nueva_poliza.fecha_primer_vencimiento_cuponera
+                or nueva_poliza.start_date
+            )
+            fecha_limite = nueva_poliza.end_date
+
+            if isinstance(fecha_venc, str):
+                fecha_venc = date.fromisoformat(fecha_venc)
+            if isinstance(fecha_limite, str):
+                fecha_limite = date.fromisoformat(fecha_limite)
+
+            n_cuota = 1
+            while fecha_venc < fecha_limite:
+                if not Payment.objects.filter(
+                    policy=nueva_poliza, numero_cuota=n_cuota
+                ).exists():
+                    Payment.objects.create(
+                        policy=nueva_poliza,
+                        numero_cuota=n_cuota,
+                        fecha_vencimiento=fecha_venc,
+                        estado="PENDIENTE",
+                    )
+                fecha_venc = fecha_venc + relativedelta(months=frecuencia_int)
+                n_cuota += 1
 
         messages.success(request, "🔄 Póliza renovada correctamente")
         return redirect(f"/clientes/ver/{poliza.client.id}/")
