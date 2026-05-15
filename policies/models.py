@@ -77,13 +77,12 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    # 🔥 NUEVO CAMPO: PATENTE / DOMINIO
     patente = models.CharField(
         max_length=20,
         blank=True,
         null=True,
         verbose_name="Patente / Dominio",
-        db_index=True,  # Índice para búsqueda rápida
+        db_index=True,
     )
 
     risk_type = models.ForeignKey(
@@ -179,12 +178,13 @@ class Policy(models.Model):
         self.pdf_poliza = self._normalizar_url(self.pdf_poliza)
         self.cuponera_pdf = self._normalizar_url(self.cuponera_pdf)
 
+        # Guardamos primero para tener una ID válida de póliza
         super().save(*args, **kwargs)
 
+        # 🟢 CIRUGÍA: GENERACIÓN INTELIGENTE DE CUOTAS RESTANTES 🟢
         if (
             self.forma_pago == "CUPONERA"
             and not self.anulada
-            and not self.pagos.exists()
             and self.frecuencia_cuponera
         ):
             from .models import Payment
@@ -200,9 +200,18 @@ class Policy(models.Model):
 
             numero = 1
             while fecha < fecha_fin:
-                Payment.objects.create(
-                    policy=self, numero_cuota=numero, fecha_vencimiento=fecha
-                )
+                # Verificamos si la cuota ya existe (así no duplicamos la primera cuota manual)
+                cuota_existe = self.pagos.filter(numero_cuota=numero).exists()
+
+                if not cuota_existe:
+                    Payment.objects.create(
+                        policy=self,
+                        numero_cuota=numero,
+                        fecha_vencimiento=fecha,
+                        estado="PENDIENTE",
+                    )
+
+                # Avanzamos al siguiente mes según la frecuencia
                 fecha = fecha + relativedelta(months=frecuencia)
                 numero += 1
 
@@ -247,7 +256,7 @@ class Policy(models.Model):
         indexes = [
             models.Index(fields=["end_date"]),
             models.Index(fields=["policy_number"]),
-            models.Index(fields=["patente"]),  # Índice para optimizar el buscador
+            models.Index(fields=["patente"]),
         ]
 
 
@@ -324,7 +333,7 @@ class Payment(models.Model):
             f"Hola {cliente} 👋\n\n"
             "Esperamos que te encuentres muy bien.\n\n"
             "Te escribimos desde *Fuerza Natural Broker de Seguros* para recordarte el próximo vencimiento de tu póliza.\n\n"
-            f"📌 Póliza N°: {numero_poliza}\n"
+            "📌 Póliza N°: {numero_poliza}\n"
             f"💳 Cuota N°: {self.numero_cuota}\n"
             f"📅 Vencimiento: {fecha}\n\n"
             "Te recomendamos realizar el pago antes de la fecha indicada para evitar cualquier interrupción en tu cobertura.\n\n"
