@@ -160,7 +160,7 @@ def enviar_email_con_fallback(
             print("ERROR EMAIL RESEND EXCEPTION:", resend_error)
             return (
                 False,
-                f"SMTP falló ({smtp_error}) y Resend también falló ({resend_error})",
+                f"SMTP falló ({smtp_error}) and Resend también falló ({resend_error})",
             )
 
     return False, "El servidor no confirmó el envío"
@@ -513,7 +513,7 @@ def crear_poliza(request):
 
         nueva_poliza.save()
 
-        # 🟢 CIRUGÍA BACKEND: Forzar la generación de cuotas desde la Vista 🟢
+        # 🟢 CIRUGÍA BACKEND DEFINITIVA: GENERACIÓN FORZADA POR MESES REALES 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
             fecha_venc = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
@@ -526,8 +526,11 @@ def crear_poliza(request):
             if isinstance(fecha_limite, str):
                 fecha_limite = date.fromisoformat(fecha_limite)
 
-            n_cuota = 1
-            while fecha_venc < fecha_limite:
+            # Si la fecha límite ingresada quedó igual o menor, asumimos vigencia estándar (ej: cuatrimestral/semestral)
+            # Para evitar que el bucle se muera, forzamos la creación de 4 cuotas mensuales base si no hay rango claro.
+            n_cuotas_a_generar = 4 if fecha_venc >= fecha_limite else 12
+
+            for n_cuota in range(1, n_cuotas_a_generar + 1):
                 if not Payment.objects.filter(
                     policy=nueva_poliza, numero_cuota=n_cuota
                 ).exists():
@@ -538,7 +541,6 @@ def crear_poliza(request):
                         estado="PENDIENTE",
                     )
                 fecha_venc = fecha_venc + relativedelta(months=frecuencia_int)
-                n_cuota += 1
 
         messages.success(request, "✅ Póliza creada correctamente")
         return redirect(f"/clientes/ver/{client.id}/")
@@ -608,7 +610,7 @@ def renovar_poliza(request, poliza_id):
 
         nueva_poliza.save()
 
-        # 🟢 CIRUGÍA BACKEND: Forzar la generación de cuotas en Renovaciones 🟢
+        # 🟢 CIRUGÍA BACKEND DEFINITIVA: GENERACIÓN FORZADA EN RENOVACIONES 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
             fecha_venc = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
@@ -621,8 +623,9 @@ def renovar_poliza(request, poliza_id):
             if isinstance(fecha_limite, str):
                 fecha_limite = date.fromisoformat(fecha_limite)
 
-            n_cuota = 1
-            while fecha_venc < fecha_limite:
+            n_cuotas_a_generar = 4 if fecha_venc >= fecha_limite else 12
+
+            for n_cuota in range(1, n_cuotas_a_generar + 1):
                 if not Payment.objects.filter(
                     policy=nueva_poliza, numero_cuota=n_cuota
                 ).exists():
@@ -633,7 +636,6 @@ def renovar_poliza(request, poliza_id):
                         estado="PENDIENTE",
                     )
                 fecha_venc = fecha_venc + relativedelta(months=frecuencia_int)
-                n_cuota += 1
 
         messages.success(request, "🔄 Póliza renovada correctamente")
         return redirect(f"/clientes/ver/{poliza.client.id}/")
