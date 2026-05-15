@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- MENSAJES -->
 {% if messages %}
   {% for message in messages %}
   <div class="mensaje-ok">
@@ -13,7 +12,6 @@
   {% endfor %}
 {% endif %}
 
-<!-- HEADER -->
 <div class="page-header">
   <div class="cliente-header-info">
     <div class="cliente-avatar-xl">
@@ -97,7 +95,6 @@
   </div>
 </div>
 
-<!-- BLOQUE CRM -->
 <div class="crm-panel">
   <div class="crm-header">
     <div class="crm-title-wrap">
@@ -235,7 +232,6 @@
   {% endif %}
 </div>
 
-<!-- KPIs RESUMEN -->
 <div class="resumen-grid">
   <div class="resumen-card resumen-verde">
     <div class="resumen-icon">
@@ -276,7 +272,6 @@
   </div>
 </div>
 
-<!-- TABLA DE PÓLIZAS -->
 {% regroup polizas by policy_number as grupos %}
 <div class="polizas-detalle">
   {% for grupo in grupos %}
@@ -296,7 +291,7 @@
         <table class="tabla-detalle">
           <thead>
             <tr>
-              <th>N°</th>
+              <th>N° Póliza</th>
               <th>Compañía</th>
               <th>Inicio</th>
               <th>Vencimiento</th>
@@ -336,6 +331,7 @@
                     <button class="btn btn-ghost btn-sm">Enviar</button>
                   </form>
 
+                  {# 🟢 NORMALIZACIÓN DE VARIABLES PARA CAMPOS ADJUNTOS 🟢 #}
                   {% if p.pdf_poliza %}
                   <a href="{{ p.pdf_poliza }}" target="_blank" class="btn btn-primary btn-sm">
                     PDF
@@ -393,17 +389,22 @@
             </tr>
           </thead>
           <tbody>
+            {# 🟢 EL BUCLE RECORRE Y DIBUJA TODAS LAS CUOTAS DEL RELANDING EN ORDEN 🟢 #}
             {% for pago in p.pagos.all %}
             <tr>
               <td>{{ pago.numero_cuota }}</td>
-              <td>{{ pago.fecha_vencimiento }}</td>
+              <td>{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
               <td>
                 {% if pago.estado == "PAGADO" %}
                   <span class="badge badge-green">Pagado</span>
                 {% elif pago.estado == "VENCIDO" %}
                   <span class="badge badge-red">Vencido</span>
+                {% elif pago.estado == "HOY" %}
+                  <span class="badge badge-yellow">Vence hoy</span>
+                {% elif pago.estado == "PROXIMO" %}
+                  <span class="badge badge-yellow">Próximo</span>
                 {% else %}
-                  <span class="badge badge-yellow">Pendiente</span>
+                  <span class="badge badge-gray">Pendiente</span>
                 {% endif %}
               </td>
               <td>
@@ -761,6 +762,18 @@
   border: 1px solid rgba(59,130,246,0.22);
 }
 
+.badge-gray {
+  background: rgba(148,163,184,0.14);
+  color: #cbd5e1;
+  border: 1px solid rgba(148,163,184,0.20);
+}
+
+.badge-blue {
+  background: rgba(59,130,246,0.14);
+  color: #bfdbfe;
+  border: 1px solid rgba(59,130,246,0.22);
+}
+
 @media (max-width: 980px) {
   .crm-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -773,7 +786,6 @@
   .header-actions { width: 100%; }
   .crm-grid { grid-template-columns: 1fr; }
 }
-
 </style>
 
 {% endblock %}
