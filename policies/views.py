@@ -89,6 +89,9 @@ def enviar_email_con_fallback(
 
     adjuntos = adjuntos or []
 
+    # 🟢 PROTOCOLO: COPIA OCULTA AUTOMÁTICA PARA LA EMPRESA 🟢
+    copia_empresa = ["fuerzanaturalbroker@gmail.com"]
+
     # 1) Intento con SMTP configurado en Django
     try:
         email = EmailMultiAlternatives(
@@ -96,6 +99,7 @@ def enviar_email_con_fallback(
             body=mensaje_texto,
             from_email=remitente,
             to=destinatarios,
+            bcc=copia_empresa,  # Inyección de copia oculta quirúrgica
         )
 
         if mensaje_html:
@@ -112,7 +116,7 @@ def enviar_email_con_fallback(
         enviados = email.send(fail_silently=False)
 
         if enviados == 1:
-            print("✅ EMAIL enviado por SMTP")
+            print("✅ EMAIL enviado por SMTP con copia oculta a Fuerza Natural")
             return True, "smtp"
     except Exception as smtp_error:
         print("ERROR EMAIL SMTP:", smtp_error)
@@ -129,6 +133,7 @@ def enviar_email_con_fallback(
             payload = {
                 "from": remitente,
                 "to": destinatarios,
+                "bcc": copia_empresa,  # Inyección de copia oculta en contingencia de Resend
                 "subject": asunto,
                 "text": mensaje_texto,
             }
@@ -147,7 +152,7 @@ def enviar_email_con_fallback(
             )
 
             if response.status_code in (200, 201):
-                print("✅ EMAIL enviado por Resend")
+                print("✅ EMAIL enviado por Resend con copia oculta a Fuerza Natural")
                 return True, "resend"
 
             print("ERROR EMAIL RESEND:", response.status_code, response.text)
@@ -160,7 +165,7 @@ def enviar_email_con_fallback(
             print("ERROR EMAIL RESEND EXCEPTION:", resend_error)
             return (
                 False,
-                f"SMTP falló ({smtp_error}) and Resend también falló ({resend_error})",
+                f"SMTP falló ({smtp_error}) y Resend también falló ({resend_error})",
             )
 
     return False, "El servidor no confirmó el envío"
@@ -496,7 +501,7 @@ def crear_poliza(request):
             company=company_nombre,
             company_obj=company_obj,
             policy_number=request.POST.get("policy_number"),
-            patente=request.POST.get("patente"),  # Captura de Patente
+            patente=request.POST.get("patente"),
             risk_type=risk_type_obj,
             tipo_poliza=request.POST.get("tipo_poliza"),
             start_date=start_date,
@@ -513,7 +518,7 @@ def crear_poliza(request):
 
         nueva_poliza.save()
 
-        # 🟢 CIRUGÍA BACKEND: Tanda de cuotas basada estrictamente en la Frecuencia 🟢
+        # 🟢 Tanda de cuotas basada estrictamente en la Frecuencia 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
             base_date = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
@@ -523,7 +528,6 @@ def crear_poliza(request):
             if isinstance(base_date, str):
                 base_date = date.fromisoformat(base_date)
 
-            # Se generan X cantidad de cuotas mensuales según el paquete de refacturación (Ej: Trimestral = 3 cuotas)
             n_cuotas_a_generar = frecuencia_int
 
             for i in range(n_cuotas_a_generar):
@@ -608,7 +612,7 @@ def renovar_poliza(request, poliza_id):
 
         nueva_poliza.save()
 
-        # 🟢 CIRUGÍA BACKEND: Tanda de cuotas basada estrictamente en la Frecuencia (Renovación) 🟢
+        # 🟢 Tanda de cuotas basada estrictamente en la Frecuencia (Renovación) 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
             base_date = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
