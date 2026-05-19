@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from clients.models import Client
-from policies.models import Policy, Payment
+from policies.models import Policy, Payment, EmailLog
 from accounts.models import User
 from datetime import date, timedelta
 from django.db.models import Count, Sum
@@ -20,11 +20,23 @@ def home(request):
         policies_qs = Policy.objects.select_related("client").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
+        # 🟢 PROTOCOLO: EXTRAER ÚLTIMOS LOGS DE CORREOS PARA EL ADMINISTRADOR 🟢
+        email_logs = (
+            EmailLog.objects.select_related("client", "policy")
+            .all()
+            .order_by("-fecha_envio")[:5]
+        )
     else:
         clientes_qs = Client.objects.all()
         policies_qs = Policy.objects.all().select_related("client")
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
+        # 🟢 PROTOCOLO: EXTRAER ÚLTIMOS LOGS DE CORREOS PARA EL PRODUCTOR 🟢
+        email_logs = (
+            EmailLog.objects.select_related("client", "policy")
+            .filter(policy__client__producer=request.user)
+            .order_by("-fecha_envio")[:5]
+        )
 
     # CIRUGÍA QUIRÚRGICA: Conteo de pólizas activas vs anuladas
     # Las activas son las que NO están anuladas
@@ -60,16 +72,21 @@ def home(request):
             elif dias <= 15:
                 lvl = "warning"
 
+            p_message = (
+                p.client.nombre_completo() if p.client else "Cliente desconocido"
+            )
             ultimas_alertas.append(
                 {
-                    "message": f"{p.client.nombre_completo()} - Vence en {dias} días",
+                    "message": f"{p_message} - Vence en {dias} días",
                     "level": lvl,
                 }
             )
 
-            telefono = getattr(p.client, "phone", "") or getattr(
-                p.client, "telefono", ""
-            )
+            telefono = ""
+            if p.client:
+                telefono = getattr(p.client, "phone", "") or getattr(
+                    p.client, "telefono", ""
+                )
 
             if dias <= 7:
                 vencen_7 += 1
@@ -84,15 +101,18 @@ def home(request):
                 prioridad = "MEDIA"
                 orden = 3
 
+            nombre_completo_texto = (
+                p.client.nombre_completo() if p.client else "Cliente"
+            )
             mensaje = (
-                f"Hola {p.client.nombre_completo()}, te escribo de Fuerza Natural Broker. "
+                f"Hola {nombre_completo_texto}, te escribo de Fuerza Natural Broker. "
                 f"Tu póliza N° {p.policy_number} de {p.company} vence el {p.end_date.strftime('%d/%m/%Y')}."
             )
 
             clientes_llamar_lista.append(
                 {
                     "cliente": p.client,
-                    "cliente_id": p.client.id,
+                    "cliente_id": p.client.id if p.client else None,
                     "numero": p.policy_number,
                     "compania_texto": str(p.company),
                     "telefono": telefono,
@@ -107,6 +127,8 @@ def home(request):
     clientes_agrupados = {}
     for c in clientes_llamar_lista:
         cid = c["cliente_id"]
+        if not cid:
+            continue
         if cid not in clientes_agrupados:
             clientes_agrupados[cid] = {
                 "cliente": c["cliente"],
@@ -216,7 +238,7 @@ def home(request):
     context = {
         "clientes": clientes,
         "polizas": polizas,
-        "polizas_anuladas_count": polizas_anuladas_count,  # Enviamos el dato al HTML
+        "polizas_anuladas_count": polizas_anuladas_count,
         "usuarios": usuarios,
         "alert_count": len(ultimas_alertas),
         "ultimas_alertas": ultimas_alertas,
@@ -241,6 +263,7 @@ def home(request):
         "meses": meses,
         "crecimiento_totales": crecimiento_totales,
         "produccion_companias": produccion_companias,
+        "email_logs": email_logs,  # 🟢 ENVIADO COMPLETO AL TEMPLATE 🟢
     }
 
     return render(request, "dashboard/dashboard.html", context)
