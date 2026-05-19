@@ -114,11 +114,21 @@
                 {% for log in email_logs %}
                 <tr>
                     <td style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">{{ log.fecha_envio|date:"d/m/Y H:i" }}</td>
-                    <td><strong style="color: var(--text-primary);">{{ log.client.nombre_completo|default:log.policy.client.nombre_completo }}</strong></td>
-                    <td style="font-family: var(--font-mono); font-size: 12px;">{{ log.destinatario }}</td>
+                    <td>
+                        <strong style="color: var(--text-primary);">
+                            {% if log.client %}
+                                {{ log.client.nombre_completo }}
+                            {% elif log.policy and log.policy.client %}
+                                {{ log.policy.client.nombre_completo }}
+                            {% else %}
+                                Cliente Manual / Web
+                            {% endif %}
+                        </strong>
+                    </td>
+                    <td style="font-family: var(--font-mono); font-size: 12px;">{{ log.destinatario|default:"---" }}</td>
                     <td>
                         <small style="color: var(--text-muted);">
-                            {{ log.asunto }}<br>
+                            {{ log.asunto|default:"Envío automático" }}<br>
                             <span style="color: #60a5fa; font-size: 10px; text-transform: uppercase; font-weight: 600;">{{ log.get_tipo_display }}</span>
                         </small>
                     </td>
