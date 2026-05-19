@@ -26,8 +26,14 @@ def home(request):
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
 
-    # 🟢 PROTOCOLO ANTI-ERROR 500: Consulta limpia sin select_related para evitar fallos de relación
-    email_logs = EmailLog.objects.all().order_by("-fecha_envio")[:5]
+    # 🟢 PROTOCOLO DE MÁXIMA SEGURIDAD BLINDADO: Evita el Server Error (500) ante cualquier inconsistencia de base de datos
+    try:
+        email_logs = EmailLog.objects.all().order_by("-fecha_envio")[:5]
+        # Forzamos la evaluación de la query dentro del bloque de seguridad para capturar cualquier error de mapeo
+        len(email_logs)
+    except Exception as e:
+        print("⚠️ Error controlado en EmailLog para evitar caída del sistema:", e)
+        email_logs = []
 
     # CIRUGÍA QUIRÚRGICA: Conteo de pólizas activas vs anuladas
     # Las activas son las que NO están anuladas
@@ -254,7 +260,7 @@ def home(request):
         "meses": meses,
         "crecimiento_totales": crecimiento_totales,
         "produccion_companias": produccion_companias,
-        "email_logs": email_logs,  # 🟢 ENVIADO SEGURO AL TEMPLATE
+        "email_logs": email_logs,
     }
 
     return render(request, "dashboard/dashboard.html", context)
