@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Policy, Payment, Company, RiskType
+from .models import Policy, Payment, Company, RiskType, EmailLog
 from clients.models import Client
 from datetime import date, timedelta
 import os
@@ -735,9 +735,27 @@ def enviar_poliza(request, poliza_id):
         adjuntos=adjuntos,
     )
 
+    # 🟢 PROTOCOLO: PERSISTENCIA QUIRÚRGICA DE REGISTROS DE EMAIL EN LA BASE DE DATOS 🟢
     if ok:
+        EmailLog.objects.create(
+            policy=poliza,
+            client=cliente,
+            tipo="VENCIMIENTO_POLIZA",
+            estado="ENVIADO",
+            destinatario=cliente.email,
+            asunto=asunto,
+        )
         messages.success(request, f"✅ Email enviado a {cliente.email}")
     else:
+        EmailLog.objects.create(
+            policy=poliza,
+            client=cliente,
+            tipo="VENCIMIENTO_POLIZA",
+            estado="ERROR",
+            destinatario=cliente.email,
+            asunto=asunto,
+            error=str(proveedor),
+        )
         messages.error(request, f"❌ Error al enviar el email: {proveedor}")
 
     return redirect("/")
@@ -781,7 +799,7 @@ def anular_poliza(request, poliza_id):
 
         messages.warning(
             request,
-            f"⚠️ La póliza {poliza.policy_number} ha sido anulada y sus cobros cancelados.",
+            f"⚠️ La póliza {poliza.policy_number} ha sido annulada y sus cobros cancelados.",
         )
         return redirect(f"/clientes/ver/{poliza.client.id}/")
 
