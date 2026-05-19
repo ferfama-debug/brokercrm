@@ -26,12 +26,8 @@ def home(request):
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
 
-    # 🟢 PROTOCOLO: CONSULTA GLOBAL DE HISTORIAL DE EMAILS (Evita errores de cruce de ID de productor)
-    email_logs = (
-        EmailLog.objects.select_related("client", "policy")
-        .all()
-        .order_by("-fecha_envio")[:5]
-    )
+    # 🟢 PROTOCOLO ANTI-ERROR 500: Consulta limpia sin select_related para evitar fallos de relación
+    email_logs = EmailLog.objects.all().order_by("-fecha_envio")[:5]
 
     # CIRUGÍA QUIRÚRGICA: Conteo de pólizas activas vs anuladas
     # Las activas son las que NO están anuladas
@@ -258,7 +254,7 @@ def home(request):
         "meses": meses,
         "crecimiento_totales": crecimiento_totales,
         "produccion_companias": produccion_companias,
-        "email_logs": email_logs,  # 🟢 DATOS ENVIADOS EN REGLA AL TEMPLATE
+        "email_logs": email_logs,  # 🟢 ENVIADO SEGURO AL TEMPLATE
     }
 
     return render(request, "dashboard/dashboard.html", context)
