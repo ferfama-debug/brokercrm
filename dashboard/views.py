@@ -20,23 +20,18 @@ def home(request):
         policies_qs = Policy.objects.select_related("client").all()
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
-        # 🟢 PROTOCOLO: EXTRAER ÚLTIMOS LOGS DE CORREOS PARA EL ADMINISTRADOR 🟢
-        email_logs = (
-            EmailLog.objects.select_related("client", "policy")
-            .all()
-            .order_by("-fecha_envio")[:5]
-        )
     else:
         clientes_qs = Client.objects.all()
         policies_qs = Policy.objects.all().select_related("client")
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
-        # 🟢 PROTOCOLO: EXTRAER ÚLTIMOS LOGS DE CORREOS PARA EL PRODUCTOR 🟢
-        email_logs = (
-            EmailLog.objects.select_related("client", "policy")
-            .filter(policy__client__producer=request.user)
-            .order_by("-fecha_envio")[:5]
-        )
+
+    # 🟢 PROTOCOLO: VISIBILIDAD GLOBAL DE LOGS (Garantiza ver los envíos sin trabas de relaciones)
+    email_logs = (
+        EmailLog.objects.select_related("client", "policy")
+        .all()
+        .order_by("-fecha_envio")[:5]
+    )
 
     # CIRUGÍA QUIRÚRGICA: Conteo de pólizas activas vs anuladas
     # Las activas son las que NO están anuladas
