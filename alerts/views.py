@@ -28,14 +28,17 @@ def alertas(request):
     hoy = date.today()
     limite_vencimiento = hoy + timedelta(days=30)
 
+    # 🟢 CIRUGÍA QUIRÚRGICA: Ampliamos el filtro de estados para incluir cuotas de HOY y PROXIMO
+    estados_criticos = ["VENCIDO", "HOY", "PROXIMO"]
+
     if request.user.is_superuser:
         polizas_por_vencer = Policy.objects.filter(
             end_date__gte=hoy,
             end_date__lte=limite_vencimiento,
         )
-        pagos_vencidos = Payment.objects.filter(estado="VENCIDO").select_related(
-            "policy__client"
-        )
+        pagos_vencidos = Payment.objects.filter(
+            estado__in=estados_criticos
+        ).select_related("policy__client")
     else:
         polizas_por_vencer = Policy.objects.filter(
             client__producer=request.user,
@@ -43,7 +46,7 @@ def alertas(request):
             end_date__lte=limite_vencimiento,
         )
         pagos_vencidos = Payment.objects.filter(
-            estado="VENCIDO",
+            estado__in=estados_criticos,
             policy__client__producer=request.user,
         ).select_related("policy__client")
 
@@ -55,7 +58,9 @@ def alertas(request):
 
     return render(
         request,
-        "alerts/alertas.html",
+        request.user.is_superuser
+        and "alerts/alertas.html"
+        or "alerts/alertas.html",  # Mantenemos compatibilidad de render
         {
             "alertas": alertas,
             "nivel": nivel,
