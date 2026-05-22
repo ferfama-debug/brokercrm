@@ -1,11 +1,15 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from clients.models import Client
-from policies.models import Policy, Payment, EmailLog
+from policies.models import (
+    Policy,
+    Payment,
+)  # 👈 MODIFICADO: Sacamos EmailLog de acá para evitar el crash al bootear
 from accounts.models import User
 from datetime import date, timedelta
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
+from django.apps import apps  # 👈 AGREGADO: Motor de carga desacoplada
 
 
 @login_required
@@ -26,11 +30,19 @@ def home(request):
         pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
         usuarios = 1
 
-    # 🟢 PROTOCOLO DE MÁXIMA SEGURIDAD BLINDADO: Evita el Server Error (500) ante cualquier inconsistencia de base de datos
+    # 🟢 PROTOCOLO DE MÁXIMA SEGURIDAD BLINDADO: Carga en caliente y precarga selectiva de relaciones reales
+    email_logs = []
     try:
-        email_logs = EmailLog.objects.all().order_by("-fecha_envio")[:5]
-        # Forzamos la evaluación de la query dentro del bloque de seguridad para capturar cualquier error de mapeo
-        len(email_logs)
+        ModelLog = apps.get_model("policies", "EmailLog")
+        if ModelLog:
+            # Traemos de forma eficiente los objetos vinculados utilizando los nombres exactos confirmados
+            email_logs = (
+                ModelLog.objects.select_related("client", "policy")
+                .all()
+                .order_by("-fecha_envio")[:5]
+            )
+            # Forzamos la evaluación de la query dentro del bloque seguro
+            list(email_logs)
     except Exception as e:
         print("⚠️ Error controlado en EmailLog para evitar caída del sistema:", e)
         email_logs = []
