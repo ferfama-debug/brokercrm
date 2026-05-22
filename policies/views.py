@@ -735,12 +735,17 @@ def enviar_poliza(request, poliza_id):
         adjuntos=adjuntos,
     )
 
-    # 🟢 PROTOCOLO: PERSISTENCIA QUIRÚRGICA DE REGISTROS DE EMAIL EN LA BASE DE DATOS 🟢
+    # 🟢 CIRUGÍA QUIRÚRGICA: Detección dinámica del tipo de correo según la forma de pago
+    tipo_log = "VENCIMIENTO_POLIZA"
+    if poliza.forma_pago == "CUPONERA":
+        tipo_log = "VENCIMIENTO_CUPONERA"
+
+    # 🟢 PROTOCOLO: PERSISTENCIA QUIRÚRGICA DE REGISTROS DE EMAIL EN LA BASE DE DATOS
     if ok:
         EmailLog.objects.create(
             policy=poliza,
             client=cliente,
-            tipo="VENCIMIENTO_POLIZA",
+            tipo=tipo_log,  # 👈 Ahora guarda dinámicamente si es Póliza o Cuponera
             estado="ENVIADO",
             destinatario=cliente.email,
             asunto=asunto,
@@ -750,7 +755,7 @@ def enviar_poliza(request, poliza_id):
         EmailLog.objects.create(
             policy=poliza,
             client=cliente,
-            tipo="VENCIMIENTO_POLIZA",
+            tipo=tipo_log,  # 👈 En caso de error también guarda el tipo correcto
             estado="ERROR",
             destinatario=cliente.email,
             asunto=asunto,
