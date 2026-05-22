@@ -36,7 +36,7 @@ def generate_expiration_alerts():
             level = "MEDIA"
 
         mensaje_interno = (
-            f"La póliza {policy.policy_number} de {policy.client} vence en {days} días"
+            f"La póliza {policy.policy_number} de {policy.client} vence in {days} días"
         )
 
         # Actualizar o crear alerta interna en el sistema
@@ -135,14 +135,16 @@ def enviar_mail_vencimiento_poliza(policy, dias):
 
 def generate_payment_reminders():
     """
-    Detecta cuotas que vencen en 2 días y genera alertas internas.
+    Detecta cuotas que vencen hoy o en los próximos 2 días y genera alertas internas.
     """
     today = date.today()
-    target_date = today + timedelta(days=2)
+    # 🟢 MODIFICACIÓN QUIRÚRGICA: Ampliamos el filtro para incluir el rango desde hoy hasta dentro de 2 días
+    max_target_date = today + timedelta(days=2)
 
     pagos = Payment.objects.filter(
         fecha_pago__isnull=True,
-        fecha_vencimiento=target_date,
+        fecha_vencimiento__gte=today,
+        fecha_vencimiento__lte=max_target_date,
         recordatorio_enviado=False,
         policy__forma_pago="CUPONERA",
     ).select_related("policy", "policy__client", "policy__client__producer")
@@ -151,19 +153,28 @@ def generate_payment_reminders():
         if not pago.policy or not pago.policy.client:
             continue
 
+        # Determinamos nivel dinámico según los días que queden
+        dias_restantes = (pago.fecha_vencimiento - today).days
+        level = "CRITICA" if dias_restantes == 0 else "ALTA"
+        plazo_texto = "hoy" if dias_restantes == 0 else f"en {dias_restantes} días"
+
         Alert.objects.get_or_create(
             user=pago.policy.client.producer,
             policy=pago.policy,
             tipo="PAGO_PROXIMO",
             resolved=False,
             defaults={
-                "message": f"Recordatorio: {pago.policy.client} tiene el vencimiento de la cuota #{pago.numero_cuota} en 2 días.",
-                "level": "ALTA",
+                "message": f"Recordatorio: {pago.policy.client} tiene el vencimiento de la cuota #{pago.numero_cuota} {plazo_texto}.",
+                "level": level,
             },
         )
 
 
 def generate_debt_alerts():
+    """
+    Detecta cuotas vencidas (anteriores a hoy) y genera alertas de deuda.
+    """
+    # 🟢 Mantenemos la integridad de deudas puras (anteriores a hoy) para no duplicar con los recordatorios del día
     pagos_vencidos = Payment.objects.filter(
         fecha_vencimiento__lt=date.today(), fecha_pago__isnull=True
     ).select_related("policy", "policy__client", "policy__client__producer")
@@ -234,7 +245,7 @@ def generar_link_whatsapp(cliente, mensaje):
 def whatsapp_deuda(pago):
     if not pago.policy or not pago.policy.client:
         return "#"
-    mensaje = f"Hola {pago.policy.client.first_name}, te escribo por tu póliza N° {pago.policy.policy_number}. Tenés una cuota vencida (#{pago.numero_cuota}). ¿Querés que te ayude a regularizarla?"
+    mensaje = f"Hola {pago.policy.client.first_name}, te escribo por tu póliza N° {pago.policy.policy_number}. Tenés una cuota vencida (# {pago.numero_cuota}). ¿Querés que te ayude a regularizarla?"
     return generar_link_whatsapp(pago.policy.client, mensaje)
 
 
