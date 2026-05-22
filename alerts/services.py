@@ -2,6 +2,9 @@ from datetime import date, timedelta
 from urllib.parse import quote
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.db.models import (
+    Q,
+)  # 👈 INYECCIÓN QUIRÚRGICA: Necesario para la lógica flexible
 
 from policies.models import Policy, Payment, EmailLog
 from clients.models import Client
@@ -101,7 +104,7 @@ def enviar_mail_vencimiento_poliza(policy, dias):
     try:
         email = EmailMultiAlternatives(
             subject=f"⚠️ Aviso de Vencimiento: Póliza {policy.policy_number}",
-            body=f"Hola {cliente.first_name}, tu póliza vence en {dias} días.",
+            body=f"Hola {cliente.first_name}, tu póliza vence in {dias} días.",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[cliente.email],
         )
@@ -138,22 +141,26 @@ def generate_payment_reminders():
     Detecta cuotas que vencen hoy o en los próximos 2 días y genera alertas internas.
     """
     today = date.today()
-    # 🟢 MODIFICACIÓN QUIRÚRGICA: Ampliamos el filtro para incluir el rango desde hoy hasta dentro de 2 días
     max_target_date = today + timedelta(days=2)
 
-    pagos = Payment.objects.filter(
-        fecha_pago__isnull=True,
-        fecha_vencimiento__gte=today,
-        fecha_vencimiento__lte=max_target_date,
-        recordatorio_enviado=False,
-        policy__forma_pago="CUPONERA",
-    ).select_related("policy", "policy__client", "policy__client__producer")
+    # 🟢 MODIFICACIÓN BLINDADA: Filtro inteligente con Q para forzar HOY
+    pagos = (
+        Payment.objects.filter(fecha_pago__isnull=True, policy__forma_pago="CUPONERA")
+        .filter(
+            Q(fecha_vencimiento=today)
+            | Q(
+                fecha_vencimiento__gt=today,
+                fecha_vencimiento__lte=max_target_date,
+                recordatorio_enviado=False,
+            )
+        )
+        .select_related("policy", "policy__client", "policy__client__producer")
+    )
 
     for pago in pagos:
         if not pago.policy or not pago.policy.client:
             continue
 
-        # Determinamos nivel dinámico según los días que queden
         dias_restantes = (pago.fecha_vencimiento - today).days
         level = "CRITICA" if dias_restantes == 0 else "ALTA"
         plazo_texto = "hoy" if dias_restantes == 0 else f"en {dias_restantes} días"
@@ -174,7 +181,6 @@ def generate_debt_alerts():
     """
     Detecta cuotas vencidas (anteriores a hoy) y genera alertas de deuda.
     """
-    # 🟢 Mantenemos la integridad de deudas puras (anteriores a hoy) para no duplicar con los recordatorios del día
     pagos_vencidos = Payment.objects.filter(
         fecha_vencimiento__lt=date.today(), fecha_pago__isnull=True
     ).select_related("policy", "policy__client", "policy__client__producer")
