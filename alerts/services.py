@@ -257,7 +257,7 @@ def generate_payment_reminders():
         )
 
         # 🟢 CONTROL DE AUTOMATIZACIÓN: Si el cliente tiene mail, dispara el correo automático
-        if policy.client.email and not pago.recordatorio_enviado:
+        if pago.policy.client.email and not pago.recordatorio_enviado:
             enviar_mail_cuponera(pago)
 
 
