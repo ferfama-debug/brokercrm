@@ -13,6 +13,14 @@ def alertas(request):
 
     generar_todas_las_alertas()
 
+    # 🟢 LIMPIEZA AUTOMÁTICA EXTRA: Si la cuota ya se pagó, resolvemos las alertas físicas de forma automática
+    # Esto limpia las alertas del tipo PAGO_PROXIMO o DEUDA en tu grilla de "Alertas Activas" al instante
+    Alert.objects.filter(
+        tipo__in=["PAGO_PROXIMO", "DEUDA"],
+        resolved=False,
+        policy__payment_set__fecha_pago__isnull=False
+    ).update(resolved=True)
+
     nivel = request.GET.get("nivel", "")
 
     if request.user.is_superuser:
@@ -28,7 +36,7 @@ def alertas(request):
     hoy = date.today()
     limite_vencimiento = hoy + timedelta(days=30)
 
-    # 🟢 CIRUGÍA QUIRÚRGICA: Ampliamos el filtro de estados para incluir cuotas de HOY y PROXIMO
+    # 🟢 CIRUGÍA QUIRÚRGICA: Filtramos estrictamente por cuotas que NO tengan fecha de pago asentada (fecha_pago__isnull=True)
     estados_criticos = ["VENCIDO", "HOY", "PROXIMO"]
 
     if request.user.is_superuser:
@@ -37,7 +45,8 @@ def alertas(request):
             end_date__lte=limite_vencimiento,
         )
         pagos_vencidos = Payment.objects.filter(
-            estado__in=estados_criticos
+            estado__in=estados_criticos,
+            fecha_pago__isnull=True  # 👈 FILTRO CLAVE: Solo si no registra pago
         ).select_related("policy__client")
     else:
         polizas_por_vencer = Policy.objects.filter(
@@ -47,6 +56,7 @@ def alertas(request):
         )
         pagos_vencidos = Payment.objects.filter(
             estado__in=estados_criticos,
+            fecha_pago__isnull=True,  # 👈 FILTRO CLAVE: Solo si no registra pago
             policy__client__producer=request.user,
         ).select_related("policy__client")
 
