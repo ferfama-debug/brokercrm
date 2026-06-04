@@ -66,7 +66,7 @@ def generate_expiration_alerts():
 def enviar_mail_vencimiento_poliza(policy, dias):
     """
     Configuración estética del mail de vencimiento (Naranja).
-    Anota la fecha de envío en la póliza para control.
+    Anote la fecha de envío en la póliza para control.
     """
     cliente = policy.client
 
@@ -136,6 +136,79 @@ def enviar_mail_vencimiento_poliza(policy, dias):
         )
 
 
+def enviar_mail_cuponera(pago):
+    """
+    🟢 FUNCIÓN PERFECCIONADA: Envía el mail estético al cliente (Azul) 
+    y te copia automáticamente oculto (bcc) para tu control.
+    """
+    policy = pago.policy
+    cliente = policy.client
+    
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
+        <div style="max-width:520px; margin:auto; background:white; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;">
+            <div style="background:#0f172a; padding:30px 20px; text-align:center;">
+                <img src="https://crm.fuerzanaturalbroker.com/static/images/img/logo.png" style="width:160px; height:auto; display:block; margin:auto;" />
+            </div>
+            <div style="padding:28px 24px; color:#1f2937;">
+                <h2 style="margin-top:0; text-align:center; color:#2563eb;">Recordatorio de Pago de Cuponera 💳</h2>
+                <p style="font-size:15px; line-height:1.5;">Hola {cliente.first_name}, te recordamos el próximo vencimiento de la cuota de tu cobertura:</p>
+                
+                <div style="background:#eff6ff; padding:16px; border-left:4px solid #2563eb; margin:20px 0; font-size:14px; line-height:1.6;">
+                    <strong>Compañía:</strong> {policy.company}<br>
+                    <strong>Póliza N°:</strong> {policy.policy_number}<br>
+                    <strong>Cuota N°:</strong> {pago.numero_cuota}<br>
+                    <strong>Vence el:</strong> {pago.fecha_vencimiento.strftime('%d/%m/%Y')}
+                </div>
+
+                <p style="font-size:14px; line-height:1.5; color:#4b5563;">
+                    Si ya realizaste el pago, podés responder este mail adjuntando el comprobante correspondiente para mantener tu tranquilidad al día.
+                </p>
+                <hr style="border:0; border-top:1px solid #e5e7eb; margin:25px 0;">
+                <p style="line-height:1.5; font-size:13px; text-align:center; color:#6b7280;">
+                    Saludos,<br>
+                    <strong>Fuerza Natural Broker de Seguros</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+    """
+
+    try:
+        email = EmailMultiAlternatives(
+            subject=f"💳 Recordatorio de Pago: Cuota #{pago.numero_cuota} - Póliza {policy.policy_number}",
+            body=f"Hola {cliente.first_name}, te recordamos el vencimiento de tu cuota #{pago.numero_cuota}.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[cliente.email],
+            bcc=["fuerzanaturalbroker@gmail.com"],  # Copia oculta automática para vos
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+
+        # Marcar aviso enviado para proteger de duplicaciones
+        pago.recordatorio_enviado = True
+        pago.save(update_fields=["recordatorio_enviado"])
+
+        EmailLog.objects.create(
+            policy=policy,
+            client=cliente,
+            tipo="VENCIMIENTO_CUPONERA",
+            estado="ENVIADO",
+            destinatario=cliente.email,
+            asunto=f"Recordatorio de Pago: Cuota #{pago.numero_cuota}",
+        )
+    except Exception as e:
+        print(f"Error enviando mail de cuponera: {e}")
+        EmailLog.objects.create(
+            policy=policy,
+            client=cliente,
+            tipo="VENCIMIENTO_CUPONERA",
+            estado="ERROR",
+            destinatario=cliente.email,
+            error=str(e),
+        )
+
+
 def generate_payment_reminders():
     """
     Detecta cuotas que vencen hoy o en los próximos 2 días y genera alertas internas.
@@ -149,7 +222,8 @@ def generate_payment_reminders():
         .filter(
             Q(fecha_vencimiento=today)
             | Q(
-                fecha_vencimiento__gt=today,
+                # Agregamos control temporal para capturar también las de ayer si quedaron colgadas sin marcar
+                fecha_vencimiento__gte=today - timedelta(days=1),
                 fecha_vencimiento__lte=max_target_date,
                 recordatorio_enviado=False,
             )
@@ -162,8 +236,14 @@ def generate_payment_reminders():
             continue
 
         dias_restantes = (pago.fecha_vencimiento - today).days
-        level = "CRITICA" if dias_restantes == 0 else "ALTA"
-        plazo_texto = "hoy" if dias_restantes == 0 else f"en {dias_restantes} días"
+        level = "CRITICA" if dias_restantes <= 0 else "ALTA"
+        
+        if dias_restantes < 0:
+            plazo_texto = f"hace {abs(dias_restantes)} días"
+        elif dias_restantes == 0:
+            plazo_texto = "hoy"
+        else:
+            plazo_texto = f"en {dias_restantes} días"
 
         Alert.objects.get_or_create(
             user=pago.policy.client.producer,
@@ -175,6 +255,10 @@ def generate_payment_reminders():
                 "level": level,
             },
         )
+
+        # 🟢 CONTROL DE AUTOMATIZACIÓN: Si el cliente tiene mail, dispara el correo automático
+        if policy.client.email and not pago.recordatorio_enviado:
+            enviar_mail_cuponera(pago)
 
 
 def generate_debt_alerts():
