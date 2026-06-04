@@ -13,13 +13,16 @@ def alertas(request):
 
     generar_todas_las_alertas()
 
-    # 🟢 LIMPIEZA AUTOMÁTICA EXTRA: Si la cuota ya se pagó, resolvemos las alertas físicas de forma automática
-    # Esto limpia las alertas del tipo PAGO_PROXIMO o DEUDA en tu grilla de "Alertas Activas" al instante
-    Alert.objects.filter(
-        tipo__in=["PAGO_PROXIMO", "DEUDA"],
-        resolved=False,
-        policy__payment_set__fecha_pago__isnull=False
-    ).update(resolved=True)
+    # 🟢 SOLUCIÓN ESTÁNDAR: Buscamos los IDs de pólizas que SÍ tienen cuotas pagadas
+    polizas_pagadas = Payment.objects.filter(fecha_pago__isnull=False).values_list("policy_id", flat=True)
+
+    # 🟢 LIMPIEZA AUTOMÁTICA SEGURA: Resolvemos las alertas de esas pólizas sin romper el SQL
+    if polizas_pagadas.exists():
+        Alert.objects.filter(
+            tipo__in=["PAGO_PROXIMO", "DEUDA"],
+            resolved=False,
+            policy_id__in=polizas_pagadas
+        ).update(resolved=True)
 
     nivel = request.GET.get("nivel", "")
 
@@ -36,7 +39,7 @@ def alertas(request):
     hoy = date.today()
     limite_vencimiento = hoy + timedelta(days=30)
 
-    # 🟢 CIRUGÍA QUIRÚRGICA: Filtramos estrictamente por cuotas que NO tengan fecha de pago asentada (fecha_pago__isnull=True)
+    # Filtramos estrictamente por cuotas que NO tengan fecha de pago asentada
     estados_criticos = ["VENCIDO", "HOY", "PROXIMO"]
 
     if request.user.is_superuser:
@@ -46,7 +49,7 @@ def alertas(request):
         )
         pagos_vencidos = Payment.objects.filter(
             estado__in=estados_criticos,
-            fecha_pago__isnull=True  # 👈 FILTRO CLAVE: Solo si no registra pago
+            fecha_pago__isnull=True
         ).select_related("policy__client")
     else:
         polizas_por_vencer = Policy.objects.filter(
@@ -56,7 +59,7 @@ def alertas(request):
         )
         pagos_vencidos = Payment.objects.filter(
             estado__in=estados_criticos,
-            fecha_pago__isnull=True,  # 👈 FILTRO CLAVE: Solo si no registra pago
+            fecha_pago__isnull=True,
             policy__client__producer=request.user,
         ).select_related("policy__client")
 
@@ -68,9 +71,7 @@ def alertas(request):
 
     return render(
         request,
-        request.user.is_superuser
-        and "alerts/alertas.html"
-        or "alerts/alertas.html",  # Mantenemos compatibilidad de render
+        "alerts/alertas.html",
         {
             "alertas": alertas,
             "nivel": nivel,
