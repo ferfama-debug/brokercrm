@@ -8,7 +8,7 @@ from policies.models import Payment
 
 
 class Command(BaseCommand):
-    help = "Envía recordatorios de cuponera 2 días antes del vencimiento"
+    help = "Envía recordatorios de cuponera 2 días antes del vencimiento con copia oculta"
 
     def handle(self, *args, **options):
         hoy = timezone.localdate()
@@ -79,11 +79,13 @@ class Command(BaseCommand):
                 </div>
                 """
 
+                # 🟢 COPIA OCULTA (BCC): Agregamos tu mail de control de forma nativa
                 email = EmailMultiAlternatives(
                     subject=f"📌 Recordatorio de pago: Cuota #{pago.numero_cuota}",
                     body=f"Hola {cliente.first_name}, vence tu cuota #{pago.numero_cuota} el {pago.fecha_vencimiento}.",
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[cliente.email],
+                    bcc=["fuerzanaturalbroker@gmail.com"],  # 👈 Te llega un duplicado exacto a vos
                 )
                 email.attach_alternative(html_content, "text/html")
                 email.send()
