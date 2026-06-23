@@ -45,11 +45,12 @@ class Command(BaseCommand):
                 f"Hoy es el cumpleaños de {cliente.first_name} {cliente.last_name}"
             )
 
+            # 🟢 CORRECCIÓN QUIRÚRGICA: Solo omitimos si YA se generó una alerta HOY para este cumpleaños
             ya_enviado = Alert.objects.filter(
                 user=cliente.producer,
                 tipo="CUMPLEANIOS",
                 message=mensaje,
-                resolved=False,
+                created_at__date=hoy,  # 👈 Control estricto del día, ignorando alertas históricas
             ).exists()
 
             if ya_enviado:
@@ -119,11 +120,13 @@ class Command(BaseCommand):
                     "Fuerza Natural Broker"
                 )
 
+                # 🟢 COPIA OCULTA (BCC): Agregamos tu mail para que te llegue el respaldo exacto
                 email = EmailMultiAlternatives(
                     subject=f"🎉 ¡Feliz cumpleaños {cliente.first_name}!",
                     body=text_content,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[cliente.email],
+                    bcc=["fuerzanaturalbroker@gmail.com"],  # 👈 Te cae una copia oculta a vos
                 )
 
                 email.attach_alternative(html_content, "text/html")
@@ -145,7 +148,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Cumpleaños procesados. Enviados: {enviados}. "
+                f"Cumpleaños processed. Enviados: {enviados}. "
                 f"Omitidos: {omitidos}. Errores: {errores}."
             )
         )
