@@ -10,7 +10,7 @@ from policies.models import Policy, Payment, EmailLog
 
 
 class Command(BaseCommand):
-    help = "Verifica pólizas y pagos próximos a vencer y envía emails"
+    help = "Verifica pólizas y pagos próximos a vencer y envía emails con BCC de seguridad"
 
     def handle(self, *args, **kwargs):
         hoy = timezone.localdate()
@@ -97,11 +97,13 @@ class Command(BaseCommand):
                         },
                     )
 
+                    # 🟢 COPIA OCULTA (BCC): Para tu control en pólizas
                     email = EmailMultiAlternatives(
                         subject=asunto,
                         body=mensaje,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[cliente.email],
+                        bcc=["fuerzanaturalbroker@gmail.com"],
                     )
                     email.attach_alternative(html_content, "text/html")
                     email.send()
@@ -115,8 +117,9 @@ class Command(BaseCommand):
                         asunto=asunto,
                     )
 
+                    # 🟢 CORRECCIÓN QUIRÚRGICA: Quitamos update_fields para asegurar el guardado físico completo
                     policy.email_vencimiento_enviado = True
-                    policy.save(update_fields=["email_vencimiento_enviado"])
+                    policy.save()
 
                     self.stdout.write(
                         self.style.SUCCESS(f"Email de póliza enviado a {cliente.email}")
@@ -233,11 +236,13 @@ class Command(BaseCommand):
                         },
                     )
 
+                    # 🟢 COPIA OCULTA (BCC): Para tu control en cuponeras
                     email = EmailMultiAlternatives(
                         subject=asunto,
                         body=mensaje,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[cliente.email],
+                        bcc=["fuerzanaturalbroker@gmail.com"],
                     )
                     email.attach_alternative(html_content, "text/html")
                     email.send()
@@ -252,8 +257,9 @@ class Command(BaseCommand):
                         asunto=asunto,
                     )
 
+                    # 🟢 CORRECCIÓN QUIRÚRGICA: Guardado completo sin restricciones de columnas
                     pago.recordatorio_enviado = True
-                    pago.save(update_fields=["recordatorio_enviado"])
+                    pago.save()
 
                     self.stdout.write(
                         self.style.SUCCESS(
