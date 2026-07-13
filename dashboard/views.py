@@ -36,10 +36,15 @@ def home(request):
     try:
         ModelLog = apps.get_model("policies", "EmailLog")
         if ModelLog:
+            # 🟢 NUEVA CIRUGÍA: Aislamiento de tracking de emails
+            if request.user.is_superuser:
+                email_logs_qs = ModelLog.objects.all()
+            else:
+                email_logs_qs = ModelLog.objects.filter(client__producer=request.user)
+
             # Traemos de forma eficiente los objetos vinculados utilizando los nombres exactos confirmados
             email_logs = (
-                ModelLog.objects.select_related("client", "policy")
-                .all()
+                email_logs_qs.select_related("client", "policy")
                 .order_by("-fecha_envio")[:5]
             )
             # Forzamos la evaluación de la query dentro del bloque seguro
