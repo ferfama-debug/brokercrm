@@ -25,9 +25,10 @@ def home(request):
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
     else:
-        clientes_qs = Client.objects.all()
-        policies_qs = Policy.objects.all().select_related("client")
-        pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
+        # 🟢 CIRUGÍA APLICADA: Filtramos exclusivamente los datos del productor logueado
+        clientes_qs = Client.objects.filter(producer=request.user)
+        policies_qs = Policy.objects.filter(client__producer=request.user).select_related("client")
+        pagos_qs = Payment.objects.filter(policy__client__producer=request.user).select_related("policy", "policy__client")
         usuarios = 1
 
     # 🟢 PROTOCOLO DE MÁXIMA SEGURIDAD BLINDADO: Carga en caliente y precarga selectiva de relaciones reales
@@ -35,10 +36,15 @@ def home(request):
     try:
         ModelLog = apps.get_model("policies", "EmailLog")
         if ModelLog:
+            # 🟢 NUEVA CIRUGÍA: Aislamiento de tracking de emails
+            if request.user.is_superuser:
+                email_logs_qs = ModelLog.objects.all()
+            else:
+                email_logs_qs = ModelLog.objects.filter(client__producer=request.user)
+
             # Traemos de forma eficiente los objetos vinculados utilizando los nombres exactos confirmados
             email_logs = (
-                ModelLog.objects.select_related("client", "policy")
-                .all()
+                email_logs_qs.select_related("client", "policy")
                 .order_by("-fecha_envio")[:5]
             )
             # Forzamos la evaluación de la query dentro del bloque seguro
