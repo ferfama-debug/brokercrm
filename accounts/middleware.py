@@ -1,36 +1,29 @@
 from django.shortcuts import redirect
-from django.utils import timezone
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
 
 class PasswordExpirationMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # Solo actuamos si el usuario ya inició sesión
-        if request.user.is_authenticated:
-            
-            # Configurá acá los días de vencimiento (ej: 90 días)
-            DIAS_MAXIMOS = 90
-            
-            # Rutas permitidas para evitar que el sistema se bloquee a sí mismo en bucle
-            urls_permitidas = [
-                reverse('password_change'),
-                reverse('password_change_done'),
-                reverse('logout'),
-            ]
-            
-            # Si el usuario no está yendo a las pantallas de cambio de clave o logout...
-            if request.path not in urls_permitidas and not request.path.startswith('/admin/'):
-                usuario = request.user
-                ahora = timezone.now()
-                
-                # Calculamos cuántos días pasaron desde el último cambio
-                dias_pasados = (ahora - usuario.password_changed_at).days
-                
-                # Si tiene el cambio forzado O si ya pasaron los 90 días...
-                if usuario.force_password_change or dias_pasados >= DIAS_MAXIMOS:
-                    # ¡Lo desviamos directo a cambiar la contraseña!
-                    return redirect('password_change')
+        # Si el usuario inició sesión y tiene el bloqueo de contraseña activo
+        if request.user.is_authenticated and getattr(request.user, 'force_password_change', False):
+            try:
+                # Intentamos buscar las rutas usando el namespace 'accounts:' de tu CRM
+                password_change_url = reverse('accounts:password_change')
+                logout_url = reverse('accounts:logout')
+            except NoReverseMatch:
+                try:
+                    # Si no existiera el namespace, probamos con los nombres directos
+                    password_change_url = reverse('password_change')
+                    logout_url = reverse('logout')
+                except NoReverseMatch:
+                    # Si no encuentra ninguna de las dos rutas, dejamos pasar al usuario 
+                    # para evitar que la página web tire un Error 500 en producción.
+                    return self.get_response(request)
+
+            # Si el usuario intenta navegar a cualquier lado que NO sea cambiar la clave o desloguearse:
+            if request.path != password_change_url and request.path != logout_url:
+                return redirect(password_change_url)
 
         return self.get_response(request)
