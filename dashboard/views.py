@@ -25,9 +25,10 @@ def home(request):
         pagos_qs = Payment.objects.select_related("policy", "policy__client")
         usuarios = User.objects.count()
     else:
-        clientes_qs = Client.objects.all()
-        policies_qs = Policy.objects.all().select_related("client")
-        pagos_qs = Payment.objects.all().select_related("policy", "policy__client")
+        # 🟢 CIRUGÍA APLICADA: Filtramos exclusivamente los datos del productor logueado
+        clientes_qs = Client.objects.filter(producer=request.user)
+        policies_qs = Policy.objects.filter(client__producer=request.user).select_related("client")
+        pagos_qs = Payment.objects.filter(policy__client__producer=request.user).select_related("policy", "policy__client")
         usuarios = 1
 
     # 🟢 PROTOCOLO DE MÁXIMA SEGURIDAD BLINDADO: Carga en caliente y precarga selectiva de relaciones reales
