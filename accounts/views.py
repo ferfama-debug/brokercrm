@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.http import HttpResponse
-# 🌟 Importaciones certificadas para el cambio de contraseña
 from django.contrib.auth.views import PasswordChangeView
 from django.urls import reverse_lazy
 
@@ -42,19 +41,24 @@ def crear_admin_rapido(request):
     return HttpResponse("No disponible", status=403)
 
 
-# 🔒 VISTA CERTIFICADA PARA CAMBIO DE CONTRASEÑA FORZOSO
-# Esta vista procesa el cambio de clave y apaga automáticamente el tilde en la base de datos.
+# 🔒 VISTA DE CAMBIO DE CONTRASEÑA (Cierra sesión automáticamente al terminar)
 class CustomPasswordChangeView(PasswordChangeView):
     template_name = "accounts/password_change.html"
-    success_url = reverse_lazy("accounts:password_change_done")
+    success_url = reverse_lazy("accounts:login")
 
     def form_valid(self, form):
-        # 1. Guarda la contraseña nueva y mantiene la sesión del usuario activa
-        response = super().form_valid(form)
+        # 1. Guardamos la contraseña nueva en la base de datos
+        user = form.save()
         
-        # 2. Desactiva el flag 'force_password_change' en la base de datos
-        user = self.request.user
+        # 2. Apagamos el bloqueo (force_password_change = False)
         user.force_password_change = False
         user.save()
         
-        return response
+        # 3. Deslogueamos al usuario de la sesión actual
+        logout(self.request)
+        
+        # 4. Dejamos un mensaje para que aparezca en la pantalla de login
+        messages.success(self.request, "Contraseña actualizada con éxito. Por favor, iniciá sesión con tu nueva contraseña.")
+        
+        # 5. Redirigimos directo al login
+        return redirect("accounts:login")
