@@ -7,8 +7,8 @@ class PasswordExpirationMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # 1. Si el usuario no está autenticado, pasa sin evaluar
-        if not request.user.is_authenticated:
+        # 1. 🛡️ Defensa extrema: si el middleware se ejecuta antes de la autenticación de Django
+        if not hasattr(request, 'user') or not request.user.is_authenticated:
             return self.get_response(request)
 
         # 2. Si el usuario no requiere cambio de contraseña, pasa normalmente
@@ -35,8 +35,7 @@ class PasswordExpirationMiddleware:
                 password_change_url = reverse('password_change')
                 logout_url = reverse('logout')
             except NoReverseMatch:
-                # Si fallan ambos en producción, usamos rutas harcodeadas seguras 
-                # para evitar el bypass silencioso
+                # Si fallan ambos, usamos rutas seguras harcodeadas
                 password_change_url = '/accounts/password-change/'
                 logout_url = '/accounts/logout/'
 
