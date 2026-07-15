@@ -1,15 +1,15 @@
 from django.core.management.base import BaseCommand
-from alerts.services import generate_expiration_alerts
+# 👈 IMPORTANTE: Cambiamos el import para traer la función que ejecuta todo
+from alerts.services import generar_todas_las_alertas
 
 
 class Command(BaseCommand):
-
-    help = "Genera alertas y envía emails de vencimiento"
+    help = "Genera todas las alertas del sistema (vencimientos, cuotas, deudas y cumpleaños)"
 
     def handle(self, *args, **kwargs):
-
-        generate_expiration_alerts()
+        # Ejecutamos el motor completo de alertas
+        generar_todas_las_alertas()
 
         self.stdout.write(
-            self.style.SUCCESS("Alertas de vencimiento revisadas correctamente")
+            self.style.SUCCESS("Todas las alertas del sistema fueron procesadas correctamente.")
         )
