@@ -195,7 +195,7 @@ def enviar_mail_cuponera(pago):
 
 def generate_payment_reminders():
     """
-    Detecta cuotas que vencen hoy o en los próximos 2 días y genera alertas internas de forma segura.
+    Detecta cuotas que vencen hoy o en los próximos 2 días y actualiza/crea alertas respetando los constraints.
     """
     today = date.today()
     max_target_date = today + timedelta(days=2)
@@ -229,22 +229,16 @@ def generate_payment_reminders():
 
         mensaje = f"Recordatorio: {pago.policy.client} tiene el vencimiento de la cuota #{pago.numero_cuota} {plazo_texto}."
 
-        # 🟢 Control seguro contra duplicados
-        if not Alert.objects.filter(
+        Alert.objects.update_or_create(
             user=pago.policy.client.producer,
             policy=pago.policy,
             tipo="PAGO_PROXIMO",
-            message=mensaje,
             resolved=False,
-        ).exists():
-            Alert.objects.create(
-                user=pago.policy.client.producer,
-                policy=pago.policy,
-                tipo="PAGO_PROXIMO",
-                message=mensaje,
-                level=level,
-                resolved=False,
-            )
+            defaults={
+                "message": mensaje,
+                "level": level,
+            },
+        )
 
         if pago.policy.client.email and not pago.recordatorio_enviado:
             enviar_mail_cuponera(pago)
@@ -252,7 +246,7 @@ def generate_payment_reminders():
 
 def generate_debt_alerts():
     """
-    Detecta cuotas vencidas (anteriores a hoy) y genera alertas de deuda de forma segura.
+    Detecta cuotas vencidas (anteriores a hoy) y actualiza/crea alertas respetando los constraints de BD.
     """
     pagos_vencidos = Payment.objects.filter(
         fecha_vencimiento__lt=date.today(), fecha_pago__isnull=True
@@ -269,22 +263,16 @@ def generate_debt_alerts():
 
         mensaje = f"Cuota vencida #{pago.numero_cuota} de la póliza {policy.policy_number}"
 
-        # 🟢 Control seguro contra duplicados
-        if not Alert.objects.filter(
+        Alert.objects.update_or_create(
             user=policy.client.producer,
             policy=policy,
             tipo="DEUDA",
-            message=mensaje,
             resolved=False,
-        ).exists():
-            Alert.objects.create(
-                user=policy.client.producer,
-                policy=policy,
-                tipo="DEUDA",
-                message=mensaje,
-                level="CRITICA",
-                resolved=False,
-            )
+            defaults={
+                "message": mensaje,
+                "level": "CRITICA",
+            },
+        )
 
     Alert.objects.filter(tipo="DEUDA", resolved=False).exclude(
         policy_id__in=policies_con_deuda
@@ -307,20 +295,16 @@ def generate_birthday_alerts():
 
         mensaje = f"Hoy es el cumpleaños de {cliente.first_name} {cliente.last_name}"
 
-        # 🟢 Control seguro por cliente y mensaje único
-        if not Alert.objects.filter(
+        Alert.objects.update_or_create(
             user=cliente.producer,
+            policy=None,
             tipo="CUMPLEANIOS",
-            message=mensaje,
             resolved=False,
-        ).exists():
-            Alert.objects.create(
-                user=cliente.producer,
-                tipo="CUMPLEANIOS",
-                message=mensaje,
-                level="MEDIA",
-                resolved=False,
-            )
+            defaults={
+                "message": mensaje,
+                "level": "MEDIA",
+            },
+        )
 
 
 def generar_todas_las_alertas():
