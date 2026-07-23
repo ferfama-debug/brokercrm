@@ -1,6 +1,23 @@
+import os
 from django.db import models
 from datetime import date
 from dateutil.relativedelta import relativedelta
+
+
+def policy_directory_path(instance, filename):
+    client_name = f"{instance.client.last_name}_{instance.client.first_name}".replace(" ", "_")
+    return f"polizas/cliente_{instance.client.id}_{client_name}/{filename}"
+
+
+def cuponera_directory_path(instance, filename):
+    client_name = f"{instance.client.last_name}_{instance.client.first_name}".replace(" ", "_")
+    return f"cuponeras/cliente_{instance.client.id}_{client_name}/{filename}"
+
+
+def comprobante_directory_path(instance, filename):
+    client = instance.policy.client
+    client_name = f"{client.last_name}_{client.first_name}".replace(" ", "_")
+    return f"comprobantes/cliente_{client.id}_{client_name}/{filename}"
 
 
 class RiskType(models.Model):
@@ -113,6 +130,17 @@ class Policy(models.Model):
         db_index=True,
     )
 
+    # NUEVO CAMPO: Permite vincular esta póliza con su renovación anterior
+    renovacion_de = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Renueva a la póliza anterior",
+        related_name="renovaciones",
+        help_text="Seleccione la póliza anterior correspondiente al mismo bien en caso de renovación.",
+    )
+
     fecha_primer_vencimiento_cuponera = models.DateField(
         blank=True,
         null=True,
@@ -132,10 +160,11 @@ class Policy(models.Model):
         null=True, blank=True, verbose_name="Último Aviso Vencimiento"
     )
 
-    pdf_poliza = models.TextField(
+    pdf_poliza = models.FileField(
+        upload_to=policy_directory_path,
         blank=True,
         null=True,
-        verbose_name="URL PDF de póliza",
+        verbose_name="Archivo PDF de póliza",
     )
 
     forma_pago = models.CharField(
@@ -145,10 +174,11 @@ class Policy(models.Model):
         verbose_name="Forma de pago",
     )
 
-    cuponera_pdf = models.TextField(
+    cuponera_pdf = models.FileField(
+        upload_to=cuponera_directory_path,
         blank=True,
         null=True,
-        verbose_name="URL cuponera",
+        verbose_name="Archivo PDF cuponera",
     )
 
     frecuencia_cuponera = models.IntegerField(
@@ -165,28 +195,28 @@ class Policy(models.Model):
         null=True, blank=True, verbose_name="Motivo de la baja"
     )
 
-    def _normalizar_url(self, valor):
-        if not valor:
-            return None
-        valor = str(valor).strip()
-        return valor or None
-
     def save(self, *args, **kwargs):
         if self.company_obj:
             self.company = self.company_obj.nombre
-
-        self.pdf_poliza = self._normalizar_url(self.pdf_poliza)
-        self.cuponera_pdf = self._normalizar_url(self.cuponera_pdf)
-
         super().save(*args, **kwargs)
 
     @property
     def pdf_url(self):
-        return self._normalizar_url(self.pdf_poliza)
+        if self.pdf_poliza:
+            try:
+                return self.pdf_poliza.url
+            except Exception:
+                return str(self.pdf_poliza)
+        return None
 
     @property
     def cuponera_url(self):
-        return self._normalizar_url(self.cuponera_pdf)
+        if self.cuponera_pdf:
+            try:
+                return self.cuponera_pdf.url
+            except Exception:
+                return str(self.cuponera_pdf)
+        return None
 
     @property
     def estado(self):
@@ -261,10 +291,11 @@ class Payment(models.Model):
         null=True,
         verbose_name="Monto",
     )
-    comprobante = models.TextField(
+    comprobante = models.FileField(
+        upload_to=comprobante_directory_path,
         blank=True,
         null=True,
-        verbose_name="URL comprobante",
+        verbose_name="Archivo comprobante",
     )
     recordatorio_enviado = models.BooleanField(
         default=False,
@@ -301,7 +332,7 @@ class Payment(models.Model):
             f"Hola {cliente} 👋\n\n"
             "Esperamos que te encuentres muy bien.\n\n"
             "Te escribimos desde *Fuerza Natural Broker de Seguros* para recordarte el próximo vencimiento de tu póliza.\n\n"
-            "📌 Póliza N°: {numero_poliza}\n"
+            f"📌 Póliza N°: {numero_poliza}\n"
             f"💳 Cuota N°: {self.numero_cuota}\n"
             f"📅 Vencimiento: {fecha}\n\n"
             "Te recomendamos realizar el pago antes de la fecha indicada para evitar cualquier interrupción en tu cobertura.\n\n"

@@ -32,10 +32,9 @@ class RiskTypeAdmin(admin.ModelAdmin):
 class PolicyAdmin(admin.ModelAdmin):
     inlines = [PaymentInline]
 
-    # CIRUGÍA: Agregada 'patente' al listado principal
     list_display = (
         "policy_number",
-        "patente",  # <-- Nueva columna visible
+        "patente",
         "client",
         "company_obj",
         "risk_type",
@@ -52,7 +51,8 @@ class PolicyAdmin(admin.ModelAdmin):
                     "client",
                     "company_obj",
                     "policy_number",
-                    "patente",  # <-- Campo agregado para edición manual
+                    "renovacion_de",  # <-- Campo agregado para gestionar renovaciones
+                    "patente",
                     "risk_type",
                     "tipo_poliza",
                     "insurance_type",
@@ -96,10 +96,9 @@ class PolicyAdmin(admin.ModelAdmin):
         "end_date",
     )
 
-    # CIRUGÍA: 'patente' agregada al buscador inteligente del admin
     search_fields = (
         "policy_number",
-        "patente",  # <-- Ahora podés buscar por patente también en el admin
+        "patente",
         "client__first_name",
         "client__last_name",
     )
