@@ -74,6 +74,8 @@ def home(request):
     policies_para_alertas = policies_qs.filter(anulada=False)
 
     for p in policies_para_alertas:
+        if not p.end_date:
+            continue
         dias = (p.end_date - hoy).days
 
         if dias < 0:
