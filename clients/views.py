@@ -121,6 +121,10 @@ def ver_cliente(request, cliente_id):
     polizas_vencidas = 0
 
     for poliza in polizas_query:
+        # 🟢 BLINDAJE DE SEGURIDAD: Evita error si end_date es nulo
+        if not poliza.end_date:
+            continue
+
         dias = (poliza.end_date - hoy).days
 
         if dias < 0:
