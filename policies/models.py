@@ -178,7 +178,6 @@ class Policy(models.Model):
         self.pdf_poliza = self._normalizar_url(self.pdf_poliza)
         self.cuponera_pdf = self._normalizar_url(self.cuponera_pdf)
 
-        # 100% Limpio: El modelo solo guarda los datos de la póliza
         super().save(*args, **kwargs)
 
     @property
@@ -193,6 +192,9 @@ class Policy(models.Model):
     def estado(self):
         if self.anulada:
             return "ANULADA"
+
+        if not self.end_date:
+            return "SIN FECHA"
 
         hoy = date.today()
         dias = (self.end_date - hoy).days
