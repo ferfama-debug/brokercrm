@@ -68,8 +68,8 @@
           <div class="sub-line"></div>
         </div>
 
-        <!-- 🟢 FILA 1: CLIENTE Y N° PÓLIZA -->
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- FILA 1: CLIENTE, N° PÓLIZA Y RENOVACIÓN DE -->
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
           <div class="form-grupo">
             <label>Cliente</label>
             <select name="client" class="form-control required" required>
@@ -87,9 +87,21 @@
             <label>N° Póliza</label>
             <input type="text" name="policy_number" class="form-control required" required placeholder="Ej: 123456789">
           </div>
+
+          <div class="form-grupo">
+            <label style="color: var(--green-400);">¿Es renovación de...?</label>
+            <select name="renovacion_de" class="form-control">
+              <option value="">Ninguna (Póliza nueva)</option>
+              {% for pol in polizas %}
+              <option value="{{ pol.id }}">
+                N° {{ pol.policy_number }} - {{ pol.client }} ({{ pol.company|default:"Sin compañía" }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
 
-        <!-- 🟢 FILA 2: PATENTE Y COMPAÑÍA 🟢 -->
+        <!-- FILA 2: PATENTE Y COMPAÑÍA -->
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 15px;">
           <div class="form-grupo">
             <label style="color: var(--green-400);">Patente / Dominio</label>

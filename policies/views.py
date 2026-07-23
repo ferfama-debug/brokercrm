@@ -372,10 +372,6 @@ def panel_cobranzas(request):
 
 @login_required
 def lista_polizas(request):
-    """
-    CIRUGÍA QUIRÚRGICA: Buscador inteligente potenciado.
-    Ahora busca por Nombre, Apellido, N° Póliza, DNI y Patente.
-    """
     compania = request.GET.get("compania")
     buscar = request.GET.get("buscar")
 
@@ -387,19 +383,17 @@ def lista_polizas(request):
         )
 
     if buscar:
-        # Buscador Multicampo (DNI y Patente incluidos)
         clientes = clientes.filter(
             Q(first_name__icontains=buscar)
             | Q(last_name__icontains=buscar)
-            | Q(dni__icontains=buscar)  # Búsqueda por DNI
+            | Q(dni__icontains=buscar)
             | Q(policy__policy_number__icontains=buscar)
-            | Q(policy__patente__icontains=buscar)  # Búsqueda por Patente
+            | Q(policy__patente__icontains=buscar)
         ).distinct()
 
     if compania:
         clientes = clientes.filter(policy__company=compania).distinct()
 
-    # --- CORRECCIÓN: Lista de compañías única y ordenada ---
     if request.user.is_superuser:
         companias = (
             Policy.objects.exclude(company__isnull=True)
@@ -434,10 +428,13 @@ def lista_polizas(request):
 def crear_poliza(request):
     if request.user.is_superuser:
         clientes = Client.objects.all()
+        todas_las_polizas = Policy.objects.all()
     else:
         clientes = Client.objects.filter(producer=request.user)
+        todas_las_polizas = Policy.objects.filter(client__producer=request.user)
 
     clientes = clientes.order_by("last_name", "first_name")
+    todas_las_polizas = todas_las_polizas.order_by("-id")
 
     cliente_id = request.GET.get("cliente")
     companias = Company.objects.all().order_by("nombre")
@@ -463,9 +460,19 @@ def crear_poliza(request):
                     "cliente_id": cliente_id,
                     "companias": companias,
                     "riesgos": riesgos,
+                    "polizas": todas_las_polizas,
                     "error": "Debe completar las fechas",
                 },
             )
+
+        # 🟢 Capturar póliza anterior (renovación)
+        renovacion_de_id = request.POST.get("renovacion_de")
+        renovacion_de_obj = None
+        if renovacion_de_id:
+            try:
+                renovacion_de_obj = Policy.objects.get(id=renovacion_de_id)
+            except Exception:
+                pass
 
         print("===== DEBUG SUBIDA POLIZA (CREAR) =====")
         archivo_poliza = request.FILES.get("pdf_poliza")
@@ -512,13 +519,13 @@ def crear_poliza(request):
                 "fecha_primer_vencimiento_cuponera"
             )
             or None,
+            renovacion_de=renovacion_de_obj,  # 👈 Guardado de relación de renovación
             pdf_poliza=pdf_url or None,
             cuponera_pdf=cuponera_url or None,
         )
 
         nueva_poliza.save()
 
-        # 🟢 Tanda de cuotas basada estrictamente en la Frecuencia 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
             base_date = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
@@ -555,6 +562,7 @@ def crear_poliza(request):
             "cliente_id": cliente_id,
             "companias": companias,
             "riesgos": riesgos,
+            "polizas": todas_las_polizas,  # 👈 Enviado al template
         },
     )
 
@@ -612,7 +620,6 @@ def renovar_poliza(request, poliza_id):
 
         nueva_poliza.save()
 
-        # 🟢 Tanda de cuotas basada estrictamente en la Frecuencia (Renovación) 🟢
         if nueva_poliza.forma_pago == "CUPONERA":
             base_date = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
@@ -735,17 +742,15 @@ def enviar_poliza(request, poliza_id):
         adjuntos=adjuntos,
     )
 
-    # 🟢 CIRUGÍA QUIRÚRGICA: Detección dinámica del tipo de correo según la forma de pago
     tipo_log = "VENCIMIENTO_POLIZA"
     if poliza.forma_pago == "CUPONERA":
         tipo_log = "VENCIMIENTO_CUPONERA"
 
-    # 🟢 PROTOCOLO: PERSISTENCIA QUIRÚRGICA DE REGISTROS DE EMAIL EN LA BASE DE DATOS
     if ok:
         EmailLog.objects.create(
             policy=poliza,
             client=cliente,
-            tipo=tipo_log,  # 👈 Ahora guarda dinámicamente si es Póliza o Cuponera
+            tipo=tipo_log,
             estado="ENVIADO",
             destinatario=cliente.email,
             asunto=asunto,
@@ -755,7 +760,7 @@ def enviar_poliza(request, poliza_id):
         EmailLog.objects.create(
             policy=poliza,
             client=cliente,
-            tipo=tipo_log,  # 👈 En caso de error también guarda el tipo correcto
+            tipo=tipo_log,
             estado="ERROR",
             destinatario=cliente.email,
             asunto=asunto,
@@ -804,7 +809,7 @@ def anular_poliza(request, poliza_id):
 
         messages.warning(
             request,
-            f"⚠️ La póliza {poliza.policy_number} ha sido annulada y sus cobros cancelados.",
+            f"⚠️ La póliza {poliza.policy_number} ha sido anulada y sus cobros cancelados.",
         )
         return redirect(f"/clientes/ver/{poliza.client.id}/")
 
