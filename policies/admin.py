@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.html import format_html
-from .models import Policy, Company, Payment, RiskType
+from .models import Company, Payment, Policy, RiskType
 
 
 # --- Inline para ver pagos dentro de la Póliza ---
@@ -22,6 +23,28 @@ class PaymentInline(admin.TabularInline):
     show_change_link = True
 
 
+# --- Inline para ver las renovaciones hijas de esta póliza ---
+class RenovacionInline(admin.TabularInline):
+    model = Policy
+    fk_name = "renovacion_de"
+    extra = 0
+    fields = (
+        "policy_number",
+        "start_date",
+        "end_date",
+        "forma_pago",
+    )
+    readonly_fields = (
+        "policy_number",
+        "start_date",
+        "end_date",
+    )
+    can_delete = False
+    show_change_link = True
+    verbose_name = "Póliza Renovada (Posterior)"
+    verbose_name_plural = "Historial de Renovaciones Posteriores"
+
+
 @admin.register(RiskType)
 class RiskTypeAdmin(admin.ModelAdmin):
     list_display = ("nombre",)
@@ -30,7 +53,7 @@ class RiskTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Policy)
 class PolicyAdmin(admin.ModelAdmin):
-    inlines = [PaymentInline]
+    inlines = [PaymentInline, RenovacionInline]
 
     list_display = (
         "policy_number",
@@ -51,7 +74,8 @@ class PolicyAdmin(admin.ModelAdmin):
                     "client",
                     "company_obj",
                     "policy_number",
-                    "renovacion_de",  # <-- Campo agregado para gestionar renovaciones
+                    "renovacion_de",  # <-- Campo para gestionar la póliza anterior
+                    "ver_poliza_anterior_link",  # <-- Enlace visual directo a la póliza anterior
                     "patente",
                     "risk_type",
                     "tipo_poliza",
@@ -89,6 +113,8 @@ class PolicyAdmin(admin.ModelAdmin):
         ),
     )
 
+    readonly_fields = ("ver_poliza_anterior_link",)
+
     list_filter = (
         "risk_type",
         "company_obj",
@@ -110,6 +136,18 @@ class PolicyAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(client__producer=request.user)
+
+    def ver_poliza_anterior_link(self, obj):
+        if obj.renovacion_de:
+            url = reverse("admin:policies_policy_change", args=[obj.renovacion_de.pk])
+            return format_html(
+                '<a href="{}" target="_blank">🔗 Ver póliza anterior (N°: {})</a>',
+                url,
+                obj.renovacion_de.policy_number,
+            )
+        return "Es una póliza original (sin renovación previa)"
+
+    ver_poliza_anterior_link.short_description = "Póliza de Origen"
 
     def estado_colored(self, obj):
         estado = obj.estado
@@ -173,7 +211,9 @@ class PaymentAdmin(admin.ModelAdmin):
     get_client.short_description = "Cliente"
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request).select_related("policy", "policy__client")
+        qs = super().get_queryset(request).select_related(
+            "policy", "policy__client"
+        )
         if request.user.is_superuser:
             return qs
         return qs.filter(policy__client__producer=request.user)
