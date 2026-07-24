@@ -10,9 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='policy',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, null=True, verbose_name='Fecha de creación'),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddField(
+                    model_name='policy',
+                    name='created_at',
+                    field=models.DateTimeField(auto_now_add=True, null=True, verbose_name='Fecha de creación'),
+                ),
+            ],
+            database_operations=[],  # No ejecuta nada en la base de datos porque la columna ya existe
         ),
     ]
