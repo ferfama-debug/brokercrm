@@ -15,8 +15,6 @@ class PaymentInline(admin.TabularInline):
         "estado",
         "comprobante",
     )
-    # 🟢 Quitamos "numero_cuota" y "fecha_vencimiento" de readonly_fields
-    # para que se puedan completar al crear cuotas manuales.
     readonly_fields = ()
     can_delete = True
     show_change_link = True
@@ -33,11 +31,9 @@ class RenovacionInline(admin.TabularInline):
         "end_date",
         "forma_pago",
     )
-    readonly_fields = (
-        "policy_number",
-        "start_date",
-        "end_date",
-    )
+    # 🟢 Quitamos los campos de readonly_fields para evitar que se muestren como guiones (-) 
+    # y permitimos que `show_change_link = True` genere el enlace para ver/editar la póliza.
+    readonly_fields = ()
     can_delete = False
     show_change_link = True
     verbose_name = "Póliza Renovada (Posterior)"
