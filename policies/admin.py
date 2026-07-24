@@ -7,7 +7,7 @@ from .models import Company, Payment, Policy, RiskType
 # --- Inline para ver pagos dentro de la Póliza ---
 class PaymentInline(admin.TabularInline):
     model = Payment
-    extra = 0
+    extra = 1  # Deja una fila vacía para agregar una cuota fácilmente
     fields = (
         "numero_cuota",
         "fecha_vencimiento",
@@ -15,10 +15,9 @@ class PaymentInline(admin.TabularInline):
         "estado",
         "comprobante",
     )
-    readonly_fields = (
-        "numero_cuota",
-        "fecha_vencimiento",
-    )
+    # 🟢 Quitamos "numero_cuota" y "fecha_vencimiento" de readonly_fields
+    # para que se puedan completar al crear cuotas manuales.
+    readonly_fields = ()
     can_delete = True
     show_change_link = True
 
@@ -74,8 +73,8 @@ class PolicyAdmin(admin.ModelAdmin):
                     "client",
                     "company_obj",
                     "policy_number",
-                    "renovacion_de",  # <-- Campo para gestionar la póliza anterior
-                    "ver_poliza_anterior_link",  # <-- Enlace visual directo a la póliza anterior
+                    "renovacion_de",
+                    "ver_poliza_anterior_link",
                     "patente",
                     "risk_type",
                     "tipo_poliza",
