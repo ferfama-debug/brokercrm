@@ -2,7 +2,6 @@
 {% block content %}
 
 <style>
-  /* Ajustes quirúrgicos para mejorar la legibilidad de los campos */
   .form-grupo { margin-bottom: 20px; }
   .form-grupo label { 
     display: block; 
@@ -20,19 +19,47 @@
     padding: 12px !important;
     border-radius: var(--radius-sm) !important;
     color: var(--text-primary) !important;
+    width: 100%;
   }
   .form-control:focus {
     border-color: var(--green-400) !important;
     background: rgba(52, 211, 100, 0.05) !important;
   }
-  .form-section-title {
-    margin-top: 10px;
-    margin-bottom: 25px;
-    padding-bottom: 10px;
+  
+  /* Sistema de Pestañas */
+  .tabs-nav {
+    display: flex;
+    gap: 8px;
     border-bottom: 1px solid var(--border);
+    margin-bottom: 25px;
+    padding-bottom: 0;
+    list-style: none;
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 18px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .tab-btn:hover {
+    color: var(--text-primary);
+  }
+  .tab-btn.active {
+    color: var(--green-400);
+    border-bottom-color: var(--green-400);
+  }
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
   }
 
-  /* FIX QUIRÚRGICO: Contraste para selectores */
   select option {
     background-color: #ffffff !important;
     color: #1a1a1a !important;
@@ -59,24 +86,23 @@
     <form method="post" enctype="multipart/form-data" id="form-poliza">
       {% csrf_token %}
 
-      <!-- CAMPO OCULTO: Seteamos la categoría como OTRO automáticamente para la DB -->
-      <input type="hidden" name="tipo_poliza" value="OTRO">
+      <!-- PESTAÑAS DE NAVEGACIÓN -->
+      <div class="tabs-nav">
+        <button type="button" class="tab-btn active" onclick="switchTab(event, 'tab-basica')">Información Básica</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-vigencia')">Vigencia de Póliza</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-pagos')">Configuración de Pagos</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-docs')">Documentación y Alertas</button>
+      </div>
 
-      <div class="form-section">
-        <div class="form-section-title titulo-pro">
-          Cliente y póliza
-          <div class="sub-line"></div>
-        </div>
-
-        <!-- FILA 1: CLIENTE, N° PÓLIZA Y RENOVACIÓN DE -->
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+      <!-- PESTAÑA 1: INFORMACIÓN BÁSICA -->
+      <div id="tab-basica" class="tab-content active">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
-            <label>Cliente</label>
+            <label>Cliente *</label>
             <select name="client" class="form-control required" required>
               <option value="">Seleccionar cliente</option>
               {% for cliente in clientes %}
-              <option value="{{ cliente.id }}"
-                {% if cliente.id|stringformat:"s" == cliente_id %}selected{% endif %}>
+              <option value="{{ cliente.id }}" {% if cliente.id|stringformat:"s" == cliente_id %}selected{% endif %}>
                 {{ cliente }}
               </option>
               {% endfor %}
@@ -84,32 +110,7 @@
           </div>
 
           <div class="form-grupo">
-            <label>N° Póliza</label>
-            <input type="text" name="policy_number" class="form-control required" required placeholder="Ej: 123456789">
-          </div>
-
-          <div class="form-grupo">
-            <label style="color: var(--green-400);">¿Es renovación de...?</label>
-            <select name="renovacion_de" class="form-control">
-              <option value="">Ninguna (Póliza nueva)</option>
-              {% for pol in polizas %}
-              <option value="{{ pol.id }}">
-                N° {{ pol.policy_number }} - {{ pol.client }} ({{ pol.company|default:"Sin compañía" }})
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <!-- FILA 2: PATENTE Y COMPAÑÍA -->
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 15px;">
-          <div class="form-grupo">
-            <label style="color: var(--green-400);">Patente / Dominio</label>
-            <input type="text" name="patente" class="form-control" placeholder="Ej: ABC123 o AF123JK">
-          </div>
-
-          <div class="form-grupo">
-            <label>Compañía</label>
+            <label>Compañía *</label>
             <select name="company" class="form-control required" required>
               <option value="">Seleccionar compañía</option>
               {% for c in companias %}
@@ -119,44 +120,99 @@
           </div>
         </div>
 
-        <!-- FILA 3: RIESGO DINÁMICO -->
-        <div class="form-row" style="margin-top: 15px;">
-          <div class="form-grupo" style="max-width: 50%;">
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 15px;">
+          <div class="form-grupo">
+            <label>Número de póliza *</label>
+            <input type="text" name="policy_number" class="form-control required" required placeholder="Ej: 123456789">
+          </div>
+
+          <div class="form-grupo">
+            <label style="color: var(--green-400);">Renueva a la póliza anterior</label>
+            <select name="renovacion_de" class="form-control">
+              <option value="">--------- (Póliza nueva)</option>
+              {% for pol in polizas %}
+              <option value="{{ pol.id }}">N° {{ pol.policy_number }} - {{ pol.client }} ({{ pol.company|default:"Sin compañía" }})</option>
+              {% endfor %}
+            </select>
+            <small style="color: var(--text-secondary); font-size: 11px;">Seleccione la póliza anterior correspondiente al mismo bien en caso de renovación.</small>
+          </div>
+        </div>
+
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 15px;">
+          <div class="form-grupo">
+            <label style="color: var(--green-400);">Patente / Dominio</label>
+            <input type="text" name="patente" class="form-control" placeholder="Ej: HDS434">
+          </div>
+
+          <div class="form-grupo">
             <label>Tipo de Riesgo (Dinámico)</label>
             <select name="risk_type" class="form-control">
               <option value="">Seleccionar riesgo...</option>
               {% for r in riesgos %}
-                <option value="{{ r.id }}">{{ r.nombre }}</option>
+              <option value="{{ r.id }}">{{ r.nombre }}</option>
               {% endfor %}
             </select>
+          </div>
+
+          <div class="form-grupo">
+            <label>Tipo de póliza (Categoría) *</label>
+            <select name="tipo_poliza" class="form-control">
+              <option value="AUTO">Auto</option>
+              <option value="MOTO">Moto</option>
+              <option value="HOGAR">Hogar</option>
+              <option value="VIDA">Vida</option>
+              <option value="COMERCIO">Comercio</option>
+              <option value="AP">Accidentes Personales</option>
+              <option value="RC">Responsabilidad Civil</option>
+              <option value="OTRO">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- CAMPOS DE VEHÍCULO -->
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+          <div class="form-grupo">
+            <label>Marca del Auto</label>
+            <input type="text" name="marca" class="form-control" placeholder="Ej: Volkswagen">
+          </div>
+          <div class="form-grupo">
+            <label>Modelo</label>
+            <input type="text" name="modelo" class="form-control" placeholder="Ej: Gol Trend">
+          </div>
+          <div class="form-grupo">
+            <label>Versión</label>
+            <input type="text" name="version_auto" class="form-control" placeholder="Ej: 1.6 Highline">
+          </div>
+          <div class="form-grupo">
+            <label>Año</label>
+            <input type="text" name="anio_auto" class="form-control" placeholder="Ej: 2022">
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top: 15px;">
+          <div class="form-grupo">
+            <label>Detalle del seguro</label>
+            <input type="text" name="detalle_seguro" class="form-control" placeholder="Ej: Cobertura contra terceros completo">
           </div>
         </div>
       </div>
 
-      <div class="form-section" style="margin-top: 30px;">
-        <div class="form-section-title titulo-pro">
-          Vigencia de Póliza
-          <div class="sub-line"></div>
-        </div>
-
+      <!-- PESTAÑA 2: VIGENCIA DE PÓLIZA -->
+      <div id="tab-vigencia" class="tab-content">
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
-            <label>Fecha de inicio</label>
+            <label>Fecha de inicio *</label>
             <input type="date" name="start_date" class="form-control required" required>
           </div>
           <div class="form-grupo">
-            <label>Fecha de vencimiento</label>
+            <label>Fecha de vencimiento *</label>
             <input type="date" name="end_date" class="form-control required" required>
           </div>
         </div>
       </div>
 
-      <div class="form-section" style="margin-top: 30px;">
-        <div class="form-section-title titulo-pro">
-          Facturación y Cobro
-          <div class="sub-line"></div>
-        </div>
-
+      <!-- PESTAÑA 3: CONFIGURACIÓN DE PAGOS -->
+      <div id="tab-pagos" class="tab-content">
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
             <label>Método de Pago</label>
@@ -185,22 +241,18 @@
         </div>
       </div>
 
-      <div class="form-section" style="margin-top: 30px;">
-        <div class="form-section-title titulo-pro">
-          Documentos
-          <div class="sub-line"></div>
-        </div>
-
+      <!-- PESTAÑA 4: DOCUMENTACIÓN Y ALERTAS -->
+      <div id="tab-docs" class="tab-content">
         <div class="upload-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <input type="file" id="pdf_poliza" name="pdf_poliza" accept=".pdf,application/pdf" class="file-input-hidden" onchange="mostrarNombre(this, 'poliza_nombre')">
-          <label for="pdf_poliza" class="drop-zone drop-zone-premium" style="border: 1px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer;">
+          <label for="pdf_poliza" class="drop-zone drop-zone-premium" style="border: 1px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; display: block;">
             <div class="drop-icon" style="font-size: 24px; margin-bottom: 10px;">📄</div>
             <strong>Subir póliza</strong>
             <div id="poliza_nombre" style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">Ningún archivo seleccionado</div>
           </label>
 
           <input type="file" id="cuponera_pdf" name="cuponera_pdf" accept=".pdf,application/pdf" class="file-input-hidden" onchange="mostrarNombre(this, 'cuponera_nombre')">
-          <label for="cuponera_pdf" class="drop-zone drop-zone-premium" style="border: 1px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer;">
+          <label for="cuponera_pdf" class="drop-zone drop-zone-premium" style="border: 1px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; display: block;">
             <div class="drop-icon" style="font-size: 24px; margin-bottom: 10px;">💳</div>
             <strong>Subir cuponera</strong>
             <div id="cuponera_nombre" style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">Ningún archivo seleccionado</div>
@@ -208,6 +260,7 @@
         </div>
       </div>
 
+      <!-- ACCIONES GLOBALES -->
       <div class="form-actions" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 15px;">
         <a href="/polizas/" class="btn btn-ghost">Cancelar</a>
         <button type="submit" class="btn btn-primary btn-pro" style="padding: 12px 30px;">
@@ -219,6 +272,19 @@
 </div>
 
 <script>
+function switchTab(evt, tabId) {
+  var contents = document.getElementsByClassName("tab-content");
+  for (var i = 0; i < contents.length; i++) {
+    contents[i].classList.remove("active");
+  }
+  var buttons = document.getElementsByClassName("tab-btn");
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove("active");
+  }
+  document.getElementById(tabId).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+
 function mostrarNombre(input, id) {
   var el = document.getElementById(id);
   if (input.files && input.files.length > 0) {

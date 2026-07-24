@@ -1,17 +1,16 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from .models import Policy, Payment, Company, RiskType, EmailLog
-from clients.models import Client
 from datetime import date, timedelta
 import os
-import requests
 from dateutil.relativedelta import relativedelta
-
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+import requests
+
+from clients.models import Client
+from .models import Company, EmailLog, Payment, Policy, RiskType
 
 print("🔥 Integración Supabase inicializada")
 
@@ -511,6 +510,11 @@ def crear_poliza(request):
             patente=request.POST.get("patente"),
             risk_type=risk_type_obj,
             tipo_poliza=request.POST.get("tipo_poliza"),
+            insurance_type=request.POST.get("detalle_seguro"),
+            marca=request.POST.get("marca"),
+            modelo=request.POST.get("modelo"),
+            version_auto=request.POST.get("version_auto"),
+            anio_auto=request.POST.get("anio_auto"),
             start_date=start_date,
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
@@ -606,6 +610,11 @@ def renovar_poliza(request, poliza_id):
             patente=request.POST.get("patente") or poliza.patente,
             risk_type=poliza.risk_type,
             tipo_poliza=poliza.tipo_poliza,
+            insurance_type=request.POST.get("detalle_seguro") or poliza.insurance_type,
+            marca=request.POST.get("marca") or poliza.marca,
+            modelo=request.POST.get("modelo") or poliza.modelo,
+            version_auto=request.POST.get("version_auto") or poliza.version_auto,
+            anio_auto=request.POST.get("anio_auto") or poliza.anio_auto,
             start_date=start_date,
             end_date=end_date,
             forma_pago=request.POST.get("forma_pago"),
