@@ -293,6 +293,7 @@
             <tr>
               <th>N° Póliza</th>
               <th>Compañía</th>
+              <th>Vehículo / Patente</th>
               <th>Inicio</th>
               <th>Vencimiento</th>
               <th>Pago</th>
@@ -308,6 +309,16 @@
                 </a>
               </td>
               <td>{{ p.company }}</td>
+              <td>
+                {% if p.patente %}
+                  <div style="font-family: var(--font-mono); font-weight: 700; color: #4ade80; font-size: 12px;">{{ p.patente }}</div>
+                  {% if p.marca or p.modelo %}
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ p.marca|default:"" }} {{ p.modelo|default:"" }}</div>
+                  {% endif %}
+                {% else %}
+                  <span style="color: var(--text-muted);">{{ p.risk_type.nombre|default:"—" }}</span>
+                {% endif %}
+              </td>
               <td>{{ p.start_date }}</td>
               <td>{{ p.end_date }}</td>
               <td>{{ p.get_forma_pago_display }}</td>
@@ -331,7 +342,6 @@
                     <button class="btn btn-ghost btn-sm">Enviar</button>
                   </form>
 
-                  {# 🟢 NORMALIZACIÓN DE VARIABLES PARA CAMPOS ADJUNTOS 🟢 #}
                   {% if p.pdf_poliza %}
                   <a href="{{ p.pdf_poliza }}" target="_blank" class="btn btn-primary btn-sm">
                     PDF
@@ -389,7 +399,6 @@
             </tr>
           </thead>
           <tbody>
-            {# 🟢 EL BUCLE RECORRE Y DIBUJA TODAS LAS CUOTAS DEL RELANDING EN ORDEN 🟢 #}
             {% for pago in p.pagos.all %}
             <tr>
               <td>{{ pago.numero_cuota }}</td>
@@ -749,18 +758,6 @@
 }
 .btn-whatsapp:hover { background: rgba(37,211,102,0.22) !important; border-color: rgba(37,211,102,0.4); }
 .btn-whatsapp-sm { padding: 5px 10px; font-size: 11.5px; }
-
-.badge-gray {
-  background: rgba(148,163,184,0.14);
-  color: #cbd5e1;
-  border: 1px solid rgba(148,163,184,0.20);
-}
-
-.badge-blue {
-  background: rgba(59,130,246,0.14);
-  color: #bfdbfe;
-  border: 1px solid rgba(59,130,246,0.22);
-}
 
 .badge-gray {
   background: rgba(148,163,184,0.14);
