@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card border-danger shadow">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">⚠️ Confirmación de Seguridad</h4>
+        </div>
+        <div class="card-body">
+            <p>Estás a punto de eliminar permanentemente la póliza:</p>
+            <ul>
+                <li><strong>N° de Póliza:</strong> {{ poliza.policy_number|default:"Sin número" }}</li>
+                <li><strong>Cliente:</strong> {{ poliza.client.first_name }} {{ poliza.client.last_name }}</li>
+                <li><strong>Compañía:</strong> {{ poliza.company }}</li>
+            </ul>
+            <p class="text-danger"><strong>Atención:</strong> Esta acción borrará la póliza del sistema y todas sus cuotas/pagos vinculados de forma definitiva.</p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="password" class="form-label">Ingresa tu contraseña de superusuario para confirmar:</label>
+                    <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password" placeholder="Tu contraseña actual">
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="/clientes/ver/{{ poliza.client.id }}/" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-danger">Sí, eliminar definitivamente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
