@@ -601,6 +601,118 @@ def crear_poliza(request):
 
 
 @login_required
+def editar_poliza(request, poliza_id):
+    if request.user.is_superuser:
+        poliza = get_object_or_404(Policy, id=poliza_id)
+        clientes = Client.objects.all()
+    else:
+        poliza = get_object_or_404(Policy, id=poliza_id, client__producer=request.user)
+        clientes = Client.objects.filter(producer=request.user)
+
+    clientes = clientes.order_by("last_name", "first_name")
+    companias = Company.objects.all().order_by("nombre")
+    riesgos = RiskType.objects.all().order_by("nombre")
+
+    if request.method == "POST":
+        client_id = request.POST.get("client")
+        if request.user.is_superuser:
+            client = get_object_or_404(Client, id=client_id)
+        else:
+            client = get_object_or_404(Client, id=client_id, producer=request.user)
+
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        if not start_date or not end_date:
+            return render(
+                request,
+                "policies/editar_poliza.html",
+                {
+                    "poliza": poliza,
+                    "clientes": clientes,
+                    "companias": companias,
+                    "riesgos": riesgos,
+                    "error": "Debe completar las fechas",
+                },
+            )
+
+        print("===== DEBUG SUBIDA POLIZA (EDITAR) =====")
+        archivo_poliza = request.FILES.get("pdf_poliza")
+        archivo_cuponera = request.FILES.get("cuponera_pdf")
+
+        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
+        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
+
+        # 🟢 Reemplazar y borrar archivo anterior de póliza en Supabase si se subió uno nuevo
+        if pdf_url:
+            if poliza.pdf_poliza:
+                eliminar_archivo_supabase_por_url(poliza.pdf_poliza)
+            poliza.pdf_poliza = pdf_url
+
+        # 🟢 Reemplazar y borrar archivo anterior de cuponera en Supabase si se subió uno nuevo
+        if cuponera_url:
+            if poliza.cuponera_pdf:
+                eliminar_archivo_supabase_por_url(poliza.cuponera_pdf)
+            poliza.cuponera_pdf = cuponera_url
+
+        company_id = request.POST.get("company")
+        company_obj = None
+        company_nombre = None
+
+        if company_id:
+            try:
+                company_obj = Company.objects.get(id=company_id)
+                company_nombre = company_obj.nombre
+            except Exception:
+                company_nombre = request.POST.get("company")
+
+        risk_type_id = request.POST.get("risk_type")
+        risk_type_obj = None
+        if risk_type_id:
+            try:
+                risk_type_obj = RiskType.objects.get(id=risk_type_id)
+            except Exception:
+                pass
+
+        frecuencia_val = request.POST.get("frecuencia_cuponera")
+        frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
+
+        poliza.client = client
+        poliza.company = company_nombre
+        poliza.company_obj = company_obj
+        poliza.policy_number = request.POST.get("policy_number")
+        poliza.patente = request.POST.get("patente")
+        poliza.risk_type = risk_type_obj
+        poliza.tipo_poliza = request.POST.get("tipo_poliza")
+        poliza.insurance_type = request.POST.get("detalle_seguro")
+        poliza.marca = request.POST.get("marca")
+        poliza.modelo = request.POST.get("modelo")
+        poliza.version_auto = request.POST.get("version_auto")
+        poliza.anio_auto = request.POST.get("anio_auto")
+        poliza.start_date = start_date
+        poliza.end_date = end_date
+        poliza.forma_pago = request.POST.get("forma_pago")
+        poliza.frecuencia_cuponera = frecuencia_int
+        poliza.fecha_primer_vencimiento_cuponera = request.POST.get("fecha_primer_vencimiento_cuponera") or None
+
+        poliza.save()
+
+        messages.success(request, "✅ Póliza actualizada correctamente")
+        return redirect(f"/clientes/ver/{client.id}/")
+
+    return render(
+        request,
+        "policies/editar_poliza.html",
+        {
+            "poliza": poliza,
+            "clientes": clientes,
+            "companias": companias,
+            "riesgos": riesgos,
+        },
+    )
+
+
+@login_required
 def renovar_poliza(request, poliza_id):
     if request.user.is_superuser:
         poliza = get_object_or_404(Policy, id=poliza_id)
@@ -707,19 +819,21 @@ def marcar_pago(request, pago_id):
     if request.method == "POST":
         print("===== DEBUG SUBIDA COMPROBANTE =====")
         archivo_comprobante = request.FILES.get("comprobante")
-        comprobante_url = procesar_archivo(archivo_comprobante, "comprobantes_pagos")
-
-        if archivo_comprobante and not comprobante_url:
-            messages.error(request, "❌ El comprobante no se pudo subir")
-            return render(
-                request,
-                "policies/cargar_comprobante.html",
-                {
-                    "pago": pago,
-                },
-            )
-
-        if comprobante_url:
+        
+        if archivo_comprobante:
+            comprobante_url = procesar_archivo(archivo_comprobante, "comprobantes_pagos")
+            if not comprobante_url:
+                messages.error(request, "❌ El comprobante no se pudo subir")
+                return render(
+                    request,
+                    "policies/cargar_comprobante.html",
+                    {
+                        "pago": pago,
+                    },
+                )
+            # 🟢 Borrar comprobante anterior de Supabase si ya existía
+            if pago.comprobante:
+                eliminar_archivo_supabase_por_url(pago.comprobante)
             pago.comprobante = comprobante_url
 
         pago.estado = "PAGADO"
