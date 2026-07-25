@@ -9,7 +9,11 @@ import re
 def get_supabase():
     try:
         url = getattr(settings, "SUPABASE_URL", None)
-        key = getattr(settings, "SUPABASE_KEY", None)
+        # Priorizamos service_role_key si existe para tener permisos completos de escritura/borrado
+        key = (
+            getattr(settings, "SUPABASE_SERVICE_ROLE_KEY", None)
+            or getattr(settings, "SUPABASE_KEY", None)
+        )
 
         if not url or not key:
             print("⚠️ Supabase no configurado")
@@ -23,7 +27,7 @@ def get_supabase():
 
 
 def _bucket_name():
-    return getattr(settings, "SUPABASE_BUCKET", "documents")
+    return getattr(settings, "SUPABASE_BUCKET", "polizas_clientes")
 
 
 def _safe_filename(filename):
@@ -89,7 +93,7 @@ def _build_public_url(bucket, file_path):
     return f"{base_url}/storage/v1/object/public/{bucket}/{file_path}"
 
 
-def subir_archivo_supabase(file, folder):
+def subir_archivo_supabase(file, folder="polizas_clientes"):
     try:
         if not file:
             print("⚠️ No se recibió archivo para subir")
@@ -156,3 +160,38 @@ def subir_archivo_supabase(file, folder):
     except Exception as e:
         print("❌ Error subiendo archivo a Supabase:", e)
         return None
+
+
+def eliminar_archivo_supabase_por_url(url):
+    """
+    Elimina un archivo de Supabase de manera limpia utilizando la librería oficial.
+    """
+    if not url:
+        return
+    try:
+        supabase = get_supabase()
+        if not supabase:
+            print("⚠️ No se pudo inicializar Supabase para borrado.")
+            return
+
+        bucket = _bucket_name()
+
+        # Extraer la ruta relativa desde la URL pública de Supabase
+        if "/storage/v1/object/public/" in url:
+            partes = url.split("/storage/v1/object/public/")
+            if len(partes) > 1:
+                ruta_relativa = partes[1]  # Ej: 'polizas_clientes/carpeta/archivo.pdf'
+                segmentos = ruta_relativa.split("/", 1)
+                if len(segmentos) == 2:
+                    bkt = segmentos[0]
+                    path = segmentos[1]
+                    
+                    # Usamos el cliente oficial para remover el archivo
+                    print(f"🗑️ Eliminando de Supabase [Bucket: {bkt}] -> Ruta: {path}")
+                    res = supabase.storage.from_(bkt).remove([path])
+                    print("✅ Resultado borrado Supabase:", res)
+                    return
+
+        print("⚠️ No se pudo parsear limpiamente la URL para eliminar en Supabase:", url)
+    except Exception as e:
+        print("❌ Error eliminando archivo de Supabase:", e)
