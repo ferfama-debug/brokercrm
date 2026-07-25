@@ -841,3 +841,37 @@ def reporte_anulaciones(request):
         "policies/reporte_anulaciones.html",
         {"polizas_anuladas": polizas_anuladas},
     )
+
+
+@login_required
+def eliminar_poliza(request, poliza_id):
+    # Validar que solo un superusuario pueda intentar eliminar
+    if not request.user.is_superuser:
+        messages.error(request, "❌ No tienes permisos de superusuario para eliminar pólizas.")
+        return redirect('lista_polizas')
+
+    poliza = get_object_or_404(Policy, id=poliza_id)
+
+    if request.method == "POST":
+        password = request.POST.get("password", "")
+        
+        # Validar que la contraseña del superusuario sea correcta
+        if request.user.check_password(password):
+            numero_poliza = poliza.policy_number or poliza.id
+            cliente_id = poliza.client.id
+            
+            # Eliminar el registro de la base de datos
+            poliza.delete()
+            
+            messages.success(request, f"🗑️ La póliza {numero_poliza} fue eliminada correctamente.")
+            return redirect(f"/clientes/ver/{cliente_id}/")
+        else:
+            messages.error(request, "❌ Contraseña incorrecta. No se pudo eliminar la póliza.")
+
+    return render(
+        request,
+        "policies/eliminar_poliza_confirmar.html",
+        {
+            "poliza": poliza,
+        },
+    )
