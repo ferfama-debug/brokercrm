@@ -73,6 +73,35 @@ def descargar_adjunto_desde_url(url, nombre_archivo):
         return None
 
 
+def eliminar_archivo_supabase_por_url(url):
+    if not url:
+        return
+    try:
+        # Ejemplo de URL de Supabase: .../storage/v1/object/public/NOMBRE_BUCKET/ruta/al/archivo.pdf
+        if "/storage/v1/object/public/" in url:
+            partes = url.split("/storage/v1/object/public/")
+            if len(partes) > 1:
+                ruta_relativa = partes[1]  # 'polizas_clientes/archivo.pdf'
+                segmentos = ruta_relativa.split("/", 1)
+                if len(segmentos) == 2:
+                    bucket = segmentos[0]
+                    path = segmentos[1]
+
+                    supabase_url = getattr(settings, "SUPABASE_URL", None)
+                    supabase_key = getattr(settings, "SUPABASE_SERVICE_ROLE_KEY", None) or getattr(settings, "SUPABASE_KEY", None)
+
+                    if supabase_url and supabase_key:
+                        delete_endpoint = f"{supabase_url.rstrip('/')}/storage/v1/object/{bucket}/{path}"
+                        headers = {
+                            "Authorization": f"Bearer {supabase_key}",
+                            "apikey": supabase_key,
+                        }
+                        resp = requests.delete(delete_endpoint, headers=headers, timeout=10)
+                        print(f"🗑️ Supabase delete resp ({bucket}/{path}):", resp.status_code, resp.text)
+    except Exception as e:
+        print("⚠️ Error eliminando archivo de Supabase:", e)
+
+
 def enviar_email_con_fallback(
     asunto,
     mensaje_texto,
@@ -860,10 +889,16 @@ def eliminar_poliza(request, poliza_id):
             numero_poliza = poliza.policy_number or poliza.id
             cliente_id = poliza.client.id
             
-            # Eliminar el registro de la base de datos
+            # 🟢 Eliminar archivos asociados de Supabase Storage antes de borrar el registro
+            if poliza.pdf_poliza:
+                eliminar_archivo_supabase_por_url(poliza.pdf_poliza)
+            if poliza.cuponera_pdf:
+                eliminar_archivo_supabase_por_url(poliza.cuponera_pdf)
+            
+            # Eliminar el registro de la base de datos (y cuotas en CASCADE)
             poliza.delete()
             
-            messages.success(request, f"🗑️ La póliza {numero_poliza} fue eliminada correctamente.")
+            messages.success(request, f"🗑️ La póliza {numero_poliza} y sus archivos en Supabase fueron eliminados correctamente.")
             return redirect(f"/clientes/ver/{cliente_id}/")
         else:
             messages.error(request, "❌ Contraseña incorrecta. No se pudo eliminar la póliza.")
