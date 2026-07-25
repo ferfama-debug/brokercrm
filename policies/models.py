@@ -183,6 +183,7 @@ class Policy(models.Model):
 
     pdf_poliza = models.FileField(
         upload_to=policy_directory_path,
+        max_length=500,
         blank=True,
         null=True,
         verbose_name="Archivo PDF de póliza",
@@ -197,6 +198,7 @@ class Policy(models.Model):
 
     cuponera_pdf = models.FileField(
         upload_to=cuponera_directory_path,
+        max_length=500,
         blank=True,
         null=True,
         verbose_name="Archivo PDF cuponera",
