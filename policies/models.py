@@ -218,7 +218,6 @@ class Policy(models.Model):
         null=True, blank=True, verbose_name="Motivo de la baja"
     )
 
-    # 🟢 CAMPO AGREGADO PARA SOLUCIONAR EL ERROR DE "created_at"
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="Fecha de creación", null=True, blank=True
     )
@@ -323,6 +322,7 @@ class Payment(models.Model):
     )
     comprobante = models.FileField(
         upload_to=comprobante_directory_path,
+        max_length=500,
         blank=True,
         null=True,
         verbose_name="Archivo comprobante",
