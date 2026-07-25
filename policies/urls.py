@@ -16,6 +16,8 @@ urlpatterns = [
     path("enviar/<int:poliza_id>/", views.enviar_poliza, name="enviar_poliza"),
     # RUTA DE ANULACIÓN
     path("anular/<int:poliza_id>/", views.anular_poliza, name="anular_poliza"),
+    # 🔥 NUEVA RUTA: ELIMINACIÓN SEGURA DE PÓLIZA
+    path("eliminar/<int:poliza_id>/", views.eliminar_poliza, name="eliminar_poliza"),
     # 🔥 NUEVA RUTA: REPORTE DE ANULACIONES
     path("reporte-anulaciones/", views.reporte_anulaciones, name="reporte_anulaciones"),
     path("health/", health),
