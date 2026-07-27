@@ -9,7 +9,6 @@ import re
 def get_supabase():
     try:
         url = getattr(settings, "SUPABASE_URL", None)
-        # Priorizamos service_role_key si existe para tener permisos completos de escritura/borrado
         key = (
             getattr(settings, "SUPABASE_SERVICE_ROLE_KEY", None)
             or getattr(settings, "SUPABASE_KEY", None)
@@ -93,7 +92,11 @@ def _build_public_url(bucket, file_path):
     return f"{base_url}/storage/v1/object/public/{bucket}/{file_path}"
 
 
-def subir_archivo_supabase(file, folder="polizas_clientes"):
+def subir_archivo_supabase(file, folder="polizas", cliente=None):
+    """
+    Sube un archivo a Supabase organizándolo por cliente y subcarpeta.
+    Estructura resultante en el bucket: cliente_nombre / folder / archivo.pdf
+    """
     try:
         if not file:
             print("⚠️ No se recibió archivo para subir")
@@ -107,7 +110,16 @@ def subir_archivo_supabase(file, folder="polizas_clientes"):
 
         bucket = _bucket_name()
         safe_filename = _safe_filename(getattr(file, "name", "archivo.pdf"))
-        file_path = f"{folder}/{safe_filename}"
+
+        if cliente:
+            cliente_str = str(cliente).strip()
+            cliente_safe = re.sub(r"[^A-Za-z0-9._-]+", "_", cliente_str).strip("._")
+            if not cliente_safe:
+                cliente_safe = "cliente_sin_nombre"
+            file_path = f"{cliente_safe}/{folder}/{safe_filename}"
+        else:
+            file_path = f"{folder}/{safe_filename}"
+
         content_type = _content_type(file, safe_filename)
 
         try:
@@ -133,7 +145,10 @@ def subir_archivo_supabase(file, folder="polizas_clientes"):
             error_text = str(e)
             if "Duplicate" in error_text or "already exists" in error_text:
                 nuevo_nombre = _filename_with_suffix(safe_filename, uuid4().hex[:8])
-                file_path = f"{folder}/{nuevo_nombre}"
+                if cliente:
+                    file_path = f"{cliente_safe}/{folder}/{nuevo_nombre}"
+                else:
+                    file_path = f"{folder}/{nuevo_nombre}"
 
                 supabase.storage.from_(bucket).upload(
                     path=file_path,
@@ -163,9 +178,6 @@ def subir_archivo_supabase(file, folder="polizas_clientes"):
 
 
 def eliminar_archivo_supabase_por_url(url):
-    """
-    Elimina un archivo de Supabase de manera limpia utilizando la librería oficial.
-    """
     if not url:
         return
     try:
@@ -176,17 +188,15 @@ def eliminar_archivo_supabase_por_url(url):
 
         bucket = _bucket_name()
 
-        # Extraer la ruta relativa desde la URL pública de Supabase
         if "/storage/v1/object/public/" in url:
             partes = url.split("/storage/v1/object/public/")
             if len(partes) > 1:
-                ruta_relativa = partes[1]  # Ej: 'polizas_clientes/carpeta/archivo.pdf'
+                ruta_relativa = partes[1]
                 segmentos = ruta_relativa.split("/", 1)
                 if len(segmentos) == 2:
                     bkt = segmentos[0]
                     path = segmentos[1]
                     
-                    # Usamos el cliente oficial para remover el archivo
                     print(f"🗑️ Eliminando de Supabase [Bucket: {bkt}] -> Ruta: {path}")
                     res = supabase.storage.from_(bkt).remove([path])
                     print("✅ Resultado borrado Supabase:", res)
