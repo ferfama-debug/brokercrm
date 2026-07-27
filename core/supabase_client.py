@@ -95,7 +95,7 @@ def _build_public_url(bucket, file_path):
 def subir_archivo_supabase(file, folder="polizas", cliente=None):
     """
     Sube un archivo a Supabase organizándolo por cliente y subcarpeta.
-    Estructura resultante en el bucket: cliente_nombre / folder / archivo.pdf
+    Estructura resultante en el bucket: ID_O_NOMBRE_CLIENTE / folder / archivo.pdf
     """
     try:
         if not file:
@@ -111,7 +111,7 @@ def subir_archivo_supabase(file, folder="polizas", cliente=None):
         bucket = _bucket_name()
         safe_filename = _safe_filename(getattr(file, "name", "archivo.pdf"))
 
-        if cliente:
+        if cliente is not None:
             cliente_str = str(cliente).strip()
             cliente_safe = re.sub(r"[^A-Za-z0-9._-]+", "_", cliente_str).strip("._")
             if not cliente_safe:
@@ -145,7 +145,7 @@ def subir_archivo_supabase(file, folder="polizas", cliente=None):
             error_text = str(e)
             if "Duplicate" in error_text or "already exists" in error_text:
                 nuevo_nombre = _filename_with_suffix(safe_filename, uuid4().hex[:8])
-                if cliente:
+                if cliente is not None:
                     file_path = f"{cliente_safe}/{folder}/{nuevo_nombre}"
                 else:
                     file_path = f"{folder}/{nuevo_nombre}"
@@ -186,8 +186,6 @@ def eliminar_archivo_supabase_por_url(url):
             print("⚠️ No se pudo inicializar Supabase para borrado.")
             return
 
-        bucket = _bucket_name()
-
         if "/storage/v1/object/public/" in url:
             partes = url.split("/storage/v1/object/public/")
             if len(partes) > 1:
@@ -196,7 +194,7 @@ def eliminar_archivo_supabase_por_url(url):
                 if len(segmentos) == 2:
                     bkt = segmentos[0]
                     path = segmentos[1]
-                    
+
                     print(f"🗑️ Eliminando de Supabase [Bucket: {bkt}] -> Ruta: {path}")
                     res = supabase.storage.from_(bkt).remove([path])
                     print("✅ Resultado borrado Supabase:", res)
