@@ -18,9 +18,6 @@ except Exception:
 # CORE
 # =========================
 
-# Cambio mínimo y seguro:
-# - En desarrollo permite fallback estable
-# - En producción exige DJANGO_SECRET_KEY para no invalidar sesiones
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 if DEBUG:
@@ -45,7 +42,7 @@ ALLOWED_HOSTS = [
 
 
 # =========================
-# LOGGING (RECUPERADO COMPLETO)
+# LOGGING
 # =========================
 
 LOGGING = {
@@ -119,7 +116,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.middleware.AdminAccessMiddleware",
-    'accounts.middleware.PasswordExpirationMiddleware',
+    "accounts.middleware.PasswordExpirationMiddleware",
 ]
 
 
@@ -164,7 +161,7 @@ if DATABASE_URL and not USE_SQLITE_LOCAL:
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=False,  # Cambiado a False para estabilidad en Render
+            ssl_require=False,
         )
     }
 else:
@@ -222,7 +219,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # =========================
-# SEGURIDAD (CORREGIDO)
+# SEGURIDAD
 # =========================
 
 CSRF_TRUSTED_ORIGINS = [
@@ -236,7 +233,6 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-# Ajuste para evitar el Error 500 en el primer deploy de Render
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 SECURE_SSL_REDIRECT = False
@@ -307,7 +303,8 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get(
     "SUPABASE_KEY"
 )
 
-SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "documents")
+# 🟢 Bucket por defecto sincronizado con la estructura del sistema
+SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "polizas_clientes")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("SUPABASE no configurado correctamente (variables faltantes)")
