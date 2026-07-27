@@ -26,20 +26,23 @@ def get_subir_archivo():
         return None
 
 
-def procesar_archivo(file, carpeta):
+def procesar_archivo(file, carpeta, cliente=None):
     if not file:
         print(f"⚠️ No se recibió archivo para carpeta: {carpeta}")
         return None
 
     print(
-        f"📂 Procesando archivo | carpeta={carpeta} | nombre={file.name} | size={getattr(file, 'size', 'N/A')}"
+        f"📂 Procesando archivo | carpeta={carpeta} | nombre={file.name} | size={getattr(file, 'size', 'N/A')} | cliente={cliente}"
     )
 
     subir_archivo = get_subir_archivo()
 
     try:
         if subir_archivo:
-            resultado = subir_archivo(file, carpeta)
+            if cliente is not None:
+                resultado = subir_archivo(file, carpeta, cliente=cliente)
+            else:
+                resultado = subir_archivo(file, carpeta)
             print(f"✅ Resultado subida ({carpeta}):", resultado)
             return resultado
 
@@ -506,8 +509,8 @@ def crear_poliza(request):
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
-        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
-        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
+        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes", cliente=client.id)
+        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes", cliente=client.id)
 
         company_id = request.POST.get("company")
         company_obj = None
@@ -640,8 +643,8 @@ def editar_poliza(request, poliza_id):
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
-        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
-        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
+        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes", cliente=client.id)
+        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes", cliente=client.id)
 
         # 🟢 Reemplazar y borrar archivo anterior de póliza en Supabase si se subió uno nuevo
         if pdf_url:
@@ -737,8 +740,8 @@ def renovar_poliza(request, poliza_id):
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
-        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes")
-        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes")
+        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes", cliente=poliza.client.id)
+        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes", cliente=poliza.client.id)
 
         frecuencia_val = request.POST.get("frecuencia_cuponera")
         frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
@@ -821,7 +824,7 @@ def marcar_pago(request, pago_id):
         archivo_comprobante = request.FILES.get("comprobante")
         
         if archivo_comprobante:
-            comprobante_url = procesar_archivo(archivo_comprobante, "comprobantes_pagos")
+            comprobante_url = procesar_archivo(archivo_comprobante, "comprobantes_pagos", cliente=pago.policy.client.id)
             if not comprobante_url:
                 messages.error(request, "❌ El comprobante no se pudo subir")
                 return render(
