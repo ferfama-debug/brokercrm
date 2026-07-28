@@ -3,9 +3,34 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.core.files.uploadedfile import UploadedFile
+from django.core.files.storage import FileSystemStorage
+from django.core.files.base import ContentFile
 
 # Asegurate de que esta ruta coincida con donde tenés la función
 from core.supabase_client import subir_archivo_supabase
+
+
+# --- STORAGE PERSONALIZADO PARA EVITAR ERRORES CON URLS DE SUPABASE ---
+class SupabaseBypassStorage(FileSystemStorage):
+    def url(self, name):
+        if name and (str(name).startswith("http://") or str(name).startswith("https://")):
+            return str(name)
+        return super().url(name)
+
+    def exists(self, name):
+        if name and (str(name).startswith("http://") or str(name).startswith("https://")):
+            return True
+        return super().exists(name)
+
+    def size(self, name):
+        if name and (str(name).startswith("http://") or str(name).startswith("https://")):
+            return 0
+        return super().size(name)
+
+    def open(self, name, mode="rb"):
+        if name and (str(name).startswith("http://") or str(name).startswith("https://")):
+            return ContentFile(b"")
+        return super().open(name, mode)
 
 
 def policy_directory_path(instance, filename):
@@ -190,6 +215,7 @@ class Policy(models.Model):
 
     pdf_poliza = models.FileField(
         upload_to=policy_directory_path,
+        storage=SupabaseBypassStorage(),
         max_length=500,
         blank=True,
         null=True,
@@ -205,6 +231,7 @@ class Policy(models.Model):
 
     cuponera_pdf = models.FileField(
         upload_to=cuponera_directory_path,
+        storage=SupabaseBypassStorage(),
         max_length=500,
         blank=True,
         null=True,
@@ -346,6 +373,7 @@ class Payment(models.Model):
     )
     comprobante = models.FileField(
         upload_to=comprobante_directory_path,
+        storage=SupabaseBypassStorage(),
         max_length=500,
         blank=True,
         null=True,
