@@ -2,6 +2,10 @@ import os
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.db import models
+from django.core.files.uploadedfile import UploadedFile
+
+# Asegurate de que esta ruta coincida con donde tenés la función
+from core.supabase_client import subir_archivo_supabase
 
 
 def policy_directory_path(instance, filename):
@@ -225,6 +229,25 @@ class Policy(models.Model):
     def save(self, *args, **kwargs):
         if self.company_obj:
             self.company = self.company_obj.nombre
+            
+        cliente_id = self.client.id if self.client else "general"
+
+        # 1. Automatización: Subir PDF de póliza a Supabase si es un archivo nuevo
+        if self.pdf_poliza and hasattr(self.pdf_poliza, "file") and isinstance(self.pdf_poliza.file, UploadedFile):
+            url_publica = subir_archivo_supabase(
+                file=self.pdf_poliza, folder="polizas", cliente=cliente_id
+            )
+            if url_publica:
+                self.pdf_poliza = url_publica
+
+        # 2. Automatización: Subir Cuponera a Supabase si es un archivo nuevo
+        if self.cuponera_pdf and hasattr(self.cuponera_pdf, "file") and isinstance(self.cuponera_pdf.file, UploadedFile):
+            url_publica_cuponera = subir_archivo_supabase(
+                file=self.cuponera_pdf, folder="cuponeras", cliente=cliente_id
+            )
+            if url_publica_cuponera:
+                self.cuponera_pdf = url_publica_cuponera
+
         super().save(*args, **kwargs)
 
     @property
@@ -382,6 +405,16 @@ class Payment(models.Model):
 
     def save(self, *args, **kwargs):
         self.estado = self.estado_calculado
+        
+        # 3. Automatización: Subir comprobante a Supabase si es un archivo nuevo
+        if self.comprobante and hasattr(self.comprobante, "file") and isinstance(self.comprobante.file, UploadedFile):
+            cliente_id = self.policy.client.id if self.policy and self.policy.client else "general"
+            url_publica = subir_archivo_supabase(
+                file=self.comprobante, folder="comprobantes", cliente=cliente_id
+            )
+            if url_publica:
+                self.comprobante = url_publica
+                
         super().save(*args, **kwargs)
 
     def __str__(self):
