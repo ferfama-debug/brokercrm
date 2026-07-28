@@ -17,7 +17,7 @@
     padding: 20px;
   }
 
-  /* ETIQUETAS Y VALORES */
+  /* ETIQUETAS Y VALORES / INPUTS */
   .info-label {
     font-size: 11px;
     text-transform: uppercase;
@@ -30,13 +30,21 @@
     gap: 8px;
   }
 
-  .info-value {
+  .info-value, .form-control-pro {
     font-size: 15px;
     color: var(--text-primary);
     background: rgba(120, 120, 120, 0.05);
     padding: 12px;
     border-radius: 8px;
     border: 1px solid var(--border);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-control-pro:focus {
+    outline: none;
+    border-color: #22c55e;
+    background: rgba(120, 120, 120, 0.08);
   }
 
   /* 🟢 PATENTE ESTILO "PLACA" 🟢 */
@@ -52,11 +60,16 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
   }
 
+  .patente-destacada::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
   /* 🔵 BOTONES DE DOCUMENTOS 🔵 */
   .doc-btn-group {
     display: flex;
     gap: 12px;
     margin-top: 15px;
+    flex-wrap: wrap;
   }
 
   .btn-doc-pro {
@@ -98,7 +111,7 @@
   body.light-mode .info-label {
     color: #475569 !important;
   }
-  body.light-mode .info-value {
+  body.light-mode .info-value, body.light-mode .form-control-pro {
     background: #f8fafc !important;
     color: #0f172a !important;
     border-color: #e2e8f0 !important;
@@ -108,7 +121,7 @@
 <div class="page-header">
   <div>
     <h1 class="page-title">Póliza {{ poliza.policy_number }}</h1>
-    <p class="page-subtitle">Detalle completo y gestión de documentos</p>
+    <p class="page-subtitle">Detalle completo, edición y gestión de documentos</p>
   </div>
   <a href="/clientes/ver/{{ poliza.client.id }}/" class="btn btn-ghost">
     ← Volver al cliente
@@ -128,115 +141,167 @@
 </div>
 {% endif %}
 
-<div class="detail-grid">
-  
-  <div class="info-box">
-    <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Identificación</div>
-    
-    <div style="margin-bottom: 20px;">
-      <label class="info-label"> Cliente</label>
-      <div class="info-value">{{ poliza.client }}</div>
-    </div>
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
 
-    <div style="margin-bottom: 20px;">
-      <label class="info-label"> Patente / Dominio</label>
-      <div class="info-value patente-destacada">
-        {{ poliza.patente|default:"SIN CARGAR" }}
+  <div class="detail-grid">
+    
+    <div class="info-box">
+      <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Identificación</div>
+      
+      <div style="margin-bottom: 20px;">
+        <label class="info-label">👤 Cliente</label>
+        <select name="client" class="form-control-pro" required>
+          {% for c in clientes %}
+            <option value="{{ c.id }}" {% if c.id == poliza.client.id %}selected{% endif %}>{{ c.last_name }}, {{ c.first_name }} (DNI: {{ c.dni }})</option>
+          {% endfor %}
+        </select>
       </div>
-    </div>
 
-    <div>
-      <label class="info-label"> Compañía</label>
-      <div class="info-value">{{ poliza.company }}</div>
-    </div>
-  </div>
+      <div style="margin-bottom: 20px;">
+        <label class="info-label">🔢 Número de Póliza</label>
+        <input type="text" name="policy_number" class="form-control-pro" value="{{ poliza.policy_number|default:'' }}" required>
+      </div>
 
-  <div class="info-box">
-    <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Vigencia y Riesgo</div>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+      <div style="margin-bottom: 20px;">
+        <label class="info-label">🚗 Patente / Dominio</label>
+        <input type="text" name="patente" class="form-control-pro patente-destacada" value="{{ poliza.patente|default:'' }}">
+      </div>
+
       <div>
-        <label class="info-label"> Inicio</label>
-        <div class="info-value">{{ poliza.start_date|date:"d/m/Y" }}</div>
+        <label class="info-label">🏢 Compañía</label>
+        <select name="company" class="form-control-pro">
+          <option value="">-- Seleccionar Compañía --</option>
+          {% for comp in companias %}
+            <option value="{{ comp.id }}" {% if poliza.company_obj_id == comp.id or poliza.company == comp.nombre %}selected{% endif %}>{{ comp.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Vigencia y Riesgo</div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div>
+          <label class="info-label">📅 Inicio</label>
+          <input type="date" name="start_date" class="form-control-pro" value="{{ poliza.start_date|date:'Y-m-d' }}" required>
+        </div>
+        <div>
+          <label class="info-label">📅 Vencimiento</label>
+          <input type="date" name="end_date" class="form-control-pro" value="{{ poliza.end_date|date:'Y-m-d' }}" required>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label class="info-label">⚠️ Tipo de Riesgo</label>
+        <select name="risk_type" class="form-control-pro">
+          <option value="">-- Seleccionar Riesgo --</option>
+          {% for r in riesgos %}
+            <option value="{{ r.id }}" {% if poliza.risk_type_id == r.id %}selected{% endif %}>{{ r.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label class="info-label">📑 Tipo de Póliza</label>
+        <select name="tipo_poliza" class="form-control-pro">
+          <option value="">-- Seleccionar Tipo --</option>
+          {% for tp in tipos_poliza %}
+            <option value="{{ tp.id }}" {% if poliza.tipo_poliza_id == tp.id %}selected{% endif %}>{{ tp.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div>
+          <label class="info-label">💳 Forma de Pago</label>
+          <select name="forma_pago" class="form-control-pro">
+            <option value="TARJETA" {% if poliza.forma_pago == "TARJETA" %}selected{% endif %}>Tarjeta</option>
+            <option value="CBU" {% if poliza.forma_pago == "CBU" %}selected{% endif %}>CBU</option>
+            <option value="CUPONERA" {% if poliza.forma_pago == "CUPONERA" %}selected{% endif %}>Cuponera</option>
+            <option value="EFECTIVO" {% if poliza.forma_pago == "EFECTIVO" %}selected{% endif %}>Efectivo</option>
+          </select>
+        </div>
+        <div>
+          <label class="info-label">🔄 Frecuencia (Cuotas)</label>
+          <input type="number" name="frecuencia_cuponera" class="form-control-pro" value="{{ poliza.frecuencia_cuponera|default:1 }}" min="1">
+        </div>
+      </div>
+
+      <div>
+        <label class="info-label">📌 1er Venc. Cuponera</label>
+        <input type="date" name="fecha_primer_vencimiento_cuponera" class="form-control-pro" value="{{ poliza.fecha_primer_vencimiento_cuponera|date:'Y-m-d' }}">
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 🚗 DATOS DEL VEHÍCULO 🚗 -->
+  <div class="info-box" style="margin-top: 25px;">
+    <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Detalle del Vehículo / Detalle del Seguro</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+      <div>
+        <label class="info-label">🏷️ Marca</label>
+        <input type="text" name="marca" class="form-control-pro" value="{{ poliza.marca|default:'' }}">
       </div>
       <div>
-        <label class="info-label"> Vencimiento</label>
-        <div class="info-value">{{ poliza.end_date|date:"d/m/Y" }}</div>
+        <label class="info-label">🚗 Modelo</label>
+        <input type="text" name="modelo" class="form-control-pro" value="{{ poliza.modelo|default:'' }}">
+      </div>
+      <div>
+        <label class="info-label">⚙️ Versión</label>
+        <input type="text" name="version_auto" class="form-control-pro" value="{{ poliza.version_auto|default:'' }}">
+      </div>
+      <div>
+        <label class="info-label">📅 Año</label>
+        <input type="text" name="anio_auto" class="form-control-pro" value="{{ poliza.anio_auto|default:'' }}">
       </div>
     </div>
-
-    <div style="margin-bottom: 20px;">
-      <label class="info-label"> Tipo de Riesgo</label>
-      <div class="info-value">{{ poliza.risk_type.nombre|default:"No especificado" }}</div>
-    </div>
-
-    <!-- 🟢 NUEVO CAMPO: TIPO DE PÓLIZA 🟢 -->
-    <div style="margin-bottom: 20px;">
-      <label class="info-label"> Tipo de Póliza</label>
-      <div class="info-value">
-        {% if poliza.tipo_poliza %}
-          {{ poliza.tipo_poliza.nombre }}
-        {% else %}
-          <span style="opacity: 0.5;">No especificado</span>
-        {% endif %}
-      </div>
-    </div>
-
     <div>
-      <label class="info-label"> Forma de Pago</label>
-      <div class="info-value">{{ poliza.get_forma_pago_display }}</div>
+      <label class="info-label">📝 Detalle / Cobertura del Seguro</label>
+      <input type="text" name="detalle_seguro" class="form-control-pro" value="{{ poliza.insurance_type|default:'' }}">
     </div>
   </div>
 
-</div>
-
-<!-- 🚗 DATOS DEL VEHÍCULO 🚗 -->
-{% if poliza.marca or poliza.modelo or poliza.version_auto or poliza.anio_auto %}
-<div class="info-box" style="margin-top: 25px;">
-  <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Detalle del Vehículo</div>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-    <div>
-      <label class="info-label"> Marca</label>
-      <div class="info-value">{{ poliza.marca|default:"-" }}</div>
-    </div>
-    <div>
-      <label class="info-label"> Modelo</label>
-      <div class="info-value">{{ poliza.modelo|default:"-" }}</div>
-    </div>
-    <div>
-      <label class="info-label"> Versión</label>
-      <div class="info-value">{{ poliza.version_auto|default:"-" }}</div>
-    </div>
-    <div>
-      <label class="info-label"> Año</label>
-      <div class="info-value">{{ poliza.anio_auto|default:"-" }}</div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-<div class="info-box" style="margin-top: 25px;">
-  <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Documentación Digital</div>
-  <div class="doc-btn-group">
-    {% if poliza.pdf_poliza or poliza.pdf_url %}
-      <a href="{% if poliza.pdf_poliza %}{{ poliza.pdf_poliza }}{% else %}{{ poliza.pdf_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-pdf">
-        📄 Ver Póliza PDF
-      </a>
-    {% endif %}
-
-    {% if poliza.cuponera_pdf or poliza.cuponera_url %}
-      <a href="{% if poliza.cuponera_pdf %}{{ poliza.cuponera_pdf }}{% else %}{{ poliza.cuponera_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-cup">
-        💳 Ver Cuponera
-      </a>
-    {% endif %}
+  <!-- 📂 DOCUMENTACIÓN DIGITAL Y ACTUALIZACIÓN 📂 -->
+  <div class="info-box" style="margin-top: 25px;">
+    <div class="form-section-title" style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 15px;">Documentación Digital</div>
     
-    {% if not poliza.pdf_poliza and not poliza.pdf_url and not poliza.cuponera_pdf and not poliza.cuponera_url %}
-        <div class="info-value" style="font-size: 12px; opacity: 0.6; border: 1px dashed var(--border);">No hay documentos cargados</div>
-    {% endif %}
-  </div>
-</div>
+    <div class="doc-btn-group" style="margin-bottom: 20px;">
+      {% if poliza.pdf_poliza or poliza.pdf_url %}
+        <a href="{% if poliza.pdf_poliza %}{{ poliza.pdf_poliza }}{% else %}{{ poliza.pdf_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-pdf">
+          📄 Ver Póliza PDF Actual
+        </a>
+      {% endif %}
 
-<div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+      {% if poliza.cuponera_pdf or poliza.cuponera_url %}
+        <a href="{% if poliza.cuponera_pdf %}{{ poliza.cuponera_pdf }}{% else %}{{ poliza.cuponera_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-cup">
+          💳 Ver Cuponera Actual
+        </a>
+      {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
+      <div>
+        <label class="info-label">📤 Reemplazar Archivo Póliza (PDF)</label>
+        <input type="file" name="pdf_poliza" class="form-control-pro" accept="application/pdf">
+      </div>
+      <div>
+        <label class="info-label">📤 Reemplazar Cuponera (PDF)</label>
+        <input type="file" name="cuponera_pdf" class="form-control-pro" accept="application/pdf">
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px; flex-wrap: wrap;">
+    <button type="submit" class="btn" style="background: #22c55e; color: #ffffff; border: 1px solid #16a34a; padding: 12px 28px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer;">
+      💾 Guardar Cambios
+    </button>
+  </div>
+</form>
+
+<div style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 15px;">
     <a href="{% url 'eliminar_poliza' poliza.id %}" class="btn" style="background: #ef4444; color: #ffffff; border: 1px solid #dc2626; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px;">
         🗑️ Eliminar Póliza
     </a>
