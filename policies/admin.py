@@ -1,7 +1,14 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
-from .models import Company, Payment, Policy, RiskType
+from .models import Company, Payment, Policy, PolicyType, RiskType
+
+
+# --- Registrar el nuevo Tipo de Póliza (Dinámico) ---
+@admin.register(PolicyType)
+class PolicyTypeAdmin(admin.ModelAdmin):
+    list_display = ("nombre",)
+    search_fields = ("nombre",)
 
 
 # --- Inline para ver pagos dentro de la Póliza ---
@@ -31,8 +38,6 @@ class RenovacionInline(admin.TabularInline):
         "end_date",
         "forma_pago",
     )
-    # 🟢 Quitamos los campos de readonly_fields para evitar que se muestren como guiones (-) 
-    # y permitimos que `show_change_link = True` genere el enlace para ver/editar la póliza.
     readonly_fields = ()
     can_delete = False
     show_change_link = True
@@ -55,6 +60,7 @@ class PolicyAdmin(admin.ModelAdmin):
         "patente",
         "client",
         "company_obj",
+        "tipo_poliza",
         "risk_type",
         "end_date",
         "estado_colored",
@@ -111,6 +117,7 @@ class PolicyAdmin(admin.ModelAdmin):
     readonly_fields = ("ver_poliza_anterior_link",)
 
     list_filter = (
+        "tipo_poliza",
         "risk_type",
         "company_obj",
         "email_vencimiento_enviado",
