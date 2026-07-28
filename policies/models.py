@@ -28,6 +28,19 @@ def comprobante_directory_path(instance, filename):
     return f"comprobantes/cliente_{client.id}_{client_name}/{filename}"
 
 
+# --- NUEVO MODELO DINÁMICO PARA TIPO DE PÓLIZA ---
+class PolicyType(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = "Tipo de Póliza"
+        verbose_name_plural = "Tipos de Pólizas"
+        ordering = ["nombre"]
+
+
 class RiskType(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
 
@@ -52,17 +65,6 @@ class Company(models.Model):
 
 
 class Policy(models.Model):
-    TIPOS_POLIZA = [
-        ("AUTO", "Auto"),
-        ("MOTO", "Moto"),
-        ("HOGAR", "Hogar"),
-        ("VIDA", "Vida"),
-        ("COMERCIO", "Comercio"),
-        ("AP", "Accidentes Personales"),
-        ("RC", "Responsabilidad Civil"),
-        ("OTRO", "Otro"),
-    ]
-
     FORMAS_PAGO = [
         ("TARJETA", "Tarjeta de crédito"),
         ("CBU", "Débito / CBU"),
@@ -110,7 +112,7 @@ class Policy(models.Model):
         db_index=True,
     )
 
-    # --- NUEVOS CAMPOS DE VEHÍCULO ---
+    # --- CAMPOS DE VEHÍCULO ---
     marca = models.CharField(
         max_length=100, blank=True, null=True, verbose_name="Marca del Auto"
     )
@@ -123,7 +125,6 @@ class Policy(models.Model):
     anio_auto = models.CharField(
         max_length=10, blank=True, null=True, verbose_name="Año del Auto"
     )
-    # ---------------------------------
 
     risk_type = models.ForeignKey(
         RiskType,
@@ -133,10 +134,12 @@ class Policy(models.Model):
         verbose_name="Tipo de Riesgo (Dinámico)",
     )
 
-    tipo_poliza = models.CharField(
-        max_length=20,
-        choices=TIPOS_POLIZA,
-        default="AUTO",
+    # --- CAMPO AHORA CONECTADO A POLICYTYPE (DINÁMICO) ---
+    tipo_poliza = models.ForeignKey(
+        PolicyType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         verbose_name="Tipo de póliza (Categoría)",
     )
 
@@ -229,10 +232,9 @@ class Policy(models.Model):
     def save(self, *args, **kwargs):
         if self.company_obj:
             self.company = self.company_obj.nombre
-            
+
         cliente_id = self.client.id if self.client else "general"
 
-        # 1. Automatización: Subir PDF de póliza a Supabase si es un archivo nuevo
         if self.pdf_poliza and hasattr(self.pdf_poliza, "file") and isinstance(self.pdf_poliza.file, UploadedFile):
             url_publica = subir_archivo_supabase(
                 file=self.pdf_poliza, folder="polizas", cliente=cliente_id
@@ -240,7 +242,6 @@ class Policy(models.Model):
             if url_publica:
                 self.pdf_poliza = url_publica
 
-        # 2. Automatización: Subir Cuponera a Supabase si es un archivo nuevo
         if self.cuponera_pdf and hasattr(self.cuponera_pdf, "file") and isinstance(self.cuponera_pdf.file, UploadedFile):
             url_publica_cuponera = subir_archivo_supabase(
                 file=self.cuponera_pdf, folder="cuponeras", cliente=cliente_id
@@ -405,8 +406,7 @@ class Payment(models.Model):
 
     def save(self, *args, **kwargs):
         self.estado = self.estado_calculado
-        
-        # 3. Automatización: Subir comprobante a Supabase si es un archivo nuevo
+
         if self.comprobante and hasattr(self.comprobante, "file") and isinstance(self.comprobante.file, UploadedFile):
             cliente_id = self.policy.client.id if self.policy and self.policy.client else "general"
             url_publica = subir_archivo_supabase(
@@ -414,7 +414,7 @@ class Payment(models.Model):
             )
             if url_publica:
                 self.comprobante = url_publica
-                
+
         super().save(*args, **kwargs)
 
     def __str__(self):
