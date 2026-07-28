@@ -739,6 +739,9 @@ def renovar_poliza(request, poliza_id):
     else:
         poliza = get_object_or_404(Policy, id=poliza_id, client__producer=request.user)
 
+    # 🟢 CARGAR TIPOS DE PÓLIZA DINÁMICOS
+    tipos_poliza = PolicyType.objects.all().order_by("nombre")
+
     if request.method == "POST":
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
@@ -749,6 +752,7 @@ def renovar_poliza(request, poliza_id):
                 "policies/renovar_poliza.html",
                 {
                     "poliza": poliza,
+                    "tipos_poliza": tipos_poliza,
                     "error": "Debe completar las fechas",
                 },
             )
@@ -832,6 +836,7 @@ def renovar_poliza(request, poliza_id):
         "policies/renovar_poliza.html",
         {
             "poliza": poliza,
+            "tipos_poliza": tipos_poliza,
         },
     )
 
