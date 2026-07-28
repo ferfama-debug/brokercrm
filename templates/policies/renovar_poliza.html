@@ -13,6 +13,7 @@
 
 <div class="form-layout">
 
+  <!-- RESUMEN DE LA PÓLIZA ACTUAL -->
   <div class="card info-card">
     <div class="info-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -33,7 +34,12 @@
       </div>
       <div class="info-item">
         <span class="info-label">Tipo de Riesgo</span>
-        <span class="info-val">{{ poliza.risk_type|default:poliza.tipo_poliza }}</span>
+        <span class="info-val">{{ poliza.risk_type.nombre|default:poliza.risk_type|default:"-" }}</span>
+      </div>
+      <!-- 🟢 TIPO DE PÓLIZA ACTUAL 🟢 -->
+      <div class="info-item">
+        <span class="info-label">Tipo de Póliza</span>
+        <span class="info-val">{{ poliza.tipo_poliza.nombre|default:poliza.tipo_poliza|default:"-" }}</span>
       </div>
       <div class="info-item">
         <span class="info-label">N° Póliza actual</span>
@@ -52,13 +58,26 @@
             <polyline points="23 4 23 10 17 10"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
-          Nueva vigencia
+          Nueva vigencia y datos
         </div>
 
         <div class="form-row">
           <div class="form-grupo">
             <label class="form-label">N° nueva póliza</label>
             <input type="text" name="policy_number" class="form-control" value="{{ poliza.policy_number }}" placeholder="Ej: 12345678">
+          </div>
+
+          <!-- 🟢 DESPLEGABLE TIPO DE PÓLIZA (DINÁMICO) 🟢 -->
+          <div class="form-grupo">
+            <label class="form-label">Tipo de Póliza</label>
+            <select name="tipo_poliza" class="form-control">
+              <option value="">-- Seleccionar --</option>
+              {% for tp in tipos_poliza %}
+                <option value="{{ tp.id }}" {% if poliza.tipo_poliza and poliza.tipo_poliza.id == tp.id or poliza.tipo_poliza == tp.id %}selected{% endif %}>
+                  {{ tp.nombre }}
+                </option>
+              {% endfor %}
+            </select>
           </div>
         </div>
 
