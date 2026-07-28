@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 import requests
 
 from clients.models import Client
-from .models import Company, EmailLog, Payment, Policy, RiskType
+from .models import Company, EmailLog, Payment, Policy, PolicyType, RiskType
 
 print("🔥 Integración Supabase inicializada")
 
@@ -80,11 +80,10 @@ def eliminar_archivo_supabase_por_url(url):
     if not url:
         return
     try:
-        # Ejemplo de URL de Supabase: .../storage/v1/object/public/NOMBRE_BUCKET/ruta/al/archivo.pdf
         if "/storage/v1/object/public/" in url:
             partes = url.split("/storage/v1/object/public/")
             if len(partes) > 1:
-                ruta_relativa = partes[1]  # 'polizas_clientes/archivo.pdf'
+                ruta_relativa = partes[1]
                 segmentos = ruta_relativa.split("/", 1)
                 if len(segmentos) == 2:
                     bucket = segmentos[0]
@@ -120,17 +119,15 @@ def enviar_email_con_fallback(
 
     adjuntos = adjuntos or []
 
-    # 🟢 PROTOCOLO: COPIA OCULTA AUTOMÁTICA PARA LA EMPRESA 🟢
     copia_empresa = ["fuerzanaturalbroker@gmail.com"]
 
-    # 1) Intento con SMTP configurado en Django
     try:
         email = EmailMultiAlternatives(
             subject=asunto,
             body=mensaje_texto,
             from_email=remitente,
             to=destinatarios,
-            bcc=copia_empresa,  # Inyección de copia oculta quirúrgica
+            bcc=copia_empresa,
         )
 
         if mensaje_html:
@@ -152,7 +149,6 @@ def enviar_email_con_fallback(
     except Exception as smtp_error:
         print("ERROR EMAIL SMTP:", smtp_error)
 
-        # 2) Fallback a Resend API
         resend_api_key = getattr(settings, "RESEND_API_KEY", None)
         if not resend_api_key:
             return (
@@ -164,7 +160,7 @@ def enviar_email_con_fallback(
             payload = {
                 "from": remitente,
                 "to": destinatarios,
-                "bcc": copia_empresa,  # Inyección de copia oculta en contingencia de Resend
+                "bcc": copia_empresa,
                 "subject": asunto,
                 "text": mensaje_texto,
             }
@@ -470,6 +466,7 @@ def crear_poliza(request):
     cliente_id = request.GET.get("cliente")
     companias = Company.objects.all().order_by("nombre")
     riesgos = RiskType.objects.all().order_by("nombre")
+    tipos_poliza = PolicyType.objects.all().order_by("nombre")
 
     if request.method == "POST":
         if request.user.is_superuser:
@@ -491,12 +488,12 @@ def crear_poliza(request):
                     "cliente_id": cliente_id,
                     "companias": companias,
                     "riesgos": riesgos,
+                    "tipos_poliza": tipos_poliza,
                     "polizas": todas_las_polizas,
                     "error": "Debe completar las fechas",
                 },
             )
 
-        # 🟢 Capturar póliza anterior (renovación)
         renovacion_de_id = request.POST.get("renovacion_de")
         renovacion_de_obj = None
         if renovacion_de_id:
@@ -531,6 +528,15 @@ def crear_poliza(request):
             except Exception:
                 pass
 
+        # 🟢 PROCESAR POLICYTYPE DINÁMICO
+        tipo_poliza_input = request.POST.get("tipo_poliza")
+        tipo_poliza_obj = None
+        if tipo_poliza_input:
+            if str(tipo_poliza_input).isdigit():
+                tipo_poliza_obj = PolicyType.objects.filter(id=tipo_poliza_input).first()
+            else:
+                tipo_poliza_obj, _ = PolicyType.objects.get_or_create(nombre=tipo_poliza_input)
+
         frecuencia_val = request.POST.get("frecuencia_cuponera")
         frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
 
@@ -541,7 +547,7 @@ def crear_poliza(request):
             policy_number=request.POST.get("policy_number"),
             patente=request.POST.get("patente"),
             risk_type=risk_type_obj,
-            tipo_poliza=request.POST.get("tipo_poliza"),
+            tipo_poliza=tipo_poliza_obj,
             insurance_type=request.POST.get("detalle_seguro"),
             marca=request.POST.get("marca"),
             modelo=request.POST.get("modelo"),
@@ -555,7 +561,7 @@ def crear_poliza(request):
                 "fecha_primer_vencimiento_cuponera"
             )
             or None,
-            renovacion_de=renovacion_de_obj,  # 👈 Guardado de relación de renovación
+            renovacion_de=renovacion_de_obj,
             pdf_poliza=pdf_url or None,
             cuponera_pdf=cuponera_url or None,
         )
@@ -598,7 +604,8 @@ def crear_poliza(request):
             "cliente_id": cliente_id,
             "companias": companias,
             "riesgos": riesgos,
-            "polizas": todas_las_polizas,  # 👈 Enviado al template
+            "tipos_poliza": tipos_poliza,
+            "polizas": todas_las_polizas,
         },
     )
 
@@ -615,6 +622,7 @@ def editar_poliza(request, poliza_id):
     clientes = clientes.order_by("last_name", "first_name")
     companias = Company.objects.all().order_by("nombre")
     riesgos = RiskType.objects.all().order_by("nombre")
+    tipos_poliza = PolicyType.objects.all().order_by("nombre")
 
     if request.method == "POST":
         client_id = request.POST.get("client")
@@ -635,6 +643,7 @@ def editar_poliza(request, poliza_id):
                     "clientes": clientes,
                     "companias": companias,
                     "riesgos": riesgos,
+                    "tipos_poliza": tipos_poliza,
                     "error": "Debe completar las fechas",
                 },
             )
@@ -646,13 +655,11 @@ def editar_poliza(request, poliza_id):
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes", cliente=client.id)
         cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes", cliente=client.id)
 
-        # 🟢 Reemplazar y borrar archivo anterior de póliza en Supabase si se subió uno nuevo
         if pdf_url:
             if poliza.pdf_poliza:
                 eliminar_archivo_supabase_por_url(poliza.pdf_poliza)
             poliza.pdf_poliza = pdf_url
 
-        # 🟢 Reemplazar y borrar archivo anterior de cuponera en Supabase si se subió uno nuevo
         if cuponera_url:
             if poliza.cuponera_pdf:
                 eliminar_archivo_supabase_por_url(poliza.cuponera_pdf)
@@ -677,6 +684,15 @@ def editar_poliza(request, poliza_id):
             except Exception:
                 pass
 
+        # 🟢 PROCESAR POLICYTYPE DINÁMICO EN EDITAR
+        tipo_poliza_input = request.POST.get("tipo_poliza")
+        tipo_poliza_obj = None
+        if tipo_poliza_input:
+            if str(tipo_poliza_input).isdigit():
+                tipo_poliza_obj = PolicyType.objects.filter(id=tipo_poliza_input).first()
+            else:
+                tipo_poliza_obj, _ = PolicyType.objects.get_or_create(nombre=tipo_poliza_input)
+
         frecuencia_val = request.POST.get("frecuencia_cuponera")
         frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
 
@@ -686,7 +702,7 @@ def editar_poliza(request, poliza_id):
         poliza.policy_number = request.POST.get("policy_number")
         poliza.patente = request.POST.get("patente")
         poliza.risk_type = risk_type_obj
-        poliza.tipo_poliza = request.POST.get("tipo_poliza")
+        poliza.tipo_poliza = tipo_poliza_obj
         poliza.insurance_type = request.POST.get("detalle_seguro")
         poliza.marca = request.POST.get("marca")
         poliza.modelo = request.POST.get("modelo")
@@ -711,6 +727,7 @@ def editar_poliza(request, poliza_id):
             "clientes": clientes,
             "companias": companias,
             "riesgos": riesgos,
+            "tipos_poliza": tipos_poliza,
         },
     )
 
@@ -743,6 +760,15 @@ def renovar_poliza(request, poliza_id):
         pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes", cliente=poliza.client.id)
         cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes", cliente=poliza.client.id)
 
+        tipo_poliza_input = request.POST.get("tipo_poliza")
+        if tipo_poliza_input:
+            if str(tipo_poliza_input).isdigit():
+                tipo_poliza_obj = PolicyType.objects.filter(id=tipo_poliza_input).first()
+            else:
+                tipo_poliza_obj, _ = PolicyType.objects.get_or_create(nombre=tipo_poliza_input)
+        else:
+            tipo_poliza_obj = poliza.tipo_poliza
+
         frecuencia_val = request.POST.get("frecuencia_cuponera")
         frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
 
@@ -753,7 +779,7 @@ def renovar_poliza(request, poliza_id):
             policy_number=request.POST.get("policy_number"),
             patente=request.POST.get("patente") or poliza.patente,
             risk_type=poliza.risk_type,
-            tipo_poliza=poliza.tipo_poliza,
+            tipo_poliza=tipo_poliza_obj,
             insurance_type=request.POST.get("detalle_seguro") or poliza.insurance_type,
             marca=request.POST.get("marca") or poliza.marca,
             modelo=request.POST.get("modelo") or poliza.modelo,
@@ -834,7 +860,6 @@ def marcar_pago(request, pago_id):
                         "pago": pago,
                     },
                 )
-            # 🟢 Borrar comprobante anterior de Supabase si ya existía
             if pago.comprobante:
                 eliminar_archivo_supabase_por_url(pago.comprobante)
             pago.comprobante = comprobante_url
@@ -991,7 +1016,6 @@ def reporte_anulaciones(request):
 
 @login_required
 def eliminar_poliza(request, poliza_id):
-    # Validar que solo un superusuario pueda intentar eliminar
     if not request.user.is_superuser:
         messages.error(request, "❌ No tienes permisos de superusuario para eliminar pólizas.")
         return redirect('lista_polizas')
@@ -1001,18 +1025,15 @@ def eliminar_poliza(request, poliza_id):
     if request.method == "POST":
         password = request.POST.get("password", "")
         
-        # Validar que la contraseña del superusuario sea correcta
         if request.user.check_password(password):
             numero_poliza = poliza.policy_number or poliza.id
             cliente_id = poliza.client.id
             
-            # 🟢 Eliminar archivos asociados de Supabase Storage antes de borrar el registro
             if poliza.pdf_poliza:
                 eliminar_archivo_supabase_por_url(poliza.pdf_poliza)
             if poliza.cuponera_pdf:
                 eliminar_archivo_supabase_por_url(poliza.cuponera_pdf)
             
-            # Eliminar el registro de la base de datos (y cuotas en CASCADE)
             poliza.delete()
             
             messages.success(request, f"🗑️ La póliza {numero_poliza} y sus archivos en Supabase fueron eliminados correctamente.")
