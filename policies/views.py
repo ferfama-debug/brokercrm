@@ -960,14 +960,116 @@ def enviar_poliza(request, poliza_id):
 def detalle_poliza(request, poliza_id):
     if request.user.is_superuser:
         poliza = get_object_or_404(Policy, id=poliza_id)
+        clientes = Client.objects.all().order_by("last_name", "first_name")
     else:
         poliza = get_object_or_404(Policy, id=poliza_id, client__producer=request.user)
+        clientes = Client.objects.filter(producer=request.user).order_by("last_name", "first_name")
+
+    companias = Company.objects.all().order_by("nombre")
+    riesgos = RiskType.objects.all().order_by("nombre")
+    tipos_poliza = PolicyType.objects.all().order_by("nombre")
+
+    if request.method == "POST":
+        client_id = request.POST.get("client")
+        if request.user.is_superuser:
+            client = get_object_or_404(Client, id=client_id)
+        else:
+            client = get_object_or_404(Client, id=client_id, producer=request.user)
+
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        if not start_date or not end_date:
+            messages.error(request, "❌ Debe completar las fechas de vigencia.")
+            return render(
+                request,
+                "policies/detalle_poliza.html",
+                {
+                    "poliza": poliza,
+                    "clientes": clientes,
+                    "companias": companias,
+                    "riesgos": riesgos,
+                    "tipos_poliza": tipos_poliza,
+                },
+            )
+
+        archivo_poliza = request.FILES.get("pdf_poliza")
+        archivo_cuponera = request.FILES.get("cuponera_pdf")
+
+        pdf_url = procesar_archivo(archivo_poliza, "polizas_clientes", cliente=client.id)
+        cuponera_url = procesar_archivo(archivo_cuponera, "cuponeras_clientes", cliente=client.id)
+
+        if pdf_url:
+            if poliza.pdf_poliza:
+                eliminar_archivo_supabase_por_url(poliza.pdf_poliza)
+            poliza.pdf_poliza = pdf_url
+
+        if cuponera_url:
+            if poliza.cuponera_pdf:
+                eliminar_archivo_supabase_por_url(poliza.cuponera_pdf)
+            poliza.cuponera_pdf = cuponera_url
+
+        company_id = request.POST.get("company")
+        company_obj = None
+        company_nombre = None
+        if company_id:
+            try:
+                company_obj = Company.objects.get(id=company_id)
+                company_nombre = company_obj.nombre
+            except Exception:
+                company_nombre = request.POST.get("company")
+
+        risk_type_id = request.POST.get("risk_type")
+        risk_type_obj = None
+        if risk_type_id:
+            try:
+                risk_type_obj = RiskType.objects.get(id=risk_type_id)
+            except Exception:
+                pass
+
+        tipo_poliza_input = request.POST.get("tipo_poliza")
+        tipo_poliza_obj = None
+        if tipo_poliza_input:
+            if str(tipo_poliza_input).isdigit():
+                tipo_poliza_obj = PolicyType.objects.filter(id=tipo_poliza_input).first()
+            else:
+                tipo_poliza_obj, _ = PolicyType.objects.get_or_create(nombre=tipo_poliza_input)
+
+        frecuencia_val = request.POST.get("frecuencia_cuponera")
+        frecuencia_int = int(frecuencia_val) if frecuencia_val else 1
+
+        poliza.client = client
+        poliza.company = company_nombre
+        poliza.company_obj = company_obj
+        poliza.policy_number = request.POST.get("policy_number")
+        poliza.patente = request.POST.get("patente")
+        poliza.risk_type = risk_type_obj
+        poliza.tipo_poliza = tipo_poliza_obj
+        poliza.insurance_type = request.POST.get("detalle_seguro")
+        poliza.marca = request.POST.get("marca")
+        poliza.modelo = request.POST.get("modelo")
+        poliza.version_auto = request.POST.get("version_auto")
+        poliza.anio_auto = request.POST.get("anio_auto")
+        poliza.start_date = start_date
+        poliza.end_date = end_date
+        poliza.forma_pago = request.POST.get("forma_pago")
+        poliza.frecuencia_cuponera = frecuencia_int
+        poliza.fecha_primer_vencimiento_cuponera = request.POST.get("fecha_primer_vencimiento_cuponera") or None
+
+        poliza.save()
+
+        messages.success(request, "💾 Póliza actualizada correctamente desde el detalle.")
+        return redirect(f"/polizas/{poliza.id}/")
 
     return render(
         request,
         "policies/detalle_poliza.html",
         {
             "poliza": poliza,
+            "clientes": clientes,
+            "companias": companias,
+            "riesgos": riesgos,
+            "tipos_poliza": tipos_poliza,
         },
     )
 
