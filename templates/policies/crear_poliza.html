@@ -154,17 +154,14 @@
             </select>
           </div>
 
+          <!-- 🟢 TIPO DE PÓLIZA CARGADO DINÁMICAMENTE DESDE BASE DE DATOS 🟢 -->
           <div class="form-grupo">
-            <label>Tipo de póliza (Categoría) *</label>
+            <label>Tipo de póliza (Categoría)</label>
             <select name="tipo_poliza" class="form-control">
-              <option value="AUTO">Auto</option>
-              <option value="MOTO">Moto</option>
-              <option value="HOGAR">Hogar</option>
-              <option value="VIDA">Vida</option>
-              <option value="COMERCIO">Comercio</option>
-              <option value="AP">Accidentes Personales</option>
-              <option value="RC">Responsabilidad Civil</option>
-              <option value="OTRO">Otro</option>
+              <option value="">Seleccionar tipo...</option>
+              {% for tp in tipos_poliza %}
+              <option value="{{ tp.id }}">{{ tp.nombre }}</option>
+              {% endfor %}
             </select>
           </div>
         </div>
