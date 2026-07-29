@@ -1,54 +1,62 @@
-from django.core.management.base import BaseCommand
-from django.core.mail import EmailMultiAlternatives
-from django.conf import settings
-from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from policies.models import Payment
 
 
 class Command(BaseCommand):
-    help = "Envía recordatorios de cuponera 2 días antes del vencimiento con copia oculta"
+  help = (
+      "Envía recordatorios de cuponera 2 días antes del vencimiento con copia"
+      " oculta"
+  )
 
-    def handle(self, *args, **options):
-        hoy = timezone.localdate()
-        fecha_objetivo = hoy + timedelta(days=2)
+  def handle(self, *args, **options):
+    hoy = timezone.localdate()
+    fecha_objetivo = hoy + timedelta(days=2)
 
-        # Buscamos cuotas que vencen exactamente en 2 días y no están pagadas
-        pagos = Payment.objects.filter(
-            fecha_vencimiento=fecha_objetivo,
-            fecha_pago__isnull=True,
-            recordatorio_enviado=False,
-            policy__forma_pago="CUPONERA",
-        ).select_related("policy", "policy__client")
+    # Buscamos cuotas que vencen exactamente en 2 días y no están pagadas
+    pagos = Payment.objects.filter(
+        fecha_vencimiento=fecha_objetivo,
+        fecha_pago__isnull=True,
+        recordatorio_enviado=False,
+        policy__forma_pago="CUPONERA",
+    ).select_related("policy", "policy__client")
 
-        enviados = 0
+    enviados = 0
 
-        for pago in pagos:
-            cliente = pago.policy.client
-            if not cliente or not cliente.email:
-                continue
+    for pago in pagos:
+      cliente = pago.policy.client
+      if not cliente or not cliente.email:
+        continue
 
-            # Obtener URL de cuponera si existe
-            cuponera_url = (
-                pago.policy.cuponera_pdf if pago.policy.cuponera_pdf else None
-            )
+      # 🟢 PROTECCIÓN EXTRA: Verificamos si ya pasó por este proceso hoy
+      # (Por si el cron job se dispara varias veces seguidas antes de refrescar estado)
+      if getattr(pago, "ultimo_envio_recordatorio", None) == hoy:
+        continue
 
-            # Botón de descarga opcional
-            boton_html = ""
-            if cuponera_url:
-                boton_html = f"""
+      # Obtener URL de cuponera si existe
+      cuponera_url = (
+          pago.policy.cuponera_pdf if pago.policy.cuponera_pdf else None
+      )
+
+      # Botón de descarga opcional
+      boton_html = ""
+      if cuponera_url:
+        boton_html = f"""
                 <div style="text-align: center; margin: 25px 0;">
                     <a href="{cuponera_url}" 
                        style="background-color: #22c55e; color: #ffffff; padding: 14px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                       📥 Descargar Cuponera de Pago
+                        📥 Descargar Cuponera de Pago
                     </a>
                 </div>
                 """
 
-            try:
-                # Estética Mejorada Fuerza Natural Broker
-                html_content = f"""
+      try:
+        # Estética Mejorada Fuerza Natural Broker
+        html_content = f"""
                 <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
                     <div style="max-width:520px; margin:auto; background:white; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;">
                         <div style="background:#0f172a; padding:30px 20px; text-align:center;">
@@ -79,28 +87,35 @@ class Command(BaseCommand):
                 </div>
                 """
 
-                # 🟢 COPIA OCULTA (BCC): Agregamos tu mail de control de forma nativa
-                email = EmailMultiAlternatives(
-                    subject=f"📌 Recordatorio de pago: Cuota #{pago.numero_cuota}",
-                    body=f"Hola {cliente.first_name}, vence tu cuota #{pago.numero_cuota} el {pago.fecha_vencimiento}.",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[cliente.email],
-                    bcc=["fuerzanaturalbroker@gmail.com"],  # 👈 Te llega un duplicado exacto a vos
-                )
-                email.attach_alternative(html_content, "text/html")
-                email.send()
+        # 🟢 COPIA OCULTA (BCC): Agregamos tu mail de control de forma nativa
+        email = EmailMultiAlternatives(
+            subject=f"📌 Recordatorio de pago: Cuota #{pago.numero_cuota}",
+            body=(
+                f"Hola {cliente.first_name}, vence tu cuota"
+                f" #{pago.numero_cuota} el {pago.fecha_vencimiento}."
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[cliente.email],
+            bcc=[
+                "fuerzanaturalbroker@gmail.com"
+            ],  # 👈 Te llega un duplicado exacto a vos
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
 
-                # Marcamos como enviado
-                pago.recordatorio_enviado = True
-                pago.save()
-                enviados += 1
+        # Marcamos como enviado y dejamos constancia de la fecha
+        pago.recordatorio_enviado = True
+        # Si agregaste un campo de fecha en tu modelo, podés guardarlo acá:
+        # pago.ultimo_envio_recordatorio = hoy
+        pago.save()
+        enviados += 1
 
-            except Exception as e:
-                self.stderr.write(f"Error con {cliente.email}: {e}")
+      except Exception as e:
+        self.stderr.write(f"Error con {cliente.email}: {e}")
 
-        if enviados > 0:
-            self.stdout.write(
-                self.style.SUCCESS(f"Mails de cuponera enviados: {enviados}")
-            )
-        else:
-            self.stdout.write("No hay cuotas que venzan en 2 días para avisar hoy.")
+    if enviados > 0:
+      self.stdout.write(
+          self.style.SUCCESS(f"Mails de cuponera enviados: {enviados}")
+      )
+    else:
+      self.stdout.write("No hay cuotas que venzan en 2 días para avisar hoy.")
