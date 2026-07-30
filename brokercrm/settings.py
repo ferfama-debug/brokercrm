@@ -199,6 +199,20 @@ TIME_ZONE = "America/Argentina/Mendoza"
 USE_I18N = True
 USE_TZ = True
 
+# 🟢 FORZAR FORMATOS DE FECHA ARGENTINOS (DD/MM/YYYY)
+DATE_FORMAT = 'd/m/Y'
+SHORT_DATE_FORMAT = 'd/m/Y'
+DATETIME_FORMAT = 'd/m/Y H:i'
+SHORT_DATETIME_FORMAT = 'd/m/Y H:i'
+
+# 🟢 ORDEN DE LECTURA DE FECHAS (Prioriza DD/MM/YYYY)
+DATE_INPUT_FORMATS = [
+    '%d/%m/%Y',  # Ej: 31/12/2026 (El que queremos)
+    '%d-%m-%Y',  # Ej: 31-12-2026
+    '%Y-%m-%d',  # Ej: 2026-12-31 (Formato estándar de Base de Datos)
+    '%d/%m/%y',  # Ej: 31/12/26
+]
+
 
 # =========================
 # STATIC
