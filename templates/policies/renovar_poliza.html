@@ -1,5 +1,12 @@
 {% extends "base.html" %}
-{% block content %}
+% block content %}
+
+<style>
+  select option {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+  }
+</style>
 
 <div class="page-header">
   <div>
@@ -176,11 +183,25 @@
   </div>
 </div>
 
+<!-- LIBRERÍAS DE CALENDARIO EN ESPAÑOL (FORMATO ARGENTINO) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+
 <script>
 function updateFileName(input, labelId) {
   const label = document.getElementById(labelId);
   label.textContent = input.files.length > 0 ? input.files[0].name : "";
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    flatpickr("input[type='date']", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        locale: "es"
+    });
+});
 </script>
 
 {% endblock %}
