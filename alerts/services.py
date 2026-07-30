@@ -44,9 +44,12 @@ def generate_expiration_alerts():
     dias_aviso = [30, 15]
     limite = today + timedelta(days=30)
 
+    # 🟢 PROTECCIÓN ANTI-SPAM: Excluimos las pólizas que ya recibieron su aviso hoy
     policies = Policy.objects.filter(
         end_date__gte=today,
         end_date__lte=limite,
+    ).exclude(
+        ultimo_envio_vencimiento=today
     ).select_related("client", "client__producer")
 
     for policy in policies:
@@ -124,6 +127,7 @@ def enviar_mail_vencimiento_poliza(policy, dias):
             body=f"Hola {cliente.first_name}, tu póliza vence en {dias} días.",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[cliente.email],
+            bcc=["fuerzanaturalbroker@gmail.com"],
         )
         email.attach_alternative(html_content, "text/html")
         email.send()
