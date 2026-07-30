@@ -16,7 +16,7 @@
   <!-- RESUMEN DE LA PÓLIZA ACTUAL -->
   <div class="card info-card">
     <div class="info-header">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
       </svg>
@@ -36,7 +36,6 @@
         <span class="info-label">Tipo de Riesgo</span>
         <span class="info-val">{{ poliza.risk_type.nombre|default:poliza.risk_type|default:"-" }}</span>
       </div>
-      <!-- 🟢 TIPO DE PÓLIZA ACTUAL 🟢 -->
       <div class="info-item">
         <span class="info-label">Tipo de Póliza</span>
         <span class="info-val">{{ poliza.tipo_poliza.nombre|default:poliza.tipo_poliza|default:"-" }}</span>
@@ -54,7 +53,7 @@
 
       <div class="form-section">
         <div class="form-section-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
@@ -67,7 +66,6 @@
             <input type="text" name="policy_number" class="form-control" value="{{ poliza.policy_number }}" placeholder="Ej: 12345678">
           </div>
 
-          <!-- 🟢 DESPLEGABLE TIPO DE PÓLIZA (DINÁMICO) 🟢 -->
           <div class="form-grupo">
             <label class="form-label">Tipo de Póliza</label>
             <select name="tipo_poliza" class="form-control">
@@ -97,7 +95,7 @@
 
       <div class="form-section">
         <div class="form-section-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 7h20"/>
             <path d="M4 7l1.5 10.5A2 2 0 0 0 7.48 19h9.04a2 2 0 0 0 1.98-1.5L20 7"/>
             <path d="M9 11h6"/>
@@ -132,7 +130,7 @@
 
       <div class="form-section">
         <div class="form-section-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
           </svg>
@@ -146,7 +144,7 @@
               <a href="{{ poliza.pdf_poliza }}" target="_blank" class="btn btn-ghost" style="margin-bottom:8px;">📄 Ver actual</a>
             {% endif %}
             <label class="file-drop">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
               <span class="file-drop-text">Subir nuevo PDF</span>
               <input type="file" name="pdf_poliza" accept="application/pdf" class="file-input" onchange="updateFileName(this, 'label-poliza')">
             </label>
@@ -159,7 +157,7 @@
               <a href="{{ poliza.cuponera_pdf }}" target="_blank" class="btn btn-ghost" style="margin-bottom:8px;">💳 Ver actual</a>
             {% endif %}
             <label class="file-drop">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
               <span class="file-drop-text">Subir nueva cuponera</span>
               <input type="file" name="cuponera_pdf" accept="application/pdf" class="file-input" onchange="updateFileName(this, 'label-cuponera')">
             </label>
