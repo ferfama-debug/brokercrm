@@ -268,6 +268,11 @@
   </div>
 </div>
 
+<!-- LIBRERÍAS DE CALENDARIO EN ESPAÑOL (FORMATO ARGENTINO) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+
 <script>
 function switchTab(evt, tabId) {
   var contents = document.getElementsByClassName("tab-content");
@@ -309,7 +314,17 @@ function toggleCuponeraFields() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', toggleCuponeraFields);
+document.addEventListener('DOMContentLoaded', function() {
+    toggleCuponeraFields();
+    
+    // Inicializar Flatpickr en todos los inputs de fecha (incluso los que están dentro de pestañas ocultas)
+    flatpickr("input[type='date']", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        locale: "es"
+    });
+});
 </script>
 
 {% endblock %}
