@@ -319,4 +319,20 @@
     {% endif %}
 </div>
 
+<!-- SOPORTE DE CALENDARIO EN ESPAÑOL (FORMATO ARGENTINO) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    flatpickr("input[type='date']", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        locale: "es"
+    });
+  });
+</script>
+
 {% endblock %}
