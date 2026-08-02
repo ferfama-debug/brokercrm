@@ -116,12 +116,25 @@ def ver_cliente(request, cliente_id):
         )
     ).order_by("estado_orden", "-end_date")
 
+    # Contadores originales
     polizas_activas = 0
     polizas_por_vencer = 0
     polizas_vencidas = 0
 
-    for poliza in polizas_query:
-        # 🟢 BLINDAJE DE SEGURIDAD: Evita error si end_date es nulo
+    # 🔥 NUEVO: Listas separadas para usar en el template
+    lista_polizas_vigentes = []
+    lista_polizas_historicas = []
+
+    # Iteramos sobre las pólizas ya ordenadas
+    for poliza in polizas:
+        
+        # 1. Separación basada en el nuevo estado
+        if poliza.estado in ["RENOVADA", "ANULADA"]:
+            lista_polizas_historicas.append(poliza)
+        else:
+            lista_polizas_vigentes.append(poliza)
+            
+        # 2. Lógica original de contadores (intacta)
         if not poliza.end_date:
             continue
 
@@ -141,7 +154,9 @@ def ver_cliente(request, cliente_id):
         "clientes/cliente_detalle.html",
         {
             "cliente": cliente,
-            "polizas": polizas,
+            "polizas": polizas, # Dejo el QuerySet original por si se necesita
+            "lista_polizas_vigentes": lista_polizas_vigentes,
+            "lista_polizas_historicas": lista_polizas_historicas,
             "polizas_activas": polizas_activas,
             "polizas_por_vencer": polizas_por_vencer,
             "polizas_vencidas": polizas_vencidas,
