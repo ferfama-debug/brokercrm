@@ -300,6 +300,11 @@ class Policy(models.Model):
     def estado(self):
         if self.anulada:
             return "ANULADA"
+            
+        # --- NUEVA LÓGICA DE RENOVACIÓN ---
+        # Si existe alguna póliza que apunte a esta como 'renovacion_de', pasa a ser histórica.
+        if self.renovaciones.exists():
+            return "RENOVADA"
 
         if not self.end_date:
             return "SIN FECHA"
