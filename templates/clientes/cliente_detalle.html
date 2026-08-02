@@ -277,20 +277,17 @@
 <div class="section-header" style="margin-top: 0;">
   <h3>🟢 Pólizas Vigentes</h3>
 </div>
-{% regroup lista_polizas_vigentes by policy_number as grupos_vigentes %}
 <div class="polizas-detalle">
-  {% for grupo in grupos_vigentes %}
+  {% for p in lista_polizas_vigentes %}
   <div class="poliza-grupo">
-
     <div class="grupo-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
       </svg>
-      <span>Póliza <span class="grupo-number">{{ grupo.grouper }}</span></span>
+      <span>Póliza <span class="grupo-number">{{ p.policy_number }}</span></span>
     </div>
 
-    {% for p in grupo.list %}
     <div class="poliza-fila">
       <div class="table-wrap" style="border-radius:0; border:none; box-shadow:none;">
         <table class="tabla-detalle">
@@ -430,7 +427,6 @@
       {% endif %}
 
     </div>
-    {% endfor %}
   </div>
   {% endfor %}
 </div>
@@ -441,20 +437,17 @@
 <div class="section-header">
   <h3>⏱️ Historial de Pólizas (Renovadas / Anuladas)</h3>
 </div>
-{% regroup lista_polizas_historicas by policy_number as grupos_historicas %}
 <div class="polizas-detalle" style="opacity: 0.85;">
-  {% for grupo in grupos_historicas %}
+  {% for p in lista_polizas_historicas %}
   <div class="poliza-grupo">
-
     <div class="grupo-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
       </svg>
-      <span>Póliza <span class="grupo-number">{{ grupo.grouper }}</span></span>
+      <span>Póliza <span class="grupo-number">{{ p.policy_number }}</span></span>
     </div>
 
-    {% for p in grupo.list %}
     <div class="poliza-fila">
       <div class="table-wrap" style="border-radius:0; border:none; box-shadow:none;">
         <table class="tabla-detalle">
@@ -516,7 +509,6 @@
         </table>
       </div>
     </div>
-    {% endfor %}
   </div>
   {% endfor %}
 </div>
