@@ -799,6 +799,7 @@ def renovar_poliza(request, poliza_id):
             or None,
             pdf_poliza=pdf_url or poliza.pdf_poliza,
             cuponera_pdf=cuponera_url or poliza.cuponera_pdf,
+            renovacion_de=poliza,  # 👈 ENLACE DE RENOVACIÓN AGREGADO
         )
 
         nueva_poliza.save()
