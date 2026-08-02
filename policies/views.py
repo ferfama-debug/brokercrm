@@ -564,6 +564,7 @@ def crear_poliza(request):
             renovacion_de=renovacion_de_obj,
             pdf_poliza=pdf_url or None,
             cuponera_pdf=cuponera_url or None,
+            estado="ACTIVA",
         )
 
         nueva_poliza.save()
@@ -800,9 +801,14 @@ def renovar_poliza(request, poliza_id):
             pdf_poliza=pdf_url or poliza.pdf_poliza,
             cuponera_pdf=cuponera_url or poliza.cuponera_pdf,
             renovacion_de=poliza,  # 👈 ENLACE DE RENOVACIÓN AGREGADO
+            estado="ACTIVA",
         )
 
         nueva_poliza.save()
+
+        # 🔥 MARCAR LA PÓLIZA ANTERIOR COMO RENOVADA PARA QUE PASE AL HISTORIAL
+        poliza.estado = "RENOVADA"
+        poliza.save()
 
         if nueva_poliza.forma_pago == "CUPONERA":
             base_date = (
