@@ -272,9 +272,14 @@
   </div>
 </div>
 
-{% regroup polizas by policy_number as grupos %}
+<!-- 🔥 SECCIÓN 1: PÓLIZAS VIGENTES -->
+{% if lista_polizas_vigentes %}
+<div class="section-header" style="margin-top: 0;">
+  <h3>🟢 Pólizas Vigentes</h3>
+</div>
+{% regroup lista_polizas_vigentes by policy_number as grupos_vigentes %}
 <div class="polizas-detalle">
-  {% for grupo in grupos %}
+  {% for grupo in grupos_vigentes %}
   <div class="poliza-grupo">
 
     <div class="grupo-header">
@@ -333,9 +338,7 @@
               </td>
               <td>
                 <div class="acciones">
-                  <a href="/polizas/{{ p.id }}/" class="btn btn-ghost btn-sm">
-                    Ver
-                  </a>
+                  <a href="/polizas/{{ p.id }}/" class="btn btn-ghost btn-sm">Ver</a>
                   <a href="/polizas/renovar/{{ p.id }}/" class="btn btn-secondary btn-sm">Renovar</a>
                   <form method="POST" action="/polizas/enviar/{{ p.id }}/" style="display:inline;">
                     {% csrf_token %}
@@ -343,23 +346,15 @@
                   </form>
 
                   {% if p.pdf_poliza %}
-                  <a href="{{ p.pdf_poliza }}" target="_blank" class="btn btn-primary btn-sm">
-                    PDF
-                  </a>
+                  <a href="{{ p.pdf_poliza }}" target="_blank" class="btn btn-primary btn-sm">PDF</a>
                   {% elif p.pdf_url %}
-                  <a href="{{ p.pdf_url }}" target="_blank" class="btn btn-primary btn-sm">
-                    PDF
-                  </a>
+                  <a href="{{ p.pdf_url }}" target="_blank" class="btn btn-primary btn-sm">PDF</a>
                   {% endif %}
 
                   {% if p.cuponera_pdf %}
-                  <a href="{{ p.cuponera_pdf }}" target="_blank" class="btn btn-secondary btn-sm">
-                    Cuponera
-                  </a>
+                  <a href="{{ p.cuponera_pdf }}" target="_blank" class="btn btn-secondary btn-sm">Cuponera</a>
                   {% elif p.cuponera_url %}
-                  <a href="{{ p.cuponera_url }}" target="_blank" class="btn btn-secondary btn-sm">
-                    Cuponera
-                  </a>
+                  <a href="{{ p.cuponera_url }}" target="_blank" class="btn btn-secondary btn-sm">Cuponera</a>
                   {% endif %}
 
                   {% if cliente.permite_whatsapp and cliente.telefono_normalizado %}
@@ -367,7 +362,6 @@
                      target="_blank" class="btn-whatsapp btn-whatsapp-sm">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.523 5.845L.057 23.547a.75.75 0 0 0 .918.918l5.702-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.505-5.23-1.385l-.374-.217-3.884.998.998-3.884-.217-.374A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
                     </svg>
                     WhatsApp
                   </a>
@@ -440,8 +434,110 @@
   </div>
   {% endfor %}
 </div>
+{% endif %}
+
+<!-- 🔥 SECCIÓN 2: HISTORIAL DE PÓLIZAS -->
+{% if lista_polizas_historicas %}
+<div class="section-header">
+  <h3>⏱️ Historial de Pólizas (Renovadas / Anuladas)</h3>
+</div>
+{% regroup lista_polizas_historicas by policy_number as grupos_historicas %}
+<div class="polizas-detalle" style="opacity: 0.85;">
+  {% for grupo in grupos_historicas %}
+  <div class="poliza-grupo">
+
+    <div class="grupo-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      <span>Póliza <span class="grupo-number">{{ grupo.grouper }}</span></span>
+    </div>
+
+    {% for p in grupo.list %}
+    <div class="poliza-fila">
+      <div class="table-wrap" style="border-radius:0; border:none; box-shadow:none;">
+        <table class="tabla-detalle">
+          <thead>
+            <tr>
+              <th>N° Póliza</th>
+              <th>Compañía</th>
+              <th>Vehículo / Patente</th>
+              <th>Inicio</th>
+              <th>Vencimiento</th>
+              <th>Pago</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a href="/polizas/{{ p.id }}/" class="link-poliza">
+                  {{ p.policy_number }}
+                </a>
+              </td>
+              <td>{{ p.company }}</td>
+              <td>
+                {% if p.patente %}
+                  <div style="font-family: var(--font-mono); font-weight: 700; color: #4ade80; font-size: 12px;">{{ p.patente }}</div>
+                  {% if p.marca or p.modelo %}
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ p.marca|default:"" }} {{ p.modelo|default:"" }}</div>
+                  {% endif %}
+                {% else %}
+                  <span style="color: var(--text-muted);">{{ p.risk_type.nombre|default:"—" }}</span>
+                {% endif %}
+              </td>
+              <td>{{ p.start_date }}</td>
+              <td>{{ p.end_date }}</td>
+              <td>{{ p.get_forma_pago_display }}</td>
+              <td>
+                {% if p.estado == "RENOVADA" %}
+                  <span class="badge badge-blue">RENOVADA</span>
+                {% elif p.estado == "ANULADA" %}
+                  <span class="badge badge-red">ANULADA</span>
+                {% else %}
+                  <span class="badge badge-gray">{{ p.estado }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="acciones">
+                  <a href="/polizas/{{ p.id }}/" class="btn btn-ghost btn-sm">Ver</a>
+                  
+                  {% if p.pdf_poliza %}
+                  <a href="{{ p.pdf_poliza }}" target="_blank" class="btn btn-primary btn-sm">PDF</a>
+                  {% elif p.pdf_url %}
+                  <a href="{{ p.pdf_url }}" target="_blank" class="btn btn-primary btn-sm">PDF</a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 
 <style>
+.section-header {
+  margin: 36px 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(52,211,100,0.15);
+}
+.section-header h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #ecfdf5;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .link-poliza {
   color: #4ade80;
   font-weight: 600;
