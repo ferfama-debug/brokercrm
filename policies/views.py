@@ -12,28 +12,28 @@ import requests
 from clients.models import Client
 from .models import Company, EmailLog, Payment, Policy, PolicyType, RiskType
 
-print("🔥 Integración Supabase inicializada")[cite: 1]
+print("🔥 Integración Supabase inicializada")
 
 
 def get_subir_archivo():
     try:
         from core.supabase_client import subir_archivo_supabase
 
-        print("✅ Supabase client cargado correctamente")[cite: 1]
+        print("✅ Supabase client cargado correctamente")
         return subir_archivo_supabase
     except Exception as e:
-        print("⚠️ Supabase no disponible:", e)[cite: 1]
+        print("⚠️ Supabase no disponible:", e)
         return None
 
 
 def procesar_archivo(file, carpeta, cliente=None):
     if not file:
-        print(f"⚠️ No se recibió archivo para carpeta: {carpeta}")[cite: 1]
+        print(f"⚠️ No se recibió archivo para carpeta: {carpeta}")
         return None
 
     print(
         f"📂 Procesando archivo | carpeta={carpeta} | nombre={file.name} | size={getattr(file, 'size', 'N/A')} | cliente={cliente}"
-    )[cite: 1]
+    )
 
     subir_archivo = get_subir_archivo()
 
@@ -43,13 +43,13 @@ def procesar_archivo(file, carpeta, cliente=None):
                 resultado = subir_archivo(file, carpeta, cliente=cliente)
             else:
                 resultado = subir_archivo(file, carpeta)
-            print(f"✅ Resultado subida ({carpeta}):", resultado)[cite: 1]
+            print(f"✅ Resultado subida ({carpeta}):", resultado)
             return resultado
 
-        print(f"⚠️ No hay función de subida disponible para {carpeta}")[cite: 1]
+        print(f"⚠️ No hay función de subida disponible para {carpeta}")
         return None
     except Exception as e:
-        print(f"❌ Error subiendo archivo ({carpeta}):", e)[cite: 1]
+        print(f"❌ Error subiendo archivo ({carpeta}):", e)
         return None
 
 
@@ -69,10 +69,10 @@ def descargar_adjunto_desde_url(url, nombre_archivo):
 
         print(
             f"⚠️ No se pudo descargar adjunto {nombre_archivo}: {response.status_code}"
-        )[cite: 1]
+        )
         return None
     except Exception as e:
-        print(f"⚠️ Error descargando adjunto {nombre_archivo}: {e}")[cite: 1]
+        print(f"⚠️ Error descargando adjunto {nombre_archivo}: {e}")
         return None
 
 
@@ -99,9 +99,9 @@ def eliminar_archivo_supabase_por_url(url):
                             "apikey": supabase_key,
                         }
                         resp = requests.delete(delete_endpoint, headers=headers, timeout=10)
-                        print(f"🗑️ Supabase delete resp ({bucket}/{path}):", resp.status_code, resp.text)[cite: 1]
+                        print(f"🗑️ Supabase delete resp ({bucket}/{path}):", resp.status_code, resp.text)
     except Exception as e:
-        print("⚠️ Error eliminando archivo de Supabase:", e)[cite: 1]
+        print("⚠️ Error eliminando archivo de Supabase:", e)
 
 
 def enviar_email_con_fallback(
@@ -144,10 +144,10 @@ def enviar_email_con_fallback(
         enviados = email.send(fail_silently=False)
 
         if enviados == 1:
-            print("✅ EMAIL enviado por SMTP con copia oculta a Fuerza Natural")[cite: 1]
+            print("✅ EMAIL enviado por SMTP con copia oculta a Fuerza Natural")
             return True, "smtp"
     except Exception as smtp_error:
-        print("ERROR EMAIL SMTP:", smtp_error)[cite: 1]
+        print("ERROR EMAIL SMTP:", smtp_error)
 
         resend_api_key = getattr(settings, "RESEND_API_KEY", None)
         if not resend_api_key:
@@ -179,17 +179,17 @@ def enviar_email_con_fallback(
             )
 
             if response.status_code in (200, 201):
-                print("✅ EMAIL enviado por Resend con copia oculta a Fuerza Natural")[cite: 1]
+                print("✅ EMAIL enviado por Resend con copia oculta a Fuerza Natural")
                 return True, "resend"
 
-            print("ERROR EMAIL RESEND:", response.status_code, response.text)[cite: 1]
+            print("ERROR EMAIL RESEND:", response.status_code, response.text)
             return (
                 False,
                 f"SMTP falló ({smtp_error}) y Resend devolvió {response.status_code}: {response.text}",
             )
 
         except Exception as resend_error:
-            print("ERROR EMAIL RESEND EXCEPTION:", resend_error)[cite: 1]
+            print("ERROR EMAIL RESEND EXCEPTION:", resend_error)
             return (
                 False,
                 f"SMTP falló ({smtp_error}) y Resend también falló ({resend_error})",
@@ -502,7 +502,7 @@ def crear_poliza(request):
             except Exception:
                 pass
 
-        print("===== DEBUG SUBIDA POLIZA (CREAR) =====")[cite: 1]
+        print("===== DEBUG SUBIDA POLIZA (CREAR) =====")
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
@@ -648,7 +648,7 @@ def editar_poliza(request, poliza_id):
                 },
             )
 
-        print("===== DEBUG SUBIDA POLIZA (EDITAR) =====")[cite: 1]
+        print("===== DEBUG SUBIDA POLIZA (EDITAR) =====")
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
@@ -755,7 +755,7 @@ def renovar_poliza(request, poliza_id):
                 },
             )
 
-        print("===== DEBUG SUBIDA POLIZA (RENOVAR) =====")[cite: 1]
+        print("===== DEBUG SUBIDA POLIZA (RENOVAR) =====")
         archivo_poliza = request.FILES.get("pdf_poliza")
         archivo_cuponera = request.FILES.get("cuponera_pdf")
 
@@ -853,7 +853,7 @@ def marcar_pago(request, pago_id):
         )
 
     if request.method == "POST":
-        print("===== DEBUG SUBIDA COMPROBANTE =====")[cite: 1]
+        print("===== DEBUG SUBIDA COMPROBANTE =====")
         archivo_comprobante = request.FILES.get("comprobante")
         
         if archivo_comprobante:
