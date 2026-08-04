@@ -802,9 +802,6 @@ def renovar_poliza(request, poliza_id):
 
         nueva_poliza.save()
 
-        poliza.estado = "RENOVADA"
-        poliza.save()
-
         if nueva_poliza.forma_pago == "CUPONERA":
             base_date = (
                 nueva_poliza.fecha_primer_vencimiento_cuponera
