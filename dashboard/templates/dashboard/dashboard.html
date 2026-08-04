@@ -134,11 +134,11 @@
                     </td>
                     <td style="text-align: right;">
                         {% if log.estado == "ENVIADO" %}
-                            <span class="badge badge-green" style="font-size: 11px;">✔ Enviado</span>
+                            <span class="badge badge-green" style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">✔ Enviado</span>
                         {% elif log.estado == "ERROR" %}
-                            <span class="badge badge-red" style="font-size: 11px; cursor: help;" title="{{ log.error }}">❌ Error</span>
+                            <span class="badge badge-red" style="font-size: 11px; cursor: help; display: inline-flex; align-items: center; gap: 4px;" title="{{ log.error }}">❌ Error</span>
                         {% else %}
-                            <span class="badge badge-gray" style="font-size: 11px;">{{ log.estado }}</span>
+                            <span class="badge badge-gray" style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">{{ log.estado }}</span>
                         {% endif %}
                     </td>
                 </tr>
