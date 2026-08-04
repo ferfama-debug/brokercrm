@@ -128,28 +128,67 @@ td a.btn {
     margin-bottom: 4px;
 }
 /* ============================= */
-/* ESTADOS DE POLIZA */
+/* ESTADOS DE POLIZA Y BADGES    */
 /* ============================= */
-.estado-activa {
-    background: #e8f5e9;
-    color: #2e7d32;
+.estado-activa, .badge-green {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
     font-weight: bold;
     padding: 4px 8px;
     border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
 }
-.estado-vencer {
-    background: #fff3e0;
-    color: #ef6c00;
+.estado-vencer, .badge-yellow {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
     font-weight: bold;
     padding: 4px 8px;
     border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
 }
-.estado-vencida {
-    background: #ffebee;
-    color: #c62828;
+.estado-vencida, .badge-red {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
     font-weight: bold;
     padding: 4px 8px;
     border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+.badge-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+.badge-gray {
+    background: rgba(156, 163, 175, 0.15);
+    color: #d1d5db;
+    border: 1px solid rgba(156, 163, 175, 0.3);
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
 }
 /* ============================= */
 /* GRUPO POLIZA */
