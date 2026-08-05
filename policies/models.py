@@ -305,13 +305,13 @@ class Policy(models.Model):
         return (
             f"Hola {cliente}\n\n"
             "Esperamos que te encuentres muy bien.\n\n"
-            "Te escribimos desde *Fuerza Natural Broker de Seguros* para enviarte la documentación de tu póliza.\n\n"
+            "Te escribimos desde Fuerza Natural Broker de Seguros para enviarte la documentación de tu póliza.\n\n"
             f"Póliza N°: {numero_poliza}\n"
             f"Compañía: {compania}\n\n"
             f"Póliza: {link_pdf}\n\n"
             "Si tenés alguna consulta o necesitás asistencia, estamos para ayudarte.\n\n"
             "Saludos cordiales,\n"
-            "*Fuerza Natural Broker de Seguros*"
+            "Fuerza Natural Broker de Seguros"
         )
 
     def whatsapp_link_poliza(self):
