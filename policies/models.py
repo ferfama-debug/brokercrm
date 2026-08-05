@@ -296,13 +296,40 @@ class Policy(models.Model):
                 return str(self.cuponera_pdf)
         return None
 
+    def mensaje_whatsapp_poliza(self):
+        cliente = self.client.nombre_completo()
+        numero_poliza = self.policy_number
+        compania = self.company or (self.company_obj.nombre if self.company_obj else "")
+        link_pdf = self.pdf_url or ""
+        
+        # Emojis seguros en Unicode para evitar problemas de codificación
+        wave = "\U0001F44B"          # 👋
+        pin = "\U0001F4CC"           # 📌
+        building = "\U0001F3E2"      # 🏢
+        document = "\U0001F4C4"      # 📄
+
+        return (
+            f"Hola {cliente} {wave}\n\n"
+            "Esperamos que te encuentres muy bien.\n\n"
+            "Te escribimos desde *Fuerza Natural Broker de Seguros* para enviarte la documentación de tu póliza.\n\n"
+            f"{pin} Póliza N°: {numero_poliza}\n"
+            f"{building} Compañía: {compania}\n\n"
+            f"{document} Póliza: {link_pdf}\n\n"
+            "Si tenés alguna consulta o necesitás asistencia, estamos para ayudarte.\n\n"
+            "Saludos cordiales,\n"
+            "*Fuerza Natural Broker de Seguros*"
+        )
+
+    def whatsapp_link_poliza(self):
+        telefono = getattr(self.client, "telefono", "")
+        mensaje = self.mensaje_whatsapp_poliza().replace(" ", "%20")
+        return f"https://wa.me/{telefono}?text={mensaje}"
+
     @property
     def estado(self):
         if self.anulada:
             return "ANULADA"
             
-        # --- NUEVA LÓGICA DE RENOVACIÓN ---
-        # Si existe alguna póliza que apunte a esta como 'renovacion_de', pasa a ser histórica.
         if self.renovaciones.exists():
             return "RENOVADA"
 
