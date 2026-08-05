@@ -10,6 +10,17 @@ from .services import generar_todas_las_alertas
 @login_required
 def alertas(request):
 
+    # 🟢 LIMPIEZA AUTOMÁTICA: Marcar como resueltas las alertas de pólizas que ya fueron renovadas
+    polizas_renovadas_ids_all = Policy.objects.filter(
+        renovacion_de__isnull=False
+    ).values_list("renovacion_de", flat=True)
+    
+    if polizas_renovadas_ids_all.exists():
+        Alert.objects.filter(
+            policy_id__in=polizas_renovadas_ids_all,
+            resolved=False
+        ).update(resolved=True)
+
     generar_todas_las_alertas()
 
     # 🟢 SOLUCIÓN ESTÁNDAR: Buscamos los IDs de pólizas que SÍ tienen cuotas pagadas
