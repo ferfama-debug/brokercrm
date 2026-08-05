@@ -301,20 +301,14 @@ class Policy(models.Model):
         numero_poliza = self.policy_number
         compania = self.company or (self.company_obj.nombre if self.company_obj else "")
         link_pdf = self.pdf_url or ""
-        
-        # Emojis seguros en Unicode para evitar problemas de codificación
-        wave = "\U0001F44B"          # 👋
-        pin = "\U0001F4CC"           # 📌
-        building = "\U0001F3E2"      # 🏢
-        document = "\U0001F4C4"      # 📄
 
         return (
-            f"Hola {cliente} {wave}\n\n"
+            f"Hola {cliente}\n\n"
             "Esperamos que te encuentres muy bien.\n\n"
             "Te escribimos desde *Fuerza Natural Broker de Seguros* para enviarte la documentación de tu póliza.\n\n"
-            f"{pin} Póliza N°: {numero_poliza}\n"
-            f"{building} Compañía: {compania}\n\n"
-            f"{document} Póliza: {link_pdf}\n\n"
+            f"Póliza N°: {numero_poliza}\n"
+            f"Compañía: {compania}\n\n"
+            f"Póliza: {link_pdf}\n\n"
             "Si tenés alguna consulta o necesitás asistencia, estamos para ayudarte.\n\n"
             "Saludos cordiales,\n"
             "*Fuerza Natural Broker de Seguros*"
@@ -442,21 +436,15 @@ class Payment(models.Model):
         cliente = self.policy.client.nombre_completo()
         numero_poliza = self.policy.policy_number
         fecha = self.fecha_vencimiento.strftime("%d/%m/%Y")
-        
-        # Emojis seguros en Unicode para evitar problemas de codificación
-        wave = "\U0001F44B"          # 👋
-        pin = "\U0001F4CC"           # 📌
-        card = "\U0001F4B3"          # 💳
-        calendar = "\U0001F4C5"      # 📅
 
         return (
-            f"Hola {cliente} {wave}\n\n"
+            f"Hola {cliente}\n\n"
             "Esperamos que te encuentres muy bien.\n\n"
             "Te escribimos desde *Fuerza Natural Broker de Seguros* para"
             " recordarte el próximo vencimiento de tu póliza.\n\n"
-            f"{pin} Póliza N°: {numero_poliza}\n"
-            f"{card} Cuota N°: {self.numero_cuota}\n"
-            f"{calendar} Vencimiento: {fecha}\n\n"
+            f"Póliza N°: {numero_poliza}\n"
+            f"Cuota N°: {self.numero_cuota}\n"
+            f"Vencimiento: {fecha}\n\n"
             "Te recomendamos realizar el pago antes de la fecha indicada para"
             " evitar cualquier interrupción en tu cobertura.\n\n"
             "Una vez realizado, podés enviarnos el comprobante por este medio"
