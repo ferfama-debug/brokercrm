@@ -272,10 +272,10 @@
   </div>
 </div>
 
-<!-- 🔥 SECCIÓN 1: PÓLIZAS VIGENTES -->
+<!-- SECCIÓN 1: PÓLIZAS VIGENTES -->
 {% if lista_polizas_vigentes %}
 <div class="section-header" style="margin-top: 0;">
-  <h3>🟢 Pólizas Vigentes</h3>
+  <h3>Polizas Vigentes</h3>
 </div>
 <div class="polizas-detalle">
   {% for p in lista_polizas_vigentes %}
@@ -355,7 +355,7 @@
                   {% endif %}
 
                   {% if cliente.permite_whatsapp and cliente.telefono_normalizado %}
-                  <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }},%20te%20env%C3%ADo%20los%20datos%20de%20tu%20p%C3%B3liza%20N%C2%BA%20{{ p.policy_number }}%20de%20{{ p.company }}.%0A%0AP%C3%B3liza:%20{{ p.pdf_url|default:p.pdf_poliza|default:'' }}{% if p.forma_pago == 'CUPONERA' and p.cuponera_url %}%0ACuponera:%20{{ p.cuponera_url }}{% endif %}%0A%0ACualquier%20consulta%20estoy%20a%20tu%20disposici%C3%B3n.%0A%C2%A1Saludos!" 
+                  <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }},%20te%20escribo%20de%20Fuerza%20Natural%20Broker%20para%20enviarte%20los%20datos%20de%20tu%20p%C3%B3liza%20N%C2%BA%20{{ p.policy_number }}%20de%20la%20aseguradora%20{{ p.company }}{% if p.patente %}%20(Veh%C3%ADculo:%20{{ p.patente }}){% endif %}.%0A%0AP%C3%B3liza:%20{{ p.pdf_url|default:p.pdf_poliza|default:'' }}{% if p.forma_pago == 'CUPONERA' and p.cuponera_url %}%0ACuponera:%20{{ p.cuponera_url }}{% endif %}%0A%0ACualquier%20consulta%20estoy%20a%20tu%20disposici%C3%B3n.%0A%C2%A1Saludos!" 
                      target="_blank" class="btn-whatsapp btn-whatsapp-sm">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -416,7 +416,7 @@
                 {% if pago.estado != "PAGADO" %}
                   <a href="/polizas/pago/{{ pago.id }}/" class="btn btn-secondary btn-sm">Cargar</a>
                 {% else %}
-                  <span class="badge badge-green">✔ Listo</span>
+                  <span class="badge badge-green">Listo</span>
                 {% endif %}
               </td>
             </tr>
@@ -432,10 +432,10 @@
 </div>
 {% endif %}
 
-<!-- 🔥 SECCIÓN 2: HISTORIAL DE PÓLIZAS -->
+<!-- SECCIÓN 2: HISTORIAL DE PÓLIZAS -->
 {% if lista_polizas_historicas %}
 <div class="section-header">
-  <h3>⏱️ Historial de Pólizas (Renovadas / Anuladas)</h3>
+  <h3>Historial de Polizas (Renovadas / Anuladas)</h3>
 </div>
 <div class="polizas-detalle" style="opacity: 0.85;">
   {% for p in lista_polizas_historicas %}
@@ -777,7 +777,7 @@
 .grupo-header svg { width: 14px; height: 14px; flex-shrink: 0; }
 .grupo-number { color: var(--green-400); font-family: var(--font-mono); }
 
-/* TABLA DETALLE — colores fijos para ganarle al crm.css */
+/* TABLA DETALLE */
 .tabla-detalle { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 .tabla-detalle thead th {
