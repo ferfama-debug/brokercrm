@@ -1,15 +1,16 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from clients.models import Client
-from policies.models import (
-    Policy,
-    Payment,
-)  # 👈 MODIFICADO: Sacamos EmailLog de acá para evitar el crash al bootear
-from accounts.models import User
 from datetime import date, timedelta
+from django.apps import apps  # 👈 AGREGADO: Motor de carga desacoplada
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
-from django.apps import apps  # 👈 AGREGADO: Motor de carga desacoplada
+from django.shortcuts import render
+
+from accounts.models import User
+from clients.models import Client
+from policies.models import (
+    Payment,
+    Policy,
+)  # 👈 MODIFICADO: Sacamos EmailLog de acá para evitar el crash al bootear
 
 
 @login_required
@@ -27,8 +28,12 @@ def home(request):
     else:
         # 🟢 CIRUGÍA APLICADA: Filtramos exclusivamente los datos del productor logueado
         clientes_qs = Client.objects.filter(producer=request.user)
-        policies_qs = Policy.objects.filter(client__producer=request.user).select_related("client")
-        pagos_qs = Payment.objects.filter(policy__client__producer=request.user).select_related("policy", "policy__client")
+        policies_qs = Policy.objects.filter(
+            client__producer=request.user
+        ).select_related("client")
+        pagos_qs = Payment.objects.filter(
+            policy__client__producer=request.user
+        ).select_related("policy", "policy__client")
         usuarios = 1
 
     # 🟢 PROTOCOLO DE MÁXIMA SEGURIDAD BLINDADO: Carga en caliente y precarga selectiva de relaciones reales
@@ -70,8 +75,14 @@ def home(request):
     vencen_15 = 0
     vencen_30 = 0
 
-    # Filtramos para que el CRM de renovaciones no muestre pólizas que ya fueron anuladas
-    policies_para_alertas = policies_qs.filter(anulada=False)
+    # Filtramos para que el CRM de renovaciones no muestre pólizas anuladas ni las que ya fueron renovadas
+    polizas_renovadas_ids = Policy.objects.filter(
+        renovacion_de__isnull=False
+    ).values("renovacion_de")
+    policies_para_alertas = (
+        policies_qs.filter(anulada=False)
+        .exclude(id__in=polizas_renovadas_ids)
+    )
 
     for p in policies_para_alertas:
         if not p.end_date:
@@ -167,7 +178,9 @@ def home(request):
                 clientes_agrupados[cid]["compania"] = c["compania_texto"]
                 clientes_agrupados[cid]["n_poliza"] = c["numero"]
 
-    clientes_llamar = sorted(clientes_agrupados.values(), key=lambda x: x["dias"])
+    clientes_llamar = sorted(
+        clientes_agrupados.values(), key=lambda x: x["dias"]
+    )
     clientes_hoy = len(clientes_llamar)
 
     # 🔥 COBRANZAS (Intacto)
@@ -183,13 +196,16 @@ def home(request):
         fecha_pago__isnull=True,
     ).count()
     deuda_total = (
-        pagos_qs.filter(estado="VENCIDO").aggregate(total=Sum("monto"))["total"] or 0
+        pagos_qs.filter(estado="VENCIDO").aggregate(total=Sum("monto"))[
+            "total"
+        ]
+        or 0
     )
     cuotas_vencidas = pagos_qs.filter(estado="VENCIDO").count()
     proximos_pagos = (
-        pagos_qs.filter(estado="PENDIENTE", fecha_vencimiento__gte=hoy).aggregate(
-            total=Sum("monto")
-        )["total"]
+        pagos_qs.filter(
+            estado="PENDIENTE", fecha_vencimiento__gte=hoy
+        ).aggregate(total=Sum("monto"))["total"]
         or 0
     )
     cuotas_pendientes = pagos_qs.filter(
@@ -200,9 +216,9 @@ def home(request):
     )
 
     # ⭐ SCORE (Intacto)
-    clientes_score_db = clientes_qs.annotate(total_polizas=Count("policy")).order_by(
-        "-total_polizas"
-    )
+    clientes_score_db = clientes_qs.annotate(
+        total_polizas=Count("policy")
+    ).order_by("-total_polizas")
     clientes_score = []
     for c in clientes_score_db:
         if c.total_polizas >= 4:
