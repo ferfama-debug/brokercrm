@@ -59,11 +59,6 @@
       WhatsApp
     </a>
 
-    <a href="https://wa.me/{{ cliente.telefono_normalizado }}?text=Hola%20{{ cliente.first_name }},%20te%20contacto%20para%20hacer%20seguimiento%20de%20tu%20seguro."
-       target="_blank" class="btn btn-ghost">
-      Seguimiento
-    </a>
-
     <form method="post" action="{% url 'clients:marcar_contactado' cliente.id %}" style="display:inline;">
       {% csrf_token %}
       <button type="submit" class="btn btn-secondary">
