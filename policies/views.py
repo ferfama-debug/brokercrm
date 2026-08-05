@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 import os
+import urllib.parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
@@ -360,6 +361,33 @@ Fuerza Natural Broker
 """
 
     return asunto, mensaje_texto, mensaje_html
+
+
+# 🟢 AGREGADO PARA WHATSAPP AMIGABLE EN POLICY (o inyectado de forma segura)
+def generar_whatsapp_url_poliza(poliza):
+    cliente = poliza.client
+    if not cliente or not cliente.phone:
+        return "#"
+    
+    telefono = ''.join(filter(str.isdigit, str(cliente.phone)))
+    nombre = f"{cliente.first_name or ''} {cliente.last_name or ''}".strip()
+    if not nombre:
+        nombre = "Cliente"
+        
+    aseguradora = poliza.company or "tu compañía"
+    
+    texto = f"Hola *{nombre}*! 👋 Te escribimos desde *Fuerza Natural Broker* de Seguros.\n\n" \
+            f"Te compartimos la documentación oficial correspondiente a tu póliza N° *{poliza.policy_number or 'S/N'}* de *{aseguradora}*:\n\n"
+    
+    if poliza.pdf_poliza:
+        texto += f"📄 *Ver Póliza Digital (PDF):*\n{poliza.pdf_poliza}\n\n"
+        
+    if poliza.cuponera_pdf:
+        texto += f"💳 *Ver Cuponera de Pagos (PDF):*\n{poliza.cuponera_pdf}\n\n"
+        
+    texto += "Ante cualquier duda o consulta, estamos a tu disposición. ¡Que tengas un excelente día! 😊"
+    
+    return f"https://wa.me/{telefono}?text={urllib.parse.quote(texto)}"
 
 
 @login_required
