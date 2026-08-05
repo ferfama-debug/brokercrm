@@ -415,14 +415,21 @@ class Payment(models.Model):
         cliente = self.policy.client.nombre_completo()
         numero_poliza = self.policy.policy_number
         fecha = self.fecha_vencimiento.strftime("%d/%m/%Y")
+        
+        # Emojis seguros en Unicode para evitar problemas de codificación
+        wave = "\U0001F44B"          # 👋
+        pin = "\U0001F4CC"           # 📌
+        card = "\U0001F4B3"          # 💳
+        calendar = "\U0001F4C5"      # 📅
+
         return (
-            f"Hola {cliente} 👋\n\n"
+            f"Hola {cliente} {wave}\n\n"
             "Esperamos que te encuentres muy bien.\n\n"
             "Te escribimos desde *Fuerza Natural Broker de Seguros* para"
             " recordarte el próximo vencimiento de tu póliza.\n\n"
-            f"📌 Póliza N°: {numero_poliza}\n"
-            f"💳 Cuota N°: {self.numero_cuota}\n"
-            f"📅 Vencimiento: {fecha}\n\n"
+            f"{pin} Póliza N°: {numero_poliza}\n"
+            f"{card} Cuota N°: {self.numero_cuota}\n"
+            f"{calendar} Vencimiento: {fecha}\n\n"
             "Te recomendamos realizar el pago antes de la fecha indicada para"
             " evitar cualquier interrupción en tu cobertura.\n\n"
             "Una vez realizado, podés enviarnos el comprobante por este medio"
