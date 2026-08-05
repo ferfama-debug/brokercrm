@@ -44,12 +44,19 @@ def generate_expiration_alerts():
     dias_aviso = [30, 15]
     limite = today + timedelta(days=30)
 
-    # 🟢 PROTECCIÓN ANTI-SPAM: Excluimos las pólizas que ya recibieron su aviso hoy
+    # 🟢 OBTENEMOS IDs DE PÓLIZAS RENOVADAS PARA EXCLUIRLAS
+    polizas_renovadas_ids = Policy.objects.filter(
+        renovacion_de__isnull=False
+    ).values_list("renovacion_de", flat=True)
+
+    # 🟢 PROTECCIÓN ANTI-SPAM Y EXCLUSIÓN DE RENOVADAS
     policies = Policy.objects.filter(
         end_date__gte=today,
         end_date__lte=limite,
     ).exclude(
         ultimo_envio_vencimiento=today
+    ).exclude(
+        id__in=polizas_renovadas_ids
     ).select_related("client", "client__producer")
 
     for policy in policies:
@@ -80,11 +87,20 @@ def generate_expiration_alerts():
         if days in dias_aviso and policy.client.email:
             enviar_mail_vencimiento_poliza(policy, days)
 
+    # Limpieza por vencimiento de plazo antiguo
     Alert.objects.filter(
         tipo="VENCIMIENTO",
         resolved=False,
         policy__end_date__lt=today - timedelta(days=30),
     ).update(resolved=True)
+
+    # 🟢 LIMPIEZA INMEDIATA: Resolver alertas de pólizas que ya fueron renovadas
+    if polizas_renovadas_ids.exists():
+        Alert.objects.filter(
+            tipo="VENCIMIENTO",
+            resolved=False,
+            policy_id__in=polizas_renovadas_ids,
+        ).update(resolved=True)
 
 
 def enviar_mail_vencimiento_poliza(policy, dias):
