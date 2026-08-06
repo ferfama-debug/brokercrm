@@ -317,6 +317,15 @@ def generate_debt_alerts():
 
 def generate_birthday_alerts():
     today = date.today()
+    
+    # 🟢 LIMPIEZA AUTOMÁTICA: Resolver cualquier alerta de cumpleaños que no sea de hoy
+    Alert.objects.filter(
+        tipo="CUMPLEANIOS",
+        resolved=False,
+    ).exclude(
+        created_at__date=today
+    ).update(resolved=True)
+
     clientes = Client.objects.filter(
         fecha_nacimiento__day=today.day,
         fecha_nacimiento__month=today.month,
