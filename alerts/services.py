@@ -41,7 +41,7 @@ def guardar_alerta_segura(user, tipo, policy=None, message="", level="MEDIA"):
 
 def generate_expiration_alerts():
     today = date.today()
-    dias_aviso = [30, 15]
+    dias_aviso = [5]  # 🟢 Modificado a 5 días para que el correo al cliente salga únicamente con este margen
     limite = today + timedelta(days=30)
 
     # 🟢 LIMPIEZA MASIVA INICIAL: Resolver automáticamente cualquier alerta de vencimiento 
