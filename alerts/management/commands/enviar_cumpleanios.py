@@ -2,6 +2,8 @@ from django.core.management.base import BaseCommand
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 from clients.models import Client
 from alerts.models import Alert
@@ -40,17 +42,27 @@ class Command(BaseCommand):
                 omitidos += 1
                 continue
 
+            # 🟢 Validación estricta del formato del correo electrónico antes de procesar
+            try:
+                validate_email(cliente.email)
+            except ValidationError:
+                self.stderr.write(
+                    f"Email inválido detectado para {cliente.first_name} {cliente.last_name}: {cliente.email}"
+                )
+                errores += 1
+                continue
+
             mensaje = (
                 f"Cumpleaños {hoy.year}: "
                 f"Hoy es el cumpleaños de {cliente.first_name} {cliente.last_name}"
             )
 
-            # 🟢 CORRECCIÓN QUIRÚRGICA: Solo omitimos si YA se generó una alerta HOY para este cumpleaños
+            # 🟢 Control estricto para evitar duplicados en el día
             ya_enviado = Alert.objects.filter(
                 user=cliente.producer,
                 tipo="CUMPLEANIOS",
                 message=mensaje,
-                created_at__date=hoy,  # 👈 Control estricto del día, ignorando alertas históricas
+                created_at__date=hoy,
             ).exists()
 
             if ya_enviado:
@@ -71,8 +83,8 @@ class Command(BaseCommand):
 
                         <div style="background:#0f172a; padding:24px 20px; text-align:center;">
                             <img src="https://crm.fuerzanaturalbroker.com/static/images/img/logo.png"
-                                 alt="Fuerza Natural Broker"
-                                 style="max-width:200px; display:block;margin:0 auto;" />
+                                   alt="Fuerza Natural Broker"
+                                   style="max-width:200px; display:block;margin:0 auto;" />
                         </div>
 
                         <div style="padding:28px 24px; color:#1f2937;">
@@ -120,13 +132,12 @@ class Command(BaseCommand):
                     "Fuerza Natural Broker"
                 )
 
-                # 🟢 COPIA OCULTA (BCC): Agregamos tu mail para que te llegue el respaldo exacto
                 email = EmailMultiAlternatives(
                     subject=f"🎉 ¡Feliz cumpleaños {cliente.first_name}!",
                     body=text_content,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[cliente.email],
-                    bcc=["fuerzanaturalbroker@gmail.com"],  # 👈 Te cae una copia oculta a vos
+                    bcc=["fuerzanaturalbroker@gmail.com"],
                 )
 
                 email.attach_alternative(html_content, "text/html")
