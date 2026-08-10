@@ -375,7 +375,6 @@ def generar_whatsapp_url_poliza(poliza):
         
     aseguradora = poliza.company or "tu compañía"
     
-    # Emojis codificados de forma segura mediante Unicode para evitar conflictos de codificación
     wave = "\U0001F44B"      # 👋
     file_doc = "\U0001F4C4"  # 📄
     card = "\U0001F4B3"      # 💳
@@ -596,7 +595,6 @@ def crear_poliza(request):
             renovacion_de=renovacion_de_obj,
             pdf_poliza=pdf_url or None,
             cuponera_pdf=cuponera_url or None,
-            estado="ACTIVA",
         )
 
         nueva_poliza.save()
