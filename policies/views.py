@@ -368,7 +368,20 @@ def generar_whatsapp_url_poliza(poliza):
     if not cliente or not cliente.phone:
         return "#"
     
-    telefono = ''.join(filter(str.isdigit, str(cliente.phone)))
+    # Extraer solo los números del teléfono guardado
+    raw_phone = ''.join(filter(str.isdigit, str(cliente.phone)))
+    
+    # Limpiar prefijos erróneos y asegurar el formato internacional de Argentina (+54)
+    if raw_phone.startswith("54"):
+        telefono = raw_phone
+    else:
+        if raw_phone.startswith("0"):
+            raw_phone = raw_phone[1:]
+        if not raw_phone.startswith("54"):
+            telefono = f"54{raw_phone}"
+        else:
+            telefono = raw_phone
+
     nombre = f"{cliente.first_name or ''} {cliente.last_name or ''}".strip()
     if not nombre:
         nombre = "Cliente"
