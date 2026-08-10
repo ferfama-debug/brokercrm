@@ -371,19 +371,26 @@ def generar_whatsapp_url_poliza(poliza):
     # Extraer solo los números del teléfono guardado
     raw_phone = ''.join(filter(str.isdigit, str(cliente.phone)))
     
-    # Limpieza robusta para Argentina (incluyendo características locales como Santa Rosa)
+    if not raw_phone:
+        return "#"
+
+    # Limpieza estándar para Argentina (elimina 0 inicial de discado interurbano si lo tuviera)
+    if raw_phone.startswith("0"):
+        raw_phone = raw_phone[1:]
+
+    # Si ya incluye el código de país 54
     if raw_phone.startswith("54"):
         if raw_phone.startswith("549"):
             telefono = raw_phone
         else:
+            # Si tiene 54 pero le falta el 9 intermedio, se lo insertamos
             telefono = "549" + raw_phone[2:]
     else:
-        if raw_phone.startswith("0"):
-            raw_phone = raw_phone[1:]
-            
-        if raw_phone.startswith("54"):
-            telefono = raw_phone if raw_phone.startswith("549") else "549" + raw_phone[2:]
+        # Si el número viene con el 9 de celular local explícito
+        if raw_phone.startswith("9") and len(raw_phone) > 10:
+            telefono = "54" + raw_phone
         else:
+            # Validación inteligente para evitar duplicar el 9 si ya venía incorporado
             telefono = f"549{raw_phone}"
 
     nombre = f"{cliente.first_name or ''} {cliente.last_name or ''}".strip()
