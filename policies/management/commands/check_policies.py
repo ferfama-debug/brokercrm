@@ -10,7 +10,10 @@ from policies.models import Policy, Payment, EmailLog
 
 
 class Command(BaseCommand):
-    help = "Verifica pólizas y pagos próximos a vencer y envía emails con BCC de seguridad"
+    help = (
+        "Verifica pólizas y pagos próximos a vencer y envía emails respetando la"
+        " configuración del productor"
+    )
 
     def handle(self, *args, **kwargs):
         hoy = timezone.localdate()
@@ -30,7 +33,7 @@ class Command(BaseCommand):
                 end_date__in=fechas_objetivo,
                 email_vencimiento_enviado=False,
             )
-            .select_related("client")
+            .select_related("client", "client__producer")
             .order_by("end_date")
         )
 
@@ -50,6 +53,20 @@ class Command(BaseCommand):
                     self.stdout.write(
                         self.style.WARNING(
                             f"Póliza sin cliente asociado: {policy.policy_number}"
+                        )
+                    )
+                    omitidos += 1
+                    continue
+
+                # 🟢 VALIDACIÓN DEL PRODUCTOR
+                productor = cliente.producer
+                if productor and not getattr(
+                    productor, "enviar_emails_a_clientes", True
+                ):
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Omitido: El productor {productor} tiene deshabilitado"
+                            f" el envío de emails (Póliza: {policy.policy_number})"
                         )
                     )
                     omitidos += 1
@@ -97,7 +114,6 @@ class Command(BaseCommand):
                         },
                     )
 
-                    # 🟢 COPIA OCULTA (BCC): Para tu control en pólizas
                     email = EmailMultiAlternatives(
                         subject=asunto,
                         body=mensaje,
@@ -117,7 +133,6 @@ class Command(BaseCommand):
                         asunto=asunto,
                     )
 
-                    # 🟢 CORRECCIÓN QUIRÚRGICA: Quitamos update_fields para asegurar el guardado físico completo
                     policy.email_vencimiento_enviado = True
                     policy.save()
 
@@ -156,7 +171,7 @@ class Command(BaseCommand):
                 fecha_pago__isnull=True,
                 policy__forma_pago="CUPONERA",
             )
-            .select_related("policy", "policy__client")
+            .select_related("policy", "policy__client", "policy__client__producer")
             .order_by("fecha_vencimiento", "policy__policy_number", "numero_cuota")
         )
 
@@ -180,6 +195,20 @@ class Command(BaseCommand):
                     self.stdout.write(
                         self.style.WARNING(
                             f"Pago sin póliza o cliente asociado: cuota #{pago.numero_cuota}"
+                        )
+                    )
+                    omitidos += 1
+                    continue
+
+                # 🟢 VALIDACIÓN DEL PRODUCTOR PARA PAGOS
+                productor = cliente.producer
+                if productor and not getattr(
+                    productor, "enviar_emails_a_clientes", True
+                ):
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Omitido: El productor {productor} tiene deshabilitado"
+                            f" el envío de emails (Pago cuota {pago.numero_cuota})"
                         )
                     )
                     omitidos += 1
@@ -236,7 +265,6 @@ class Command(BaseCommand):
                         },
                     )
 
-                    # 🟢 COPIA OCULTA (BCC): Para tu control en cuponeras
                     email = EmailMultiAlternatives(
                         subject=asunto,
                         body=mensaje,
@@ -257,7 +285,6 @@ class Command(BaseCommand):
                         asunto=asunto,
                     )
 
-                    # 🟢 CORRECCIÓN QUIRÚRGICA: Guardado completo sin restricciones de columnas
                     pago.recordatorio_enviado = True
                     pago.save()
 
@@ -294,6 +321,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Chequeo completado. Enviados: {enviados}, Omitidos: {omitidos}, Errores: {errores}"
+                f"Chequeo completado. Enviados: {enviados}, Omitidos:"
+                f" {omitidos}, Errores: {errores}"
             )
         )
