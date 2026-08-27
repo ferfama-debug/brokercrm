@@ -12,7 +12,7 @@ from policies.models import Policy, Payment, EmailLog
 class Command(BaseCommand):
     help = (
         "Verifica pólizas y pagos próximos a vencer y envía emails respetando la"
-        " configuración del productor"
+        " configuración del productor (Verde: cliente + copia, Rojo: solo modo pruebas al broker)"
     )
 
     def handle(self, *args, **kwargs):
@@ -58,20 +58,6 @@ class Command(BaseCommand):
                     omitidos += 1
                     continue
 
-                # 🟢 VALIDACIÓN DEL PRODUCTOR
-                productor = cliente.producer
-                if productor and not getattr(
-                    productor, "enviar_emails_a_clientes", True
-                ):
-                    self.stdout.write(
-                        self.style.WARNING(
-                            f"Omitido: El productor {productor} tiene deshabilitado"
-                            f" el envío de emails (Póliza: {policy.policy_number})"
-                        )
-                    )
-                    omitidos += 1
-                    continue
-
                 if not cliente.email:
                     self.stdout.write(
                         self.style.WARNING(
@@ -80,6 +66,18 @@ class Command(BaseCommand):
                     )
                     omitidos += 1
                     continue
+
+                # 🟢 VERIFICACIÓN DEL INTERRUPTOR DEL PRODUCTOR
+                productor = cliente.producer
+                enviar_a_cliente = True
+                if productor and not getattr(productor, "enviar_emails_a_clientes", True):
+                    enviar_a_cliente = False
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Modo pruebas activado (Rojo) para el productor {productor}. "
+                            f"El correo de la póliza {policy.policy_number} se enviará solo de forma interna."
+                        )
+                    )
 
                 fecha_vencimiento = policy.end_date.strftime("%d/%m/%Y")
                 dias_restantes = (policy.end_date - hoy).days
@@ -114,12 +112,25 @@ class Command(BaseCommand):
                         },
                     )
 
+                    # 🟢 CONFIGURACIÓN DE DESTINATARIOS SEGÚN EL INTERRUPTOR
+                    if enviar_a_cliente:
+                        destinatario_final = cliente.email
+                        emails_to = [cliente.email]
+                        emails_bcc = ["fuerzanaturalbroker@gmail.com"]
+                        tipo_log_estado = "ENVIADO"
+                    else:
+                        # Si está en rojo, se envía únicamente al broker/productor como prueba
+                        destinatario_final = "fuerzanaturalbroker@gmail.com"
+                        emails_to = ["fuerzanaturalbroker@gmail.com"]
+                        emails_bcc = []
+                        tipo_log_estado = "ENVIADO_PRUEBA_ROJO"
+
                     email = EmailMultiAlternatives(
                         subject=asunto,
                         body=mensaje,
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[cliente.email],
-                        bcc=["fuerzanaturalbroker@gmail.com"],
+                        to=emails_to,
+                        bcc=emails_bcc,
                     )
                     email.attach_alternative(html_content, "text/html")
                     email.send()
@@ -128,17 +139,22 @@ class Command(BaseCommand):
                         policy=policy,
                         client=cliente,
                         tipo="VENCIMIENTO_POLIZA",
-                        estado="ENVIADO",
-                        destinatario=cliente.email,
+                        estado=tipo_log_estado,
+                        destinatario=destinatario_final,
                         asunto=asunto,
                     )
 
                     policy.email_vencimiento_enviado = True
                     policy.save()
 
-                    self.stdout.write(
-                        self.style.SUCCESS(f"Email de póliza enviado a {cliente.email}")
-                    )
+                    if enviar_a_cliente:
+                        self.stdout.write(
+                            self.style.SUCCESS(f"Email de póliza enviado a {cliente.email}")
+                        )
+                    else:
+                        self.stdout.write(
+                            self.style.SUCCESS(f"Email de prueba de póliza enviado al broker (Modo Rojo)")
+                        )
                     enviados += 1
 
                 except Exception as e:
@@ -200,20 +216,6 @@ class Command(BaseCommand):
                     omitidos += 1
                     continue
 
-                # 🟢 VALIDACIÓN DEL PRODUCTOR PARA PAGOS
-                productor = cliente.producer
-                if productor and not getattr(
-                    productor, "enviar_emails_a_clientes", True
-                ):
-                    self.stdout.write(
-                        self.style.WARNING(
-                            f"Omitido: El productor {productor} tiene deshabilitado"
-                            f" el envío de emails (Pago cuota {pago.numero_cuota})"
-                        )
-                    )
-                    omitidos += 1
-                    continue
-
                 if not cliente.email:
                     self.stdout.write(
                         self.style.WARNING(
@@ -222,6 +224,18 @@ class Command(BaseCommand):
                     )
                     omitidos += 1
                     continue
+
+                # 🟢 VERIFICACIÓN DEL INTERRUPTOR PARA PAGOS
+                productor = cliente.producer
+                enviar_a_cliente = True
+                if productor and not getattr(productor, "enviar_emails_a_clientes", True):
+                    enviar_a_cliente = False
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Modo pruebas activado (Rojo) para el productor {productor}. "
+                            f"El correo de cuota #{pago.numero_cuota} se enviará solo de forma interna."
+                        )
+                    )
 
                 fecha_vencimiento = pago.fecha_vencimiento.strftime("%d/%m/%Y")
                 dias_restantes = (pago.fecha_vencimiento - hoy).days
@@ -265,12 +279,24 @@ class Command(BaseCommand):
                         },
                     )
 
+                    # 🟢 CONFIGURACIÓN DE DESTINATARIOS SEGÚN EL INTERRUPTOR
+                    if enviar_a_cliente:
+                        destinatario_final = cliente.email
+                        emails_to = [cliente.email]
+                        emails_bcc = ["fuerzanaturalbroker@gmail.com"]
+                        tipo_log_estado = "ENVIADO"
+                    else:
+                        destinatario_final = "fuerzanaturalbroker@gmail.com"
+                        emails_to = ["fuerzanaturalbroker@gmail.com"]
+                        emails_bcc = []
+                        tipo_log_estado = "ENVIADO_PRUEBA_ROJO"
+
                     email = EmailMultiAlternatives(
                         subject=asunto,
                         body=mensaje,
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[cliente.email],
-                        bcc=["fuerzanaturalbroker@gmail.com"],
+                        to=emails_to,
+                        bcc=emails_bcc,
                     )
                     email.attach_alternative(html_content, "text/html")
                     email.send()
@@ -280,19 +306,26 @@ class Command(BaseCommand):
                         payment=pago,
                         client=cliente,
                         tipo="VENCIMIENTO_CUPONERA",
-                        estado="ENVIADO",
-                        destinatario=cliente.email,
+                        estado=tipo_log_estado,
+                        destinatario=destinatario_final,
                         asunto=asunto,
                     )
 
                     pago.recordatorio_enviado = True
                     pago.save()
 
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Email de cuponera enviado a {cliente.email}"
+                    if enviar_a_cliente:
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"Email de cuponera enviado a {cliente.email}"
+                            )
                         )
-                    )
+                    else:
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"Email de prueba de cuponera enviado al broker (Modo Rojo)"
+                            )
+                        )
                     enviados += 1
 
                 except Exception as e:
