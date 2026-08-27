@@ -9,6 +9,12 @@ class User(AbstractUser):
     password_changed_at = models.DateTimeField(default=timezone.now)
     force_password_change = models.BooleanField(default=False)
 
+    # NUEVO INTERRUPTOR DE EMAILS (True = Envía al cliente + copia, False = Solo modo pruebas)
+    enviar_emails_a_clientes = models.BooleanField(
+        default=True, 
+        verbose_name="Enviar emails a clientes"
+    )
+
     def __str__(self):
         return self.username
 
