@@ -6,23 +6,23 @@ from .models import User
 class UserAdmin(BaseUserAdmin):
     model = User
 
-    # Agregamos los campos al listado general para que los veas a simple vista
-    list_display = ('username', 'email', 'is_producer', 'is_staff', 'is_active', 'force_password_change', 'password_changed_at')
-    list_filter = ('is_producer', 'is_staff', 'is_active', 'force_password_change')
+    # Agregamos 'enviar_emails_a_clientes' al listado general para verlo y tildarlo fácil
+    list_display = ('username', 'email', 'is_producer', 'enviar_emails_a_clientes', 'is_staff', 'is_active', 'force_password_change', 'password_changed_at')
+    list_filter = ('is_producer', 'enviar_emails_a_clientes', 'is_staff', 'is_active', 'force_password_change')
 
-    # Agregamos la nueva sección de seguridad al final de la ficha del usuario
+    # Agregamos la opción dentro de una sección en la ficha del usuario
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Información personal', {'fields': ('first_name', 'last_name', 'email')}),
         ('Permisos', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Rol', {'fields': ('is_producer',)}),
+        ('Rol y Configuración', {'fields': ('is_producer', 'enviar_emails_a_clientes')}),
         ('Seguridad de Contraseñas', {'fields': ('password_changed_at', 'force_password_change')}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'is_producer', 'is_staff', 'is_active'),
+            'fields': ('username', 'password1', 'password2', 'is_producer', 'enviar_emails_a_clientes', 'is_staff', 'is_active'),
         }),
     )
 
