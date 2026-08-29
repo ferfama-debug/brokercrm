@@ -201,6 +201,11 @@ class Policy(models.Model):
         help_text="Si se deja vacío, se usará la fecha de inicio de la póliza.",
     )
 
+    email_15_dias_enviado = models.BooleanField(
+        default=False,
+        verbose_name="Email de aviso a 15 días enviado",
+    )
+
     email_vencimiento_enviado = models.BooleanField(
         default=False,
         verbose_name="Email de vencimiento enviado",
@@ -484,11 +489,13 @@ class Payment(models.Model):
 class EmailLog(models.Model):
     ESTADO_CHOICES = [
         ("ENVIADO", "Enviado"),
+        ("ENVIADO_PRUEBA_ROJO", "Enviado Prueba Modo Rojo"),
         ("ERROR", "Error"),
         ("OMITIDO", "Omitido"),
     ]
 
     TIPO_CHOICES = [
+        ("AVISO_15_DIAS", "Aviso de póliza a 15 días"),
         ("VENCIMIENTO_POLIZA", "Vencimiento de póliza"),
         ("VENCIMIENTO_CUPONERA", "Vencimiento de cuponera"),
         ("CUMPLEANOS", "Cumpleaños"),
@@ -516,7 +523,7 @@ class EmailLog(models.Model):
         related_name="email_logs",
     )
     tipo = models.CharField(max_length=50, choices=TIPO_CHOICES)
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES)
+    estado = models.CharField(max_length=30, choices=ESTADO_CHOICES)
     destinatario = models.EmailField(blank=True, null=True)
     asunto = models.CharField(max_length=255, blank=True)
     error = models.TextField(blank=True, null=True)
