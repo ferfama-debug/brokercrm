@@ -368,29 +368,23 @@ def generar_whatsapp_url_poliza(poliza):
     if not cliente or not cliente.phone:
         return "#"
     
-    # Extraer solo los números del teléfono guardado
     raw_phone = ''.join(filter(str.isdigit, str(cliente.phone)))
     
     if not raw_phone:
         return "#"
 
-    # Limpieza estándar para Argentina (elimina 0 inicial de discado interurbano si lo tuviera)
     if raw_phone.startswith("0"):
         raw_phone = raw_phone[1:]
 
-    # Si ya incluye el código de país 54
     if raw_phone.startswith("54"):
         if raw_phone.startswith("549"):
             telefono = raw_phone
         else:
-            # Si tiene 54 pero le falta el 9 intermedio, se lo insertamos
             telefono = "549" + raw_phone[2:]
     else:
-        # Si el número viene con el 9 de celular local explícito
         if raw_phone.startswith("9") and len(raw_phone) > 10:
             telefono = "54" + raw_phone
         else:
-            # Validación inteligente para evitar duplicar el 9 si ya venía incorporado
             telefono = f"549{raw_phone}"
 
     nombre = f"{cliente.first_name or ''} {cliente.last_name or ''}".strip()
@@ -610,6 +604,9 @@ def crear_poliza(request):
             anio_auto=request.POST.get("anio_auto"),
             start_date=start_date,
             end_date=end_date,
+            # --- CAPTURA DE LOS NUEVOS CAMPOS ---
+            fecha_inicio_cobertura=request.POST.get("fecha_inicio_cobertura") or None,
+            fecha_fin_cobertura=request.POST.get("fecha_fin_cobertura") or None,
             forma_pago=request.POST.get("forma_pago"),
             frecuencia_cuponera=frecuencia_int,
             fecha_primer_vencimiento_cuponera=request.POST.get(
@@ -764,6 +761,9 @@ def editar_poliza(request, poliza_id):
         poliza.anio_auto = request.POST.get("anio_auto")
         poliza.start_date = start_date
         poliza.end_date = end_date
+        # --- ASIGNACIÓN DE LOS NUEVOS CAMPOS ---
+        poliza.fecha_inicio_cobertura = request.POST.get("fecha_inicio_cobertura") or None
+        poliza.fecha_fin_cobertura = request.POST.get("fecha_fin_cobertura") or None
         poliza.forma_pago = request.POST.get("forma_pago")
         poliza.frecuencia_cuponera = frecuencia_int
         poliza.fecha_primer_vencimiento_cuponera = request.POST.get("fecha_primer_vencimiento_cuponera") or None
@@ -844,6 +844,9 @@ def renovar_poliza(request, poliza_id):
             anio_auto=request.POST.get("anio_auto") or poliza.anio_auto,
             start_date=start_date,
             end_date=end_date,
+            # --- NUEVOS CAMPOS EN RENOVACIÓN ---
+            fecha_inicio_cobertura=request.POST.get("fecha_inicio_cobertura") or None,
+            fecha_fin_cobertura=request.POST.get("fecha_fin_cobertura") or None,
             forma_pago=request.POST.get("forma_pago"),
             frecuencia_cuponera=frecuencia_int,
             fecha_primer_vencimiento_cuponera=request.POST.get(
@@ -1106,6 +1109,9 @@ def detalle_poliza(request, poliza_id):
         poliza.anio_auto = request.POST.get("anio_auto")
         poliza.start_date = start_date
         poliza.end_date = end_date
+        # --- NUEVOS CAMPOS EN DETALLE (EDICIÓN) ---
+        poliza.fecha_inicio_cobertura = request.POST.get("fecha_inicio_cobertura") or None
+        poliza.fecha_fin_cobertura = request.POST.get("fecha_fin_cobertura") or None
         poliza.forma_pago = request.POST.get("forma_pago")
         poliza.frecuencia_cuponera = frecuencia_int
         poliza.fecha_primer_vencimiento_cuponera = request.POST.get("fecha_primer_vencimiento_cuponera") or None
@@ -1209,3 +1215,8 @@ def eliminar_poliza(request, poliza_id):
             "poliza": poliza,
         },
     )
+```[cite: 1]
+
+Una vez que reemplaces el contenido de tu `views.py` con esto, el backend estará completamente preparado[cite: 1]. 
+
+El siguiente paso lógico son las plantillas HTML (los archivos `.html` de tus formularios como `crear_poliza.html`, `editar_poliza.html`, etc.) para que los inputs donde se cargan las nuevas fechas aparezcan en pantalla. ¿Querés que revisemos esas plantillas?
