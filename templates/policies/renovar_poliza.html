@@ -88,12 +88,24 @@
 
         <div class="form-row">
           <div class="form-grupo">
-            <label class="form-label">Fecha inicio</label>
+            <label class="form-label">Fecha inicio (Emisión / Facturación)</label>
             <input type="date" name="start_date" class="form-control" required>
           </div>
           <div class="form-grupo">
-            <label class="form-label">Fecha vencimiento</label>
+            <label class="form-label">Fecha vencimiento (Emisión / Facturación)</label>
             <input type="date" name="end_date" class="form-control" required>
+          </div>
+        </div>
+
+        <!-- 🟢 NUEVOS CAMPOS DE COBERTURA REAL 🟢 -->
+        <div class="form-row" style="margin-top: 15px; border-top: 1px dashed var(--border); padding-top: 15px;">
+          <div class="form-grupo">
+            <label class="form-label" style="color: var(--green-400);">Fecha de Inicio de Cobertura (Real)</label>
+            <input type="date" name="fecha_inicio_cobertura" class="form-control">
+          </div>
+          <div class="form-grupo">
+            <label class="form-label" style="color: var(--green-400);">Fecha de Fin de Cobertura (Real)</label>
+            <input type="date" name="fecha_fin_cobertura" class="form-control">
           </div>
         </div>
       </div>
