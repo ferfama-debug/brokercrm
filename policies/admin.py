@@ -90,6 +90,8 @@ class PolicyAdmin(admin.ModelAdmin):
                 "fields": (
                     "start_date",
                     "end_date",
+                    "fecha_inicio_cobertura",
+                    "fecha_fin_cobertura",
                 )
             },
         ),
