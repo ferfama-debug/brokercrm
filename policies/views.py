@@ -1215,8 +1215,3 @@ def eliminar_poliza(request, poliza_id):
             "poliza": poliza,
         },
     )
-```[cite: 1]
-
-Una vez que reemplaces el contenido de tu `views.py` con esto, el backend estará completamente preparado[cite: 1]. 
-
-El siguiente paso lógico son las plantillas HTML (los archivos `.html` de tus formularios como `crear_poliza.html`, `editar_poliza.html`, etc.) para que los inputs donde se cargan las nuevas fechas aparezcan en pantalla. ¿Querés que revisemos esas plantillas?
