@@ -181,6 +181,19 @@ class Policy(models.Model):
         db_index=True,
     )
 
+    # --- NUEVOS CAMPOS EXCLUSIVOS DE COBERTURA ---
+    fecha_inicio_cobertura = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Fecha de Inicio de Cobertura de Póliza",
+    )
+    fecha_fin_cobertura = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Fecha de Fin de Cobertura de Póliza",
+        db_index=True,
+    )
+
     renovacion_de = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -362,6 +375,7 @@ class Policy(models.Model):
         ordering = ["end_date"]
         indexes = [
             models.Index(fields=["end_date"]),
+            models.Index(fields=["fecha_fin_cobertura"]),
             models.Index(fields=["policy_number"]),
             models.Index(fields=["patente"]),
         ]
