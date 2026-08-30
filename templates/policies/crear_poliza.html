@@ -154,7 +154,6 @@
             </select>
           </div>
 
-          <!-- 🟢 TIPO DE PÓLIZA CARGADO DINÁMICAMENTE DESDE BASE DE DATOS 🟢 -->
           <div class="form-grupo">
             <label>Tipo de póliza (Categoría)</label>
             <select name="tipo_poliza" class="form-control">
@@ -198,12 +197,26 @@
       <div id="tab-vigencia" class="tab-content">
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div class="form-grupo">
-            <label>Fecha de inicio *</label>
+            <label>Fecha de inicio (Emisión / Facturación) *</label>
             <input type="date" name="start_date" class="form-control required" required>
           </div>
           <div class="form-grupo">
-            <label>Fecha de vencimiento *</label>
+            <label>Fecha de vencimiento (Emisión / Facturación) *</label>
             <input type="date" name="end_date" class="form-control required" required>
+          </div>
+        </div>
+
+        <!-- 🟢 NUEVOS CAMPOS DE COBERTURA REAL 🟢 -->
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 20px;">
+          <div class="form-grupo">
+            <label style="color: var(--green-400);">Fecha de Inicio de Cobertura (Real)</label>
+            <input type="date" name="fecha_inicio_cobertura" class="form-control">
+            <small style="color: var(--text-secondary); font-size: 11px;">Completar solo si difiere de la fecha de inicio general.</small>
+          </div>
+          <div class="form-grupo">
+            <label style="color: var(--green-400);">Fecha de Fin de Cobertura (Real)</label>
+            <input type="date" name="fecha_fin_cobertura" class="form-control">
+            <small style="color: var(--text-secondary); font-size: 11px;">Completar solo si difiere de la fecha de vencimiento general.</small>
           </div>
         </div>
       </div>
@@ -317,7 +330,7 @@ function toggleCuponeraFields() {
 document.addEventListener('DOMContentLoaded', function() {
     toggleCuponeraFields();
     
-    // Inicializar Flatpickr en todos los inputs de fecha (incluso los que están dentro de pestañas ocultas)
+    // Inicializar Flatpickr en todos los inputs de fecha
     flatpickr("input[type='date']", {
         dateFormat: "Y-m-d",
         altInput: true,
