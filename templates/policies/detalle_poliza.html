@@ -190,12 +190,24 @@
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
         <div>
-          <label class="info-label"> Inicio</label>
+          <label class="info-label"> Inicio (Emisión)</label>
           <input type="date" name="start_date" class="form-control-pro" value="{{ poliza.start_date|date:'Y-m-d' }}" required>
         </div>
         <div>
-          <label class="info-label"> Vencimiento</label>
+          <label class="info-label"> Vencimiento (Emisión)</label>
           <input type="date" name="end_date" class="form-control-pro" value="{{ poliza.end_date|date:'Y-m-d' }}" required>
+        </div>
+      </div>
+
+      <!-- 🟢 NUEVOS CAMPOS DE COBERTURA REAL 🟢 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; border-top: 1px dashed var(--border); padding-top: 15px;">
+        <div>
+          <label class="info-label" style="color: var(--green-400);"> Inicio Cobertura (Real)</label>
+          <input type="date" name="fecha_inicio_cobertura" class="form-control-pro" value="{{ poliza.fecha_inicio_cobertura|date:'Y-m-d' }}">
+        </div>
+        <div>
+          <label class="info-label" style="color: var(--green-400);"> Fin Cobertura (Real)</label>
+          <input type="date" name="fecha_fin_cobertura" class="form-control-pro" value="{{ poliza.fecha_fin_cobertura|date:'Y-m-d' }}">
         </div>
       </div>
 
@@ -277,13 +289,13 @@
     <div class="doc-btn-group" style="margin-bottom: 20px;">
       {% if poliza.pdf_poliza or poliza.pdf_url %}
         <a href="{% if poliza.pdf_poliza %}{{ poliza.pdf_poliza }}{% else %}{{ poliza.pdf_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-pdf">
-           Ver Póliza PDF Actual
+            Ver Póliza PDF Actual
         </a>
       {% endif %}
 
       {% if poliza.cuponera_pdf or poliza.cuponera_url %}
         <a href="{% if poliza.cuponera_pdf %}{{ poliza.cuponera_pdf }}{% else %}{{ poliza.cuponera_url }}{% endif %}" target="_blank" class="btn-doc-pro btn-cup">
-           Ver Cuponera Actual
+            Ver Cuponera Actual
         </a>
       {% endif %}
     </div>
