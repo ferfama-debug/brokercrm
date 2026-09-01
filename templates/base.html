@@ -1272,6 +1272,7 @@ body.light-mode select.form-control {
 
 <script>
 (function () {
+  // 1. Gestión de tema (Claro / Oscuro)
   const storageKey = 'brokercrm-theme';
   const body = document.body;
   const toggle = document.getElementById('themeToggle');
@@ -1294,6 +1295,28 @@ body.light-mode select.form-control {
       localStorage.setItem(storageKey, nextTheme);
     });
   }
+
+  // 2. Control de Inactividad (10 minutos = 600.000 ms)
+  const INACTIVITY_LIMIT = 10 * 60 * 1000;
+  let inactivityTimer;
+
+  function handleLogout() {
+    window.location.href = '/accounts/logout/';
+  }
+
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(handleLogout, INACTIVITY_LIMIT);
+  }
+
+  // Escucha eventos globales para reiniciar el temporizador
+  const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+  events.forEach(function (evt) {
+    window.addEventListener(evt, resetInactivityTimer, { passive: true });
+  });
+
+  // Inicia la cuenta regresiva al cargar la página
+  resetInactivityTimer();
 })();
 </script>
 
