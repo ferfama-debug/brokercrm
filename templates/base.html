@@ -852,7 +852,6 @@ tbody td .btn-secondary { background: rgba(52,211,100,0.08) !important; color: #
 tbody td .btn-ghost     { background: transparent !important; color: #4d7c60 !important; }
 tbody td .btn-whatsapp  { background: rgba(37,211,102,0.12) !important; color: #4ade80 !important; }
 tbody td .btn-danger    { background: rgba(239,68,68,0.15) !important; color: #fca5a5 !important; }
-tbody td .btn-danger     { background: rgba(239,68,68,0.15) !important; color: #fca5a5 !important; }
 
 /* =============================================
    BOTONES
@@ -1242,7 +1241,7 @@ body.light-mode select.form-control {
     <div class="sidebar-divider"></div>
 
     <div class="sidebar-footer">
-      <a href="/accounts/logout/" class="nav-item danger">
+      <a href="{% url 'accounts:logout' %}" class="nav-item danger">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
           <polyline points="16 17 21 12 16 7"/>
@@ -1296,12 +1295,13 @@ body.light-mode select.form-control {
     });
   }
 
+  {% if request.user.is_authenticated %}
   // 2. Control de Inactividad (10 minutos = 600.000 ms)
   const INACTIVITY_LIMIT = 10 * 60 * 1000;
   let inactivityTimer;
 
   function handleLogout() {
-    window.location.href = '/accounts/logout/';
+    window.location.href = "{% url 'accounts:logout' %}";
   }
 
   function resetInactivityTimer() {
@@ -1317,6 +1317,7 @@ body.light-mode select.form-control {
 
   // Inicia la cuenta regresiva al cargar la página
   resetInactivityTimer();
+  {% endif %}
 })();
 </script>
 
