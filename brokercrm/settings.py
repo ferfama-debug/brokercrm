@@ -207,9 +207,9 @@ SHORT_DATETIME_FORMAT = 'd/m/Y H:i'
 
 # 🟢 ORDEN DE LECTURA DE FECHAS (Prioriza DD/MM/YYYY)
 DATE_INPUT_FORMATS = [
-    '%d/%m/%Y',  # Ej: 31/12/2026 (El que queremos)
+    '%d/%m/%Y',  # Ej: 31/12/2026
     '%d-%m-%Y',  # Ej: 31-12-2026
-    '%Y-%m-%d',  # Ej: 2026-12-31 (Formato estándar de Base de Datos)
+    '%Y-%m-%d',  # Ej: 2026-12-31
     '%d/%m/%y',  # Ej: 31/12/26
 ]
 
@@ -233,7 +233,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # =========================
-# SEGURIDAD
+# SEGURIDAD Y SESIONES
 # =========================
 
 CSRF_TRUSTED_ORIGINS = [
@@ -253,6 +253,11 @@ SECURE_SSL_REDIRECT = False
 
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
+
+# 🟢 CONFIGURACIÓN DE INACTIVIDAD (10 MINUTOS)
+SESSION_COOKIE_AGE = 600  # Expiración en 600 segundos (10 minutos)
+SESSION_SAVE_EVERY_REQUEST = True  # Renueva el tiempo de 10 min en cada interacción del usuario
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expira la sesión si cierra el navegador
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -317,7 +322,6 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get(
     "SUPABASE_KEY"
 )
 
-# 🟢 Bucket por defecto sincronizado con la estructura del sistema
 SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "polizas_clientes")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
