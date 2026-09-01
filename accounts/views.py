@@ -34,31 +34,26 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("/accounts/login/")
+    messages.info(request, "Sesión cerrada por inactividad o solicitud del usuario.")
+    return redirect("accounts:login")
 
 
 def crear_admin_rapido(request):
     return HttpResponse("No disponible", status=403)
 
 
-# 🔒 VISTA DE CAMBIO DE CONTRASEÑA (Cierra sesión automáticamente al terminar)
+# 🔒 VISTA DE CAMBIO DE CONTRASEÑA
 class CustomPasswordChangeView(PasswordChangeView):
     template_name = "accounts/password_change.html"
     success_url = reverse_lazy("accounts:login")
 
     def form_valid(self, form):
-        # 1. Guardamos la contraseña nueva en la base de datos
         user = form.save()
-        
-        # 2. Apagamos el bloqueo (force_password_change = False)
         user.force_password_change = False
         user.save()
-        
-        # 3. Deslogueamos al usuario de la sesión actual
         logout(self.request)
-        
-        # 4. Dejamos un mensaje para que aparezca en la pantalla de login
-        messages.success(self.request, "Contraseña actualizada con éxito. Por favor, iniciá sesión con tu nueva contraseña.")
-        
-        # 5. Redirigimos directo al login
+        messages.success(
+            self.request, 
+            "Contraseña actualizada con éxito. Por favor, iniciá sesión con tu nueva contraseña."
+        )
         return redirect("accounts:login")
