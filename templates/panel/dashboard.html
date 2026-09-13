@@ -15,13 +15,26 @@ body.light-mode .dashboard {
   color: #0f172a;
 }
 
+/* SECCIÓN 1: CABECERA MODERNA */
 .dashboard-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
+  padding: 24px;
+  background: rgba(15, 32, 24, 0.65);
+  border: 1px solid rgba(52, 211, 100, 0.12);
+  border-radius: 18px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+body.light-mode .dashboard-header {
+  background: #ffffff;
+  border: 1px solid rgba(21, 128, 61, 0.12);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
 }
 
 .dashboard-header-left {
@@ -33,14 +46,18 @@ body.light-mode .dashboard {
 .dashboard-header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .title {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.5rem;
   color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 body.light-mode .title {
@@ -50,7 +67,7 @@ body.light-mode .title {
 .dashboard-subtitle {
   margin: 0;
   color: #94a3b8;
-  font-size: 14px;
+  font-size: 0.9rem;
 }
 
 body.light-mode .dashboard-subtitle {
@@ -84,29 +101,37 @@ body.light-mode span {
 .btn-cobranza {
   background: linear-gradient(135deg, #22c55e, #15803d);
   color: white;
-  padding: 12px 20px;
+  padding: 11px 20px;
   border-radius: 12px;
   border: 1px solid rgba(134,239,172,0.22);
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: 0.2s ease;
-  box-shadow: 0 10px 22px rgba(21,128,61,0.20);
+  box-shadow: 0 4px 14px rgba(21,128,61,0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-cobranza:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 26px rgba(21,128,61,0.28);
+  box-shadow: 0 6px 18px rgba(21,128,61,0.35);
 }
 
 .btn-panel {
   background: rgba(34,197,94,0.12);
   color: #86efac;
-  padding: 10px 18px;
+  padding: 11px 18px;
   border-radius: 12px;
   border: 1px solid rgba(34,197,94,0.22);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.9rem;
   transition: 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 body.light-mode .btn-panel {
@@ -118,7 +143,7 @@ body.light-mode .btn-panel {
 .btn-panel:hover {
   transform: translateY(-2px);
   background: rgba(34,197,94,0.18);
-  box-shadow: 0 12px 24px rgba(21,128,61,0.18);
+  box-shadow: 0 6px 16px rgba(21,128,61,0.18);
 }
 
 /* KPI */
@@ -695,7 +720,7 @@ body.light-mode .resumen-mini span {
 
   <div class="dashboard-header">
     <div class="dashboard-header-left">
-      <h1 class="title">Panel de gestión</h1>
+      <h1 class="title"><span>📊</span> Panel de gestión</h1>
       <p class="dashboard-subtitle">
         Clientes, pólizas y seguimiento de pagos en un solo lugar
       </p>
@@ -703,11 +728,11 @@ body.light-mode .resumen-mini span {
 
     <div class="dashboard-header-right">
       <button class="btn-cobranza" onclick="ejecutarCobranza()">
-        Revisar pagos por cuponera 
+        <span>💳</span> Revisar pagos por cuponera 
       </button>
 
       <a href="/polizas/cobranzas/" class="btn-panel">
-        Ver seguimiento de pagos 
+        <span>📈</span> Ver seguimiento de pagos 
       </a>
     </div>
   </div>
