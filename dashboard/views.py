@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from django.apps import apps  # 👈 AGREGADO: Motor de carga desacoplada
+from django.apps import apps  # 👈 Motor de carga desacoplada
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
@@ -10,7 +10,7 @@ from clients.models import Client
 from policies.models import (
     Payment,
     Policy,
-)  # 👈 MODIFICADO: Sacamos EmailLog de acá para evitar el crash al bootear
+)
 
 
 @login_required
@@ -19,54 +19,53 @@ def home(request):
     hoy = date.today()
     en_3_dias = hoy + timedelta(days=3)
 
-    # 🔥 CONTADORES GENERALES - VISIBILIDAD TOTAL SIN FILTROS
+    # 🔥 CONTADORES GENERALES - FILTRADOS DESDE LA RAÍZ CONTRA ANULADAS
     if request.user.is_superuser:
         clientes_qs = Client.objects.all()
-        policies_qs = Policy.objects.select_related("client").all()
-        pagos_qs = Payment.objects.select_related("policy", "policy__client")
+        policies_qs = Policy.objects.filter(anulada=False).select_related("client")
+        pagos_qs = Payment.objects.filter(policy__anulada=False).select_related("policy", "policy__client")
         usuarios = User.objects.count()
     else:
-        # 🟢 CIRUGÍA APLICADA: Filtramos exclusivamente los datos del productor logueado
         clientes_qs = Client.objects.filter(producer=request.user)
         policies_qs = Policy.objects.filter(
-            client__producer=request.user
+            client__producer=request.user,
+            anulada=False
         ).select_related("client")
         pagos_qs = Payment.objects.filter(
-            policy__client__producer=request.user
+            policy__client__producer=request.user,
+            policy__anulada=False
         ).select_related("policy", "policy__client")
         usuarios = 1
 
-    # 🟢 PROTOCOLO DE MÁXIMA SEGURIDAD BLINDADO: Carga en caliente y precarga selectiva de relaciones reales
+    # Protocolo de seguridad para EmailLog
     email_logs = []
     try:
         ModelLog = apps.get_model("policies", "EmailLog")
         if ModelLog:
-            # 🟢 NUEVA CIRUGÍA: Aislamiento de tracking de emails
             if request.user.is_superuser:
                 email_logs_qs = ModelLog.objects.all()
             else:
                 email_logs_qs = ModelLog.objects.filter(client__producer=request.user)
 
-            # Traemos de forma eficiente los objetos vinculados utilizando los nombres exactos confirmados
             email_logs = (
                 email_logs_qs.select_related("client", "policy")
                 .order_by("-fecha_envio")[:5]
             )
-            # Forzamos la evaluación de la query dentro del bloque seguro
             list(email_logs)
     except Exception as e:
         print("⚠️ Error controlado en EmailLog para evitar caída del sistema:", e)
         email_logs = []
 
-    # CIRUGÍA QUIRÚRGICA: Conteo de pólizas activas vs anuladas
-    # Las activas son las que NO están anuladas
-    polizas_activas_count = policies_qs.filter(anulada=False).count()
-    polizas_anuladas_count = policies_qs.filter(anulada=True).count()
+    # Conteo de pólizas activas vs anuladas
+    polizas_activas_count = policies_qs.count()
+    polizas_anuladas_count = Policy.objects.filter(
+        (Q(client__producer=request.user) if not request.user.is_superuser else Q()),
+        anulada=True
+    ).count() if not request.user.is_superuser else Policy.objects.filter(anulada=True).count()
 
     clientes = clientes_qs.count()
     polizas = polizas_activas_count  # Usamos las activas para el contador principal
 
-    # Sincronización con base.html
     ultimas_alertas = []
     clientes_llamar_lista = []
 
@@ -75,14 +74,12 @@ def home(request):
     vencen_15 = 0
     vencen_30 = 0
 
-    # Filtramos para que el CRM de renovaciones no muestre pólizas anuladas ni las que ya fueron renovadas
+    # Excluimos las que ya fueron renovadas
     polizas_renovadas_ids = Policy.objects.filter(
         renovacion_de__isnull=False
     ).values("renovacion_de")
-    policies_para_alertas = (
-        policies_qs.filter(anulada=False)
-        .exclude(id__in=polizas_renovadas_ids)
-    )
+    
+    policies_para_alertas = policies_qs.exclude(id__in=polizas_renovadas_ids)
 
     for p in policies_para_alertas:
         if not p.end_date:
@@ -183,7 +180,7 @@ def home(request):
     )
     clientes_hoy = len(clientes_llamar)
 
-    # 🔥 COBRANZAS (Intacto)
+    # 🔥 COBRANZAS
     cobranzas_vencidas = pagos_qs.filter(
         fecha_vencimiento__lt=hoy, fecha_pago__isnull=True
     ).count()
@@ -215,23 +212,28 @@ def home(request):
         fecha_vencimiento__lte=hoy, fecha_pago__isnull=True
     )
 
-    # ⭐ SCORE (Intacto)
+    # ⭐ SCORE
     clientes_score_db = clientes_qs.annotate(
-        total_polizas=Count("policy")
+        total_polizas=Count("policy", filter=db_models_q_check := ~db_models_q_check if False else None) # simplificado
     ).order_by("-total_polizas")
+    
+    # Recalculamos score basándonos en pólizas activas reales
     clientes_score = []
-    for c in clientes_score_db:
-        if c.total_polizas >= 4:
+    for c in clientes_qs:
+        cant_polizas_activas = c.policy_set.filter(anulada=False).count()
+        if cant_polizas_activas >= 4:
             score = "⭐⭐⭐ Cliente Premium"
-        elif c.total_polizas >= 2:
+        elif cant_polizas_activas >= 2:
             score = "⭐⭐ Buen Cliente"
         else:
             score = "⭐ Cliente Básico"
-        clientes_score.append(
-            {"cliente": c, "polizas": c.total_polizas, "score": score}
-        )
+        
+        if cant_polizas_activas > 0 or c.policy_set.exists():
+            clientes_score.append(
+                {"cliente": c, "polizas": cant_polizas_activas, "score": score}
+            )
 
-    # 🏢 PRODUCCIÓN (Intacto)
+    # 🏢 PRODUCCIÓN
     produccion_companias_db = (
         policies_qs.values("company")
         .annotate(total=Count("id"))
@@ -248,7 +250,7 @@ def home(request):
         companias.append(company)
         cantidades.append(total)
 
-    # 📈 CRECIMIENTO (Intacto)
+    # 📈 CRECIMIENTO
     crecimiento_db = (
         policies_qs.annotate(mes_p=TruncMonth("start_date"))
         .values("mes_p")
