@@ -58,10 +58,11 @@ def home(request):
 
     # Conteo de pólizas activas vs anuladas
     polizas_activas_count = policies_qs.count()
-    polizas_anuladas_count = Policy.objects.filter(
-        (Q(client__producer=request.user) if not request.user.is_superuser else Q()),
-        anulada=True
-    ).count() if not request.user.is_superuser else Policy.objects.filter(anulada=True).count()
+    
+    if request.user.is_superuser:
+        polizas_anuladas_count = Policy.objects.filter(anulada=True).count()
+    else:
+        polizas_anuladas_count = Policy.objects.filter(client__producer=request.user, anulada=True).count()
 
     clientes = clientes_qs.count()
     polizas = polizas_activas_count  # Usamos las activas para el contador principal
@@ -213,11 +214,6 @@ def home(request):
     )
 
     # ⭐ SCORE
-    clientes_score_db = clientes_qs.annotate(
-        total_polizas=Count("policy", filter=db_models_q_check := ~db_models_q_check if False else None) # simplificado
-    ).order_by("-total_polizas")
-    
-    # Recalculamos score basándonos en pólizas activas reales
     clientes_score = []
     for c in clientes_qs:
         cant_polizas_activas = c.policy_set.filter(anulada=False).count()
@@ -232,6 +228,8 @@ def home(request):
             clientes_score.append(
                 {"cliente": c, "polizas": cant_polizas_activas, "score": score}
             )
+
+    clientes_score = sorted(clientes_score, key=lambda x: x["polizas"], reverse=True)
 
     # 🏢 PRODUCCIÓN
     produccion_companias_db = (
