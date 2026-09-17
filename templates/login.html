@@ -14,9 +14,9 @@
 
 :root {
   --bg-base:    #050d0a;
-  --bg-card:    #0a1610;
-  --border:     rgba(52, 211, 100, 0.08);
-  --border-strong: rgba(52, 211, 100, 0.18);
+  --bg-card:    rgba(10, 22, 16, 0.90); /* Le damos un toque de transparencia para que trasluzca el fondo */
+  --border:     rgba(52, 211, 100, 0.12);
+  --border-strong: rgba(52, 211, 100, 0.22);
   --green-300:  #6ee7b7;
   --green-400:  #34d364;
   --green-500:  #22c55e;
@@ -24,7 +24,7 @@
   --green-700:  #15803d;
   --text-primary:   #ecfdf5;
   --text-secondary: #86efac;
-  --text-muted:     #4d7c60;
+  --text-muted:     #6ee7b7;
   --font-sans: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'DM Mono', monospace;
   --radius-sm: 8px;
@@ -46,9 +46,13 @@ body {
   justify-content: center;
   min-height: 100vh;
   padding: 24px;
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(22, 163, 74, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(52, 211, 100, 0.04) 0%, transparent 50%);
+  /* IMAGEN DE FONDO CON CAPA OSCURA SEMITRANSPARENTE */
+  background-image: 
+    linear-gradient(rgba(5, 13, 10, 0.82), rgba(5, 13, 10, 0.90)),
+    url("{% static 'images/img/fondo.jpg' %}");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .login-card {
@@ -60,7 +64,9 @@ body {
   overflow: hidden;
   box-shadow:
     0 0 0 1px rgba(52, 211, 100, 0.04),
-    0 24px 64px rgba(0, 0, 0, 0.5);
+    0 24px 64px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .login-header {
@@ -92,7 +98,7 @@ body {
 
 .login-subtitulo {
   font-size: 13px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   font-weight: 500;
@@ -112,7 +118,7 @@ body {
 .form-label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 0.04em;
 }
 
@@ -133,7 +139,7 @@ body {
 
 .form-input {
   width: 100%;
-  background: #060f0b;
+  background: rgba(6, 15, 11, 0.85);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 11px 12px 11px 36px;
@@ -144,18 +150,18 @@ body {
   outline: none;
 }
 
-.form-input::placeholder { color: var(--text-muted); }
+.form-input::placeholder { color: var(--text-muted); opacity: 0.7; }
 
 .form-input:focus {
-  border-color: var(--green-600);
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
 }
 
 .btn-login {
   width: 100%;
   margin-top: 8px;
   padding: 12px;
-  background: var(--green-600);
+  background: linear-gradient(135deg, var(--green-500), var(--green-700));
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
@@ -168,7 +174,7 @@ body {
 }
 
 .btn-login:hover {
-  background: var(--green-500);
+  background: linear-gradient(135deg, var(--green-400), var(--green-600));
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(22, 163, 74, 0.35);
 }
@@ -198,9 +204,10 @@ body {
   border-top: 1px solid var(--border);
   text-align: center;
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
   letter-spacing: 0.04em;
+  opacity: 0.8;
 }
 
 </style>
