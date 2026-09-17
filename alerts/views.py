@@ -23,9 +23,10 @@ def alertas(request):
 
     generar_todas_las_alertas()
 
-    # 🟢 SOLUCIÓN ESTÁNDAR: Buscamos los IDs de pólizas que SÍ tienen cuotas pagadas
+    # 🟢 SOLUCIÓN ESTÁNDAR: Buscamos los IDs de pólizas que SÍ tienen cuotas pagadas (excluyendo anuladas)
     polizas_pagadas = Payment.objects.filter(
-        fecha_pago__isnull=False
+        fecha_pago__isnull=False,
+        policy__anulada=False
     ).values_list("policy_id", flat=True)
 
     # 🟢 LIMPIEZA AUTOMÁTICA SEGURA: Resolvemos las alertas de esas pólizas sin romper el SQL
@@ -39,9 +40,9 @@ def alertas(request):
     nivel = request.GET.get("nivel", "")
 
     if request.user.is_superuser:
-        alertas = Alert.objects.filter(resolved=False)
+        alertas = Alert.objects.filter(resolved=False, policy__anulada=False)
     else:
-        alertas = Alert.objects.filter(user=request.user, resolved=False)
+        alertas = Alert.objects.filter(user=request.user, resolved=False, policy__anulada=False)
 
     if nivel:
         alertas = alertas.filter(level=nivel)
@@ -61,15 +62,19 @@ def alertas(request):
 
     if request.user.is_superuser:
         polizas_por_vencer = Policy.objects.filter(
+            anulada=False,
             end_date__gte=hoy,
             end_date__lte=limite_vencimiento,
         ).exclude(id__in=polizas_renovadas_ids)
         pagos_vencidos = Payment.objects.filter(
-            estado__in=estados_criticos, fecha_pago__isnull=True
+            estado__in=estados_criticos, 
+            fecha_pago__isnull=True,
+            policy__anulada=False
         ).select_related("policy__client")
     else:
         polizas_por_vencer = Policy.objects.filter(
             client__producer=request.user,
+            anulada=False,
             end_date__gte=hoy,
             end_date__lte=limite_vencimiento,
         ).exclude(id__in=polizas_renovadas_ids)
@@ -77,6 +82,7 @@ def alertas(request):
             estado__in=estados_criticos,
             fecha_pago__isnull=True,
             policy__client__producer=request.user,
+            policy__anulada=False,
         ).select_related("policy__client")
 
     clientes_con_deuda = {
