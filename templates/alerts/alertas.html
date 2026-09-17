@@ -98,7 +98,7 @@
         <div class="alerta-body">
           <div class="alerta-nombre">{{ poliza.client }}</div>
           <div class="alerta-meta">
-            Póliza <strong>{{ poliza.policy_number }}</strong> · Vence {{ poliza.end_date|date:"d/m/Y" }}
+            Póliza de {{ poliza.tipo_riesgo|default:poliza.risk_type|default:"Seguro" }} ({{ poliza.company|default:"Sin compañía" }}) N° <strong>{{ poliza.policy_number }}</strong> · Vence {{ poliza.end_date|date:"d/m/Y" }}
           </div>
         </div>
       </div>
@@ -150,7 +150,7 @@
         <div class="alerta-body">
           <div class="alerta-nombre">{{ item.cliente|default:"Cliente" }}</div>
           <div class="alerta-meta">
-            Póliza <strong>{{ item.numero }}</strong> ({{ item.company }}) · Vencimiento cuota: <strong>{{ item.fecha|date:"d/m/Y" }}</strong>
+            Póliza de {{ item.riesgo }} ({{ item.company }}) N° <strong>{{ item.numero }}</strong> · Vencimiento cuota: <strong>{{ item.fecha|date:"d/m/Y" }}</strong>
           </div>
         </div>
       </div>
