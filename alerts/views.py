@@ -38,6 +38,7 @@ def alertas(request):
         ).update(resolved=True)
 
     nivel = request.GET.get("nivel", "")
+    tab = request.GET.get("tab", "alertas")  # 👈 Pestaña activa por defecto
 
     if request.user.is_superuser:
         alertas = Alert.objects.filter(resolved=False, policy__anulada=False)
@@ -131,6 +132,7 @@ def alertas(request):
         {
             "alertas": alertas,
             "nivel": nivel,
+            "tab": tab,
             "polizas_por_vencer": polizas_por_vencer,
             "clientes_con_deuda": clientes_con_deuda,
             "pagos_cuponera": pagos_cuponera,
