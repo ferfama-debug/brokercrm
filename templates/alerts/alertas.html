@@ -138,9 +138,9 @@
 
   <div class="seccion-items">
     {% for item in pagos_cuponera %}
-    <div class="alerta-item alerta-item-verde">
+    <div class="alerta-item {% if item.dias <= 3 %}alerta-item-urgente{% else %}alerta-item-verde{% endif %}">
       <div class="alerta-left">
-        <div class="alerta-avatar alerta-avatar-verde">
+        <div class="alerta-avatar {% if item.dias <= 3 %}alerta-avatar-urgente{% else %}alerta-avatar-verde{% endif %}">
           {% if item.cliente %}
             {{ item.cliente.first_name|first|upper }}{{ item.cliente.last_name|first|upper }}
           {% else %}
@@ -148,9 +148,14 @@
           {% endif %}
         </div>
         <div class="alerta-body">
-          <div class="alerta-nombre">{{ item.cliente|default:"Cliente" }}</div>
+          <div class="alerta-nombre">
+            {{ item.cliente|default:"Cliente" }}
+            {% if item.dias <= 3 %}
+              <span class="badge-urgente">¡Vence en {{ item.dias }} {% if item.dias == 1 %}día{% else %}días{% endif %}!</span>
+            {% endif %}
+          </div>
           <div class="alerta-meta">
-            Póliza de {{ item.riesgo }} ({{ item.company }}) N° <strong>{{ item.numero }}</strong> · Vencimiento cuota: <strong>{{ item.fecha|date:"d/m/Y" }}</strong>
+            Póliza de {{ item.riesgo }} ({{ item.company }}) N° <strong>{{ item.numero }}</strong> · Vencimiento cuota: <strong>{{ item.fecha|date:"d/m/Y" }}</strong> (en {{ item.dias }} días)
           </div>
         </div>
       </div>
@@ -164,7 +169,7 @@
         <a href="https://wa.me/{{ item.telefono|cut:' '|cut:'-' }}?text={{ item.mensaje|urlencode }}"
            target="_blank" class="btn-whatsapp btn-whatsapp-sm">
           WhatsApp
-          <span class="badge-poliza badge-green-soft">
+          <span class="badge-poliza {% if item.dias <= 3 %}badge-red-soft{% else %}badge-green-soft{% endif %}">
             #{{ item.numero|default:"-" }}
           </span>
         </a>
@@ -446,6 +451,31 @@
 
 .alerta-item-verde {
   background: rgba(20,83,45,0.06);
+}
+
+/* Estilos de urgencia para cuponeras próximas a vencer (<= 3 días) */
+.alerta-item-urgente {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-left: 4px solid #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.alerta-avatar-urgente {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #fca5a5 !important;
+}
+
+.badge-urgente {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 999px;
+  vertical-align: middle;
 }
 
 .alerta-left {
