@@ -71,6 +71,8 @@ def alertas(request):
             fecha_pago__isnull=True,
             policy__anulada=False
         ).select_related("policy__client")
+        
+        policies_for_cuponera = Policy.objects.filter(anulada=False).exclude(id__in=polizas_renovadas_ids)
     else:
         polizas_por_vencer = Policy.objects.filter(
             client__producer=request.user,
@@ -84,12 +86,44 @@ def alertas(request):
             policy__client__producer=request.user,
             policy__anulada=False,
         ).select_related("policy__client")
+        
+        policies_for_cuponera = Policy.objects.filter(
+            client__producer=request.user,
+            anulada=False
+        ).exclude(id__in=polizas_renovadas_ids)
 
     clientes_con_deuda = {
         pago.policy.client
         for pago in pagos_vencidos
         if pago.policy and pago.policy.client
     }
+
+    # 🟢 PROCESAMIENTO DE CUPONERAS PRÓXIMAS A VENCER
+    pagos_cuponera = []
+    for p in policies_for_cuponera:
+        if getattr(p, 'forma_pago', None) == "CUPONERA" and getattr(p, 'frecuencia_cuponera', None):
+            proximo_pago = getattr(p, 'proximo_pago_cuponera', None)
+            if proximo_pago:
+                dias_pago = (proximo_pago - hoy).days
+                if dias_pago <= 30:
+                    telefono = ""
+                    if p.client:
+                        telefono = getattr(p.client, "phone", "") or getattr(p.client, "telefono", "")
+                    
+                    nombre_cliente = p.client.nombre_completo() if p.client and hasattr(p.client, "nombre_completo") else (f"{p.client.first_name} {p.client.last_name}" if p.client else "Cliente")
+                    
+                    pagos_cuponera.append({
+                        "cliente": p.client,
+                        "numero": p.policy_number,
+                        "company": p.company or "Sin compañía",
+                        "fecha": proximo_pago,
+                        "dias": dias_pago,
+                        "telefono": telefono,
+                        "mensaje": f"Hola {nombre_cliente}, te recordamos el pago de la cuponera de tu póliza N° {p.policy_number} de {p.company or 'Sin compañía'} que vence el {proximo_pago.strftime('%d/%m/%Y')}." if hasattr(proximo_pago, 'strftime') else f"Vence el {proximo_pago}",
+                        "pdf": getattr(p, 'cuponera_pdf', None),
+                    })
+
+    pagos_cuponera = sorted(pagos_cuponera, key=lambda x: x["fecha"])
 
     return render(
         request,
@@ -99,5 +133,6 @@ def alertas(request):
             "nivel": nivel,
             "polizas_por_vencer": polizas_por_vencer,
             "clientes_con_deuda": clientes_con_deuda,
+            "pagos_cuponera": pagos_cuponera,
         },
     )
