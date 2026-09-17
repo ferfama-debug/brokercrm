@@ -14,7 +14,7 @@
 
 :root {
   --bg-base:    #050d0a;
-  --bg-card:    rgba(10, 22, 16, 0.90); /* Le damos un toque de transparencia para que trasluzca el fondo */
+  --bg-card:    rgba(10, 22, 16, 0.90);
   --border:     rgba(52, 211, 100, 0.12);
   --border-strong: rgba(52, 211, 100, 0.22);
   --green-300:  #6ee7b7;
@@ -46,10 +46,10 @@ body {
   justify-content: center;
   min-height: 100vh;
   padding: 24px;
-  /* IMAGEN DE FONDO CON CAPA OSCURA SEMITRANSPARENTE */
+  /* IMAGEN DE FONDO CORREGIDA A PNG */
   background-image: 
     linear-gradient(rgba(5, 13, 10, 0.82), rgba(5, 13, 10, 0.90)),
-    url("{% static 'images/img/fondo.jpg' %}");
+    url("{% static 'images/img/fondo.png' %}");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -75,7 +75,6 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-/* LOGO CIRCULAR */
 .login-logo {
   width: 80px;
   height: 80px;
