@@ -44,7 +44,11 @@
         .logo {
             width: 94px;
             height: 94px;
-            object-fit: contain;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(52, 211, 100, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            background: #0f2018;
             display: block;
         }
 
@@ -142,7 +146,8 @@
     <div class="login-card">
 
         <div class="login-brand">
-            <img src="{% static 'images/img/logo.png' %}" class="logo" alt="Fuerza Natural Broker">
+            <!-- LOGO ACTUALIZADO -->
+            <img src="{% static 'images/img/logo ultimo.png' %}" class="logo" alt="Fuerza Natural Broker">
         </div>
 
         <h2 class="login-title">Iniciar sesión</h2>
