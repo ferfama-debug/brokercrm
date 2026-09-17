@@ -8,35 +8,37 @@
   </div>
 </div>
 
-<!-- FILTROS -->
-<div class="filtros-wrap">
-  <a href="{% url 'alerts:alertas' %}" class="filtro-btn filtro-all {% if not nivel %}activo{% endif %}">Todas</a>
-  <a href="?nivel=CRITICA" class="filtro-btn filtro-critica {% if nivel == 'CRITICA' %}activo{% endif %}">Críticas</a>
-  <a href="?nivel=ALTA" class="filtro-btn filtro-alta {% if nivel == 'ALTA' %}activo{% endif %}">Altas</a>
-  <a href="?nivel=MEDIA" class="filtro-btn filtro-media {% if nivel == 'MEDIA' %}activo{% endif %}">Medias</a>
-</div>
-
+<!-- TARJETAS DE RESUMEN / PESTAÑAS INTERACTIVAS -->
 <div class="resumen-grid">
-  <div class="resumen-card resumen-rojo">
+  <a href="?tab=deudas" class="resumen-card resumen-rojo {% if tab == 'deudas' %}tab-activo{% endif %}">
     <div class="resumen-label">Clientes con deuda</div>
     <div class="resumen-valor">{{ clientes_con_deuda|length }}</div>
-  </div>
-  <div class="resumen-card resumen-amarillo">
+  </a>
+
+  <a href="?tab=vencimientos" class="resumen-card resumen-amarillo {% if tab == 'vencimientos' %}tab-activo{% endif %}">
     <div class="resumen-label">Pólizas por vencer</div>
     <div class="resumen-valor">{{ polizas_por_vencer|length }}</div>
-  </div>
-  <div class="resumen-card resumen-verde">
+  </a>
+
+  <a href="?tab=cuponeras" class="resumen-card resumen-verde {% if tab == 'cuponeras' %}tab-activo{% endif %}">
+    <div class="resumen-label">Cuponeras próximas</div>
+    <div class="resumen-valor">{{ pagos_cuponera|length }}</div>
+  </a>
+
+  <a href="?tab=alertas" class="resumen-card resumen-azul {% if tab == 'alertas' or not tab %}tab-activo{% endif %}">
     <div class="resumen-label">Alertas activas</div>
     <div class="resumen-valor">{{ alertas|length }}</div>
-  </div>
+  </a>
 </div>
 
-<!-- CLIENTES CON DEUDA -->
-{% if clientes_con_deuda %}
+<!-- CONTENIDO SEGÚN LA PESTAÑA ACTIVA -->
+
+<!-- 1. CLIENTES CON DEUDA -->
+{% if tab == 'deudas' %}
 <div class="alerta-seccion">
   <div class="seccion-header seccion-rojo">
     <div class="seccion-titulo-wrap">
-      <span>Clientes con deuda</span>
+      <span>Clientes con deuda / Comprobantes pendientes</span>
       <span class="seccion-count">{{ clientes_con_deuda|length }}</span>
     </div>
   </div>
@@ -44,7 +46,6 @@
   <div class="seccion-items">
     {% for cliente in clientes_con_deuda %}
     <div class="alerta-item alerta-item-rojo">
-
       <div class="alerta-left">
         <div class="alerta-avatar">
           {{ cliente.first_name|first|upper }}{{ cliente.last_name|first|upper }}
@@ -61,25 +62,28 @@
         <a href="/clientes/ver/{{ cliente.id }}/" class="btn btn-secondary btn-sm">
           Ver cliente
         </a>
-
         <a href="https://wa.me/{{ cliente.phone|cut:' '|cut:'-' }}?text=Hola%20{{ cliente.first_name }},%20¿cómo%20estás?%20Te%20escribo%20de%20Fuerza%20Natural%20Broker%20para%20pedirte%20si%20me%20podrías%20enviar%20el%20comprobante%20de%20la%20última%20cuota%20de%20tu%20seguro.%20¡Gracias!"
            target="_blank" class="btn-whatsapp btn-whatsapp-sm">
           Pedir Comprobante
         </a>
       </div>
-
+    </div>
+    {% empty %}
+    <div class="empty-row" style="padding: 30px; text-align: center; color: var(--text-muted);">
+      No hay clientes con deuda pendientes
     </div>
     {% endfor %}
   </div>
 </div>
 {% endif %}
 
-<!-- POLIZAS -->
-{% if polizas_por_vencer %}
+
+<!-- 2. PÓLIZAS POR VENCER -->
+{% if tab == 'vencimientos' %}
 <div class="alerta-seccion">
   <div class="seccion-header seccion-amarillo">
     <div class="seccion-titulo-wrap">
-      <span>Pólizas por vencer</span>
+      <span>Pólizas por vencer (Próximos 30 días)</span>
       <span class="seccion-count">{{ polizas_por_vencer|length }}</span>
     </div>
   </div>
@@ -87,7 +91,6 @@
   <div class="seccion-items">
     {% for poliza in polizas_por_vencer %}
     <div class="alerta-item alerta-item-amarillo">
-
       <div class="alerta-left">
         <div class="alerta-avatar alerta-avatar-amarillo">
           {{ poliza.client.first_name|first|upper }}{{ poliza.client.last_name|first|upper }}
@@ -104,7 +107,6 @@
         <a href="/clientes/ver/{{ poliza.client.id }}/?poliza={{ poliza.id }}" class="btn btn-secondary btn-sm">
           Ver
         </a>
-
         <a href="https://wa.me/{{ poliza.client.phone|cut:' '|cut:'-' }}?text=Hola {{ poliza.client.first_name }},%20tu%20póliza%20vence%20pronto.%20¿Querés%20renovarla?"
            target="_blank" class="btn-whatsapp btn-whatsapp-sm">
           WhatsApp
@@ -113,15 +115,19 @@
           </span>
         </a>
       </div>
-
+    </div>
+    {% empty %}
+    <div class="empty-row" style="padding: 30px; text-align: center; color: var(--text-muted);">
+      No hay pólizas por vencer en los próximos 30 días
     </div>
     {% endfor %}
   </div>
 </div>
 {% endif %}
 
-<!-- CUPONERAS PRÓXIMAS A VENCER -->
-{% if pagos_cuponera %}
+
+<!-- 3. CUPONERAS PRÓXIMAS A VENCER -->
+{% if tab == 'cuponeras' %}
 <div class="alerta-seccion">
   <div class="seccion-header seccion-verde">
     <div class="seccion-titulo-wrap">
@@ -133,7 +139,6 @@
   <div class="seccion-items">
     {% for item in pagos_cuponera %}
     <div class="alerta-item alerta-item-verde">
-
       <div class="alerta-left">
         <div class="alerta-avatar alerta-avatar-verde">
           {% if item.cliente %}
@@ -156,7 +161,6 @@
             Ver Cuponera
           </a>
         {% endif %}
-
         <a href="https://wa.me/{{ item.telefono|cut:' '|cut:'-' }}?text={{ item.mensaje|urlencode }}"
            target="_blank" class="btn-whatsapp btn-whatsapp-sm">
           WhatsApp
@@ -165,18 +169,30 @@
           </span>
         </a>
       </div>
-
+    </div>
+    {% empty %}
+    <div class="empty-row" style="padding: 30px; text-align: center; color: var(--text-muted);">
+      No hay cuponeras próximas a vencer
     </div>
     {% endfor %}
   </div>
 </div>
 {% endif %}
 
-<!-- ALERTAS -->
-<div class="table-wrap">
 
+<!-- 4. ALERTAS ACTIVAS (DEFAULT) -->
+{% if tab == 'alertas' or not tab %}
+<!-- FILTROS DE NIVEL -->
+<div class="filtros-wrap">
+  <a href="?tab=alertas" class="filtro-btn filtro-all {% if not nivel %}activo{% endif %}">Todas</a>
+  <a href="?tab=alertas&nivel=CRITICA" class="filtro-btn filtro-critica {% if nivel == 'CRITICA' %}activo{% endif %}">Críticas</a>
+  <a href="?tab=alertas&nivel=ALTA" class="filtro-btn filtro-alta {% if nivel == 'ALTA' %}activo{% endif %}">Altas</a>
+  <a href="?tab=alertas&nivel=MEDIA" class="filtro-btn filtro-media {% if nivel == 'MEDIA' %}activo{% endif %}">Medias</a>
+</div>
+
+<div class="table-wrap">
   <div class="tabla-header-titulo">
-    Alertas activas
+    Alertas activas del sistema
   </div>
 
   <table class="tabla-alertas">
@@ -195,7 +211,6 @@
       {% for alerta in alertas %}
       <tr>
         <td>{{ alerta.created_at|date:"d/m/Y H:i" }}</td>
-
         <td>
           {% if alerta.policy and alerta.policy.client %}
             {{ alerta.policy.client }}
@@ -203,7 +218,6 @@
             —
           {% endif %}
         </td>
-
         <td>
           {% if alerta.policy %}
             {{ alerta.policy.policy_number }}
@@ -211,9 +225,7 @@
             —
           {% endif %}
         </td>
-
         <td class="mensaje-col">{{ alerta.message }}</td>
-
         <td>
           {% if alerta.level == "CRITICA" %}
             <span class="badge badge-red">CRÍTICA</span>
@@ -223,14 +235,12 @@
             <span class="badge badge-gray">MEDIA</span>
           {% endif %}
         </td>
-
         <td>
           <div class="tabla-acciones">
             {% if alerta.policy and alerta.policy.client %}
               <a href="{% url 'clients:ver_cliente' alerta.policy.client.id %}?poliza={{ alerta.policy.id }}" class="btn btn-secondary btn-sm">
                 Ver cliente
               </a>
-
               <a href="https://wa.me/{{ alerta.policy.client.phone|cut:' '|cut:'-' }}?text={{ alerta.message|urlencode }}"
                  target="_blank" class="btn-whatsapp btn-whatsapp-sm">
                 WhatsApp
@@ -252,7 +262,6 @@
           </div>
         </td>
       </tr>
-
       {% empty %}
       <tr>
         <td colspan="6" class="empty-row">
@@ -261,11 +270,71 @@
       </tr>
       {% endfor %}
     </tbody>
-
   </table>
 </div>
+{% endif %}
+
 
 <style>
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.resumen-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  padding: 16px 18px;
+  text-decoration: none;
+  display: block;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.resumen-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(52,211,100,0.4);
+}
+
+.tab-activo {
+  border-color: #34d399 !important;
+  box-shadow: 0 0 0 2px rgba(52,211,100,0.25);
+}
+
+.resumen-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.resumen-valor {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ecfdf5;
+  line-height: 1;
+}
+
+.resumen-rojo {
+  box-shadow: inset 0 2px 0 rgba(239,68,68,0.55);
+}
+
+.resumen-amarillo {
+  box-shadow: inset 0 2px 0 rgba(245,158,11,0.55);
+}
+
+.resumen-verde {
+  box-shadow: inset 0 2px 0 rgba(34,197,94,0.55);
+}
+
+.resumen-azul {
+  box-shadow: inset 0 2px 0 rgba(59,130,246,0.55);
+}
+
 .filtros-wrap {
   display: flex;
   gap: 10px;
@@ -294,47 +363,6 @@
   color: #ecfdf5;
   border-color: rgba(52,211,100,0.28);
   background: rgba(34,197,94,0.08);
-}
-
-.resumen-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 22px;
-}
-
-.resumen-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  padding: 16px 18px;
-}
-
-.resumen-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-
-.resumen-valor {
-  font-size: 28px;
-  font-weight: 700;
-  color: #ecfdf5;
-  line-height: 1;
-}
-
-.resumen-rojo {
-  box-shadow: inset 0 2px 0 rgba(239,68,68,0.55);
-}
-
-.resumen-amarillo {
-  box-shadow: inset 0 2px 0 rgba(245,158,11,0.55);
-}
-
-.resumen-verde {
-  box-shadow: inset 0 2px 0 rgba(34,197,94,0.55);
 }
 
 .alerta-seccion {
@@ -605,7 +633,7 @@
 
 @media (max-width: 980px) {
   .resumen-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .alerta-item {
