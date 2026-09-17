@@ -22,7 +22,6 @@
   --green-500:  #22c55e;
   --green-600:  #16a34a;
   --green-700:  #15803d;
-  --green-900:  #052e16;
   --text-primary:   #ecfdf5;
   --text-secondary: #86efac;
   --text-muted:     #4d7c60;
@@ -41,7 +40,6 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* FONDO CON PATRÓN SUTIL */
 body {
   display: flex;
   align-items: center;
@@ -53,7 +51,6 @@ body {
     radial-gradient(circle at 80% 80%, rgba(52, 211, 100, 0.04) 0%, transparent 50%);
 }
 
-/* CARD DE LOGIN */
 .login-card {
   width: 100%;
   max-width: 420px;
@@ -66,17 +63,23 @@ body {
     0 24px 64px rgba(0, 0, 0, 0.5);
 }
 
-/* HEADER DE LA CARD */
 .login-header {
   padding: 36px 36px 28px;
   text-align: center;
   border-bottom: 1px solid var(--border);
 }
 
-.login-isotipo {
-  width: 56px;
-  height: 56px;
+/* LOGO CIRCULAR */
+.login-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(52, 211, 100, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  background: #0f2018;
   margin: 0 auto 16px;
+  display: block;
 }
 
 .login-titulo {
@@ -95,7 +98,6 @@ body {
   font-weight: 500;
 }
 
-/* FORMULARIO */
 .login-body {
   padding: 28px 36px 32px;
 }
@@ -149,7 +151,6 @@ body {
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
 }
 
-/* BOTÓN */
 .btn-login {
   width: 100%;
   margin-top: 8px;
@@ -176,7 +177,6 @@ body {
   transform: translateY(0);
 }
 
-/* ERRORES */
 .error-msg {
   display: flex;
   align-items: center;
@@ -193,7 +193,6 @@ body {
 
 .error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-/* FOOTER */
 .login-footer {
   padding: 14px 36px;
   border-top: 1px solid var(--border);
@@ -212,15 +211,7 @@ body {
 
   <!-- HEADER -->
   <div class="login-header">
-    <svg class="login-isotipo" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="56" height="56" rx="14" fill="#0a1f12"/>
-      <path d="M28 8 C28 8, 44 14, 44 30 C44 40, 35 44, 28 42 C21 44, 12 40, 12 30 C12 14, 28 8 Z"
-            fill="#15803d" opacity="0.9"/>
-      <path d="M28 42 L28 14" stroke="#34d364" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M28 34 Q21 31, 16 32" stroke="#34d364" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
-      <path d="M28 27 Q35 24, 40 25" stroke="#34d364" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
-      <path d="M28 38 Q35 35, 40 36" stroke="#34d364" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
-    </svg>
+    <img src="{% static 'images/img/logo ultimo.png' %}" alt="Fuerza Natural Broker" class="login-logo">
 
     <div class="login-titulo">Fuerza Natural Broker</div>
     <div class="login-subtitulo">Ingreso para productores</div>
