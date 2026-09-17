@@ -13,7 +13,13 @@
             margin: 0;
             min-height: 100vh;
             font-family: 'DM Sans', system-ui, sans-serif;
-            background: linear-gradient(135deg, #04110b 0%, #071a12 50%, #0a2217 100%);
+            /* IMAGEN DE FONDO CON CAPA OSCURA SEMITRANSPARENTE */
+            background-image: 
+                linear-gradient(rgba(4, 17, 11, 0.78), rgba(10, 34, 23, 0.88)),
+                url("{% static 'images/img/fondo.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -26,12 +32,13 @@
         }
 
         .login-card {
-            background: rgba(10, 22, 16, 0.96);
-            border: 1px solid rgba(52, 211, 100, 0.14);
+            background: rgba(10, 22, 16, 0.92);
+            border: 1px solid rgba(52, 211, 100, 0.18);
             border-radius: 22px;
             padding: 30px 28px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(8px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .login-brand {
@@ -146,7 +153,6 @@
     <div class="login-card">
 
         <div class="login-brand">
-            <!-- LOGO ACTUALIZADO -->
             <img src="{% static 'images/img/logo ultimo.png' %}" class="logo" alt="Fuerza Natural Broker">
         </div>
 
