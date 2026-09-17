@@ -113,14 +113,17 @@ def alertas(request):
                     
                     nombre_cliente = p.client.nombre_completo() if p.client and hasattr(p.client, "nombre_completo") else (f"{p.client.first_name} {p.client.last_name}" if p.client else "Cliente")
                     
+                    riesgo_str = getattr(p, 'tipo_riesgo', None) or getattr(p, 'risk_type', None) or "Seguro"
+                    
                     pagos_cuponera.append({
                         "cliente": p.client,
                         "numero": p.policy_number,
                         "company": p.company or "Sin compañía",
+                        "riesgo": riesgo_str,
                         "fecha": proximo_pago,
                         "dias": dias_pago,
                         "telefono": telefono,
-                        "mensaje": f"Hola {nombre_cliente}, te recordamos el pago de la cuponera de tu póliza N° {p.policy_number} de {p.company or 'Sin compañía'} que vence el {proximo_pago.strftime('%d/%m/%Y')}." if hasattr(proximo_pago, 'strftime') else f"Vence el {proximo_pago}",
+                        "mensaje": f"Hola {nombre_cliente}, te recordamos el pago de la cuponera de tu póliza de {riesgo_str} ({p.company or 'Sin compañía'}) N° {p.policy_number} que vence el {proximo_pago.strftime('%d/%m/%Y')}." if hasattr(proximo_pago, 'strftime') else f"Vence el {proximo_pago}",
                         "pdf": getattr(p, 'cuponera_pdf', None),
                     })
 
