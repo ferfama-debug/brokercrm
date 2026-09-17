@@ -482,6 +482,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  flex: 1;          /* Ocupa todo el ancho disponible de forma flexible */
   min-width: 0;
 }
 
@@ -529,7 +530,8 @@
 .alerta-acciones {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;   /* Impide que los botones se achiquen o bajen de línea */
   justify-content: flex-end;
 }
 
