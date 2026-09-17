@@ -120,6 +120,58 @@
 </div>
 {% endif %}
 
+<!-- CUPONERAS PRÓXIMAS A VENCER -->
+{% if pagos_cuponera %}
+<div class="alerta-seccion">
+  <div class="seccion-header seccion-verde">
+    <div class="seccion-titulo-wrap">
+      <span>Cuponeras Próximas a Vencer</span>
+      <span class="seccion-count">{{ pagos_cuponera|length }}</span>
+    </div>
+  </div>
+
+  <div class="seccion-items">
+    {% for item in pagos_cuponera %}
+    <div class="alerta-item alerta-item-verde">
+
+      <div class="alerta-left">
+        <div class="alerta-avatar alerta-avatar-verde">
+          {% if item.cliente %}
+            {{ item.cliente.first_name|first|upper }}{{ item.cliente.last_name|first|upper }}
+          {% else %}
+            CP
+          {% endif %}
+        </div>
+        <div class="alerta-body">
+          <div class="alerta-nombre">{{ item.cliente|default:"Cliente" }}</div>
+          <div class="alerta-meta">
+            Póliza <strong>{{ item.numero }}</strong> ({{ item.company }}) · Vencimiento cuota: <strong>{{ item.fecha|date:"d/m/Y" }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="alerta-acciones">
+        {% if item.pdf %}
+          <a href="{{ item.pdf.url }}" target="_blank" class="btn btn-secondary btn-sm">
+            Ver Cuponera
+          </a>
+        {% endif %}
+
+        <a href="https://wa.me/{{ item.telefono|cut:' '|cut:'-' }}?text={{ item.mensaje|urlencode }}"
+           target="_blank" class="btn-whatsapp btn-whatsapp-sm">
+          WhatsApp
+          <span class="badge-poliza badge-green-soft">
+            #{{ item.numero|default:"-" }}
+          </span>
+        </a>
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 <!-- ALERTAS -->
 <div class="table-wrap">
 
@@ -319,6 +371,11 @@
   color: #fde68a;
 }
 
+.seccion-verde {
+  background: rgba(34,197,94,0.08);
+  color: #86efac;
+}
+
 .seccion-count {
   min-width: 28px;
   height: 28px;
@@ -359,6 +416,10 @@
   background: rgba(120,53,15,0.06);
 }
 
+.alerta-item-verde {
+  background: rgba(20,83,45,0.06);
+}
+
 .alerta-left {
   display: flex;
   align-items: center;
@@ -387,6 +448,11 @@
 .alerta-avatar-amarillo {
   background: rgba(245,158,11,0.14);
   color: #fde68a;
+}
+
+.alerta-avatar-verde {
+  background: rgba(34,197,94,0.14);
+  color: #86efac;
 }
 
 .alerta-nombre {
