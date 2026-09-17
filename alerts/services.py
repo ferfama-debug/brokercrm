@@ -80,8 +80,11 @@ def generate_expiration_alerts():
         else:
             level = "MEDIA"
 
+        # 🟢 MENSAJE MODIFICADO: Muestra riesgo y compañía en lugar del número de póliza
+        compania_str = policy.company or "Sin compañía"
+        riesgo_str = getattr(policy, 'tipo_riesgo', None) or getattr(policy, 'risk_type', None) or "Seguro"
         mensaje_interno = (
-            f"La póliza {policy.policy_number} de {policy.client} vence en {days} días"
+            f"Póliza de {riesgo_str} ({compania_str}) de {policy.client} vence en {days} días"
         )
 
         guardar_alerta_segura(
