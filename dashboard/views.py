@@ -141,6 +141,7 @@ def home(request):
                     "cliente_id": p.client.id if p.client else None,
                     "numero": p.policy_number,
                     "compania_texto": str(p.company),
+                    "riesgo": getattr(p, "risk_type", None) or getattr(p, "tipo_riesgo", "Seguro"),
                     "telefono": telefono,
                     "dias": dias,
                     "mensaje": mensaje,
@@ -165,6 +166,7 @@ def home(request):
                 "prioridad": c["prioridad"],
                 "cantidad": 1,
                 "compania": c["compania_texto"],
+                "riesgo": c["riesgo"],
                 "n_poliza": c["numero"],
             }
         else:
@@ -174,6 +176,7 @@ def home(request):
                 clientes_agrupados[cid]["mensaje"] = c["mensaje"]
                 clientes_agrupados[cid]["prioridad"] = c["prioridad"]
                 clientes_agrupados[cid]["compania"] = c["compania_texto"]
+                clientes_agrupados[cid]["riesgo"] = c["riesgo"]
                 clientes_agrupados[cid]["n_poliza"] = c["numero"]
 
     clientes_llamar = sorted(
