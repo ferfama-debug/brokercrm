@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "dashboard",
     "core",
     "panel",
+    "login_tracking",
 ]
 
 
