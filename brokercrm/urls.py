@@ -27,6 +27,8 @@ urlpatterns = [
     path("clientes/", include("clients.urls")),
     path("polizas/", include("policies.urls")),
     path("alertas/", include("alerts.urls")),
+    # 7. Registro de accesos (quién entra al CRM)
+    path("accesos/", include("login_tracking.urls")),
 ]
 
 # Configuración para archivos media en desarrollo
