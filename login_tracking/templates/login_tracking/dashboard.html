@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Accesos al CRM</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; background: #f5f6f8; color: #222; }
+        h1 { margin-bottom: 0.2rem; }
+        .resumen { display: flex; gap: 1rem; margin: 1.5rem 0; }
+        .card { background: white; border-radius: 8px; padding: 1rem 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card .num { font-size: 2rem; font-weight: bold; }
+        .ok { color: #1a7f37; }
+        .fail { color: #c1121f; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { background: #333; color: white; }
+        tr:hover { background: #fafafa; }
+        .badge { padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+        .badge.login_exitoso { background: #d4f4dd; color: #1a7f37; }
+        .badge.login_fallido { background: #fddede; color: #c1121f; }
+        .badge.logout { background: #e5e5e5; color: #555; }
+    </style>
+</head>
+<body>
+    <h1>Accesos al CRM</h1>
+    <p>Últimas 100 actividades registradas.</p>
+
+    <div class="resumen">
+        <div class="card">
+            <div>Logins exitosos (24h)</div>
+            <div class="num ok">{{ logins_exitosos_24h }}</div>
+        </div>
+        <div class="card">
+            <div>Intentos fallidos (24h)</div>
+            <div class="num fail">{{ logins_fallidos_24h }}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha y hora</th>
+                <th>Usuario</th>
+                <th>Evento</th>
+                <th>IP</th>
+                <th>Dispositivo / Navegador</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in accesos_recientes %}
+            <tr>
+                <td>{{ log.timestamp|date:"d/m/Y H:i:s" }}</td>
+                <td>{% if log.user %}{{ log.user.username }}{% else %}(intento) {{ log.username_intentado }}{% endif %}</td>
+                <td><span class="badge {{ log.evento }}">{{ log.get_evento_display }}</span></td>
+                <td>{{ log.ip_address|default:"-" }}</td>
+                <td>{{ log.user_agent|truncatechars:70 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
