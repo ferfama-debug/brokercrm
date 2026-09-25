@@ -81,6 +81,31 @@ class RiskType(models.Model):
 class Company(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
 
+    url_portal = models.URLField(
+        "Link al portal",
+        blank=True,
+        help_text="Ej: https://www.aseguradora.com/siniestros",
+    )
+    telefono = models.CharField(
+        "Teléfono",
+        max_length=50,
+        blank=True,
+        help_text="Opcional",
+    )
+    notas = models.CharField(
+        "Notas",
+        max_length=255,
+        blank=True,
+        help_text="Ej: 'Usuario y clave en el mail de bienvenida'",
+    )
+    logo_emoji = models.CharField(
+        "Ícono",
+        max_length=10,
+        blank=True,
+        default="🏢",
+        help_text="Un emoji simple para identificarla rápido (opcional)",
+    )
+
     def __str__(self):
         return self.nombre
 
