@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Accesos a Aseguradoras</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; background: #f5f6f8; color: #222; }
+        h1 { margin-bottom: 0.2rem; }
+        p.subtitle { color: #666; margin-top: 0; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .card .emoji { font-size: 2rem; }
+        .card h3 { margin: 0.2rem 0; }
+        .card .telefono, .card .notas { font-size: 0.85rem; color: #555; }
+        .card a.boton {
+            margin-top: 0.6rem;
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .card a.boton:hover { background: #1d4ed8; }
+        .empty { color: #777; margin-top: 2rem; }
+        .volver { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <a class="volver" href="/">← Volver al CRM</a>
+    <h1>Accesos a Aseguradoras</h1>
+    <p class="subtitle">Entrá directo al portal de cada compañía (útil para cargar siniestros o consultar pólizas).</p>
+
+    {% if aseguradoras %}
+    <div class="grid">
+        {% for a in aseguradoras %}
+        <div class="card">
+            <div class="emoji">{{ a.logo_emoji|default:"🏢" }}</div>
+            <h3>{{ a.nombre }}</h3>
+            {% if a.telefono %}<div class="telefono">📞 {{ a.telefono }}</div>{% endif %}
+            {% if a.notas %}<div class="notas">{{ a.notas }}</div>{% endif %}
+            <a class="boton" href="{{ a.url_portal }}" target="_blank" rel="noopener">Entrar al portal ↗</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">Todavía no cargaste el link de ninguna compañía. Entrá al admin (/admin/policies/company/), editá una compañía y completá el campo "Link al portal".</p>
+    {% endif %}
+</body>
+</html>
