@@ -179,7 +179,7 @@ class PolicyAdmin(admin.ModelAdmin):
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ("nombre",)
+    list_display = ("nombre", "url_portal", "telefono")
     search_fields = ("nombre",)
 
 
