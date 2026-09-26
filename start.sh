@@ -10,5 +10,8 @@ python manage.py migrate --fake-initial --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --verbosity 2
 
+echo "Creando superusuario de prueba si no existe..."
+python manage.py createsuperuser --noinput || true
+
 echo "Starting Gunicorn..."
 exec gunicorn brokercrm.wsgi:application --bind 0.0.0.0:$PORT

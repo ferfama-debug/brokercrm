@@ -53,6 +53,11 @@ def comprobante_directory_path(instance, filename):
     return f"comprobantes/cliente_{client.id}_{client_name}/{filename}"
 
 
+def company_logo_directory_path(instance, filename):
+    nombre = (instance.nombre or "aseguradora").replace(" ", "_")
+    return f"logos_aseguradoras/{nombre}/{filename}"
+
+
 # --- NUEVO MODELO DINÁMICO PARA TIPO DE PÓLIZA ---
 class PolicyType(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
@@ -80,6 +85,61 @@ class RiskType(models.Model):
 
 class Company(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
+
+    url_portal = models.URLField(
+        "Link al portal",
+        blank=True,
+        help_text="Ej: https://www.aseguradora.com/siniestros",
+    )
+    telefono = models.CharField(
+        "Teléfono",
+        max_length=50,
+        blank=True,
+        help_text="Opcional",
+    )
+    notas = models.CharField(
+        "Notas",
+        max_length=255,
+        blank=True,
+        help_text="Ej: 'Usuario y clave en el mail de bienvenida'",
+    )
+    logo_emoji = models.CharField(
+        "Ícono (si no hay logo)",
+        max_length=10,
+        blank=True,
+        default="🏢",
+        help_text="Se usa solo si no subiste una imagen de logo",
+    )
+    logo = models.ImageField(
+        "Logo (imagen)",
+        storage=SupabaseBypassStorage(),
+        upload_to=company_logo_directory_path,
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="Subí el logo en PNG o JPG, se muestra en vez del ícono",
+    )
+
+    def save(self, *args, **kwargs):
+        if (
+            self.logo
+            and hasattr(self.logo, "file")
+            and isinstance(self.logo.file, UploadedFile)
+        ):
+            url_publica = subir_archivo_supabase(file=self.logo, folder="logos_aseguradoras")
+            if url_publica:
+                self.logo = url_publica
+
+        super().save(*args, **kwargs)
+
+    @property
+    def logo_url(self):
+        if self.logo:
+            try:
+                return self.logo.url
+            except Exception:
+                return str(self.logo)
+        return None
 
     def __str__(self):
         return self.nombre

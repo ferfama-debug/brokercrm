@@ -1215,3 +1215,12 @@ def eliminar_poliza(request, poliza_id):
             "poliza": poliza,
         },
     )
+
+
+@login_required
+def listado_aseguradoras(request):
+    """Panel de accesos rápidos: lista las compañías que tienen un link de portal cargado."""
+    aseguradoras = Company.objects.exclude(url_portal="").order_by("nombre")
+    return render(
+        request, "policies/aseguradoras.html", {"aseguradoras": aseguradoras}
+    )

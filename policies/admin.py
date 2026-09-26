@@ -179,8 +179,19 @@ class PolicyAdmin(admin.ModelAdmin):
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ("nombre",)
+    list_display = ("nombre", "logo_preview", "url_portal", "telefono")
     search_fields = ("nombre",)
+    fields = ("nombre", "logo", "url_portal", "telefono", "notas", "logo_emoji")
+
+    def logo_preview(self, obj):
+        if obj.logo_url:
+            return format_html(
+                '<img src="{}" style="height: 32px; border-radius: 4px;" />',
+                obj.logo_url,
+            )
+        return "—"
+
+    logo_preview.short_description = "Logo"
 
 
 @admin.register(Payment)

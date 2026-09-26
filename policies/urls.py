@@ -20,6 +20,8 @@ urlpatterns = [
     path("eliminar/<int:poliza_id>/", views.eliminar_poliza, name="eliminar_poliza"),
     # 🔥 NUEVA RUTA: REPORTE DE ANULACIONES
     path("reporte-anulaciones/", views.reporte_anulaciones, name="reporte_anulaciones"),
+    # 🆕 NUEVA RUTA: ACCESOS RÁPIDOS A ASEGURADORAS
+    path("aseguradoras/", views.listado_aseguradoras, name="listado_aseguradoras"),
     path("health/", health),
     path("<int:poliza_id>/", views.detalle_poliza, name="detalle_poliza"),
 ]
