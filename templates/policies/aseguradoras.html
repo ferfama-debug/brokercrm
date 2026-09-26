@@ -23,6 +23,12 @@
             gap: 0.4rem;
         }
         .card .emoji { font-size: 2rem; }
+        .card .logo-img {
+            height: 48px;
+            max-width: 100%;
+            object-fit: contain;
+            margin-bottom: 0.3rem;
+        }
         .card h3 { margin: 0.2rem 0; }
         .card .telefono, .card .notas { font-size: 0.85rem; color: #555; }
         .card a.boton {
@@ -50,7 +56,11 @@
     <div class="grid">
         {% for a in aseguradoras %}
         <div class="card">
-            <div class="emoji">{{ a.logo_emoji|default:"🏢" }}</div>
+            {% if a.logo_url %}
+                <img class="logo-img" src="{{ a.logo_url }}" alt="{{ a.nombre }}">
+            {% else %}
+                <div class="emoji">{{ a.logo_emoji|default:"🏢" }}</div>
+            {% endif %}
             <h3>{{ a.nombre }}</h3>
             {% if a.telefono %}<div class="telefono">📞 {{ a.telefono }}</div>{% endif %}
             {% if a.notas %}<div class="notas">{{ a.notas }}</div>{% endif %}
